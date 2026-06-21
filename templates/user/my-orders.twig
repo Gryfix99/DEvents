@@ -1,0 +1,128 @@
+{# templates/user/my-orders.twig — v13.0 (i18n ready) #}
+{# --- MAPA STATUSÓW ZAMÓWIEŃ --- #}
+{% set order_status_map = {
+    'pending':    { 'label': __('NIEOPŁACONE', 'devents'),  'class': 'status-badge--warning' },
+    'paid':       { 'label': __('OPŁACONE', 'devents'),     'class': 'status-badge--info' },
+    'processing': { 'label': __('W REALIZACJI', 'devents'), 'class': 'status-badge--warning' },
+    'completed':  { 'label': __('ZREALIZOWANE', 'devents'), 'class': 'status-badge--success' },
+    'cancelled':  { 'label': __('ANULOWANE', 'devents'),    'class': 'status-badge--danger' },
+    'failed':     { 'label': __('BŁĄD', 'devents'),         'class': 'status-badge--danger' }
+} %}
+
+    <div class="table-responsive-wrapper">
+        <table class="my-content-list__table orders-table">
+            <thead>
+                <tr>
+                    <th>{{ __('Nr zamówienia', 'devents') }}</th>
+                    <th>{{ __('Produkt', 'devents') }}</th>
+                    <th>{{ __('Data', 'devents') }}</th>
+                    <th>{{ __('Status', 'devents') }}</th>
+                    <th>{{ __('Cena', 'devents') }}</th>
+                    <th style="text-align: right;">{{ __('Akcje', 'devents') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    {% set status_badge = order_status_map[order.status] ?? { 'label': order.status|upper, 'class': 'status-badge--neutral' } %}
+                    
+                    <tr>
+                        <td data-label="{{ __('Nr', 'devents') }}">
+                            <strong>#{{ order.order_number|default(order.id) }}</strong>
+                        </td>
+                        <td data-label="{{ __('Produkt', 'devents') }}">
+                            <div class="product-info">
+                                <span class="product-name">{{ order.product_label|e }}</span>
+                                <small class="event-title">{{ order.event_title|e }}</small>
+                            </div>
+                        </td>
+                        <td data-label="{{ __('Data', 'devents') }}">{{ order.created_at|date('d.m.Y') }}</td>
+                        
+                        <td data-label="{{ __('Status', 'devents') }}">
+                            {% if order.payment_method == 'proforma' and order.status == 'pending' %}
+                                <span class="status-badge status-badge--proforma">{{ __('PROFORMA — DO ZAPŁATY', 'devents') }}</span>
+                                {% if order.deadline %}<div class="order-deadline"><span class="material-symbols-outlined" aria-hidden="true">schedule</span> {{ __('Termin:', 'devents') }} {{ order.deadline|date('d.m.Y') }}</div>{% endif %}
+                            {% else %}
+                                <span class="status-badge {{ status_badge.class }}">{{ status_badge.label }}</span>
+                            {% endif %}
+                        </td>
+                        
+                        <td data-label="{{ __('Cena', 'devents') }}">
+                            <strong>{{ order.amount }} {{ __('zł', 'devents') }}</strong>
+                        </td>
+                        
+                        <td data-label="{{ __('Akcje', 'devents') }}" class="actions-cell">
+                            <div class="order-actions">
+                                {# 1. NIE ZAPŁACONE #}
+                                {% if order.status == 'pending' %}
+                                    <button class="btn btn--gold btn-pay"
+                                            data-event-id="{{ order.event_id }}"
+                                            data-product="{{ order.product_type }}"
+                                            data-order-id="{{ order.id }}">
+                                        <span class="material-symbols-outlined" aria-hidden="true">credit_card</span> {{ __('Dokończ płatność', 'devents') }}
+                                    </button>
+                                    {% if order.payment_method == 'proforma' %}
+                                        <a class="btn btn--secondary btn--small" href="{{ home_url('/?devents_proforma=' ~ order.id) }}" target="_blank" rel="noopener noreferrer">
+                                            <span class="material-symbols-outlined" aria-hidden="true">description</span> {{ __('Pobierz proformę', 'devents') }}
+                                        </a>
+                                    {% endif %}
+                                {% endif %}
+
+                                {# 2. W REALIZACJI (zastępuje PAID i PROCESSING) #}
+                                {% if order.status in ['processing', 'paid'] %}
+                                    <div class="processing-info">
+                                        <span class="material-symbols-outlined spin" aria-hidden="true">sync</span> {{ __('W realizacji', 'devents') }}
+                                    </div>
+                                {% endif %}
+
+                                {# 3. ZREALIZOWANE #}
+                                {% if order.status == 'completed' %}
+                                    <div class="completed-actions">
+                                        {% if order.delivery_url %}
+                                            <a href="{{ order.delivery_url }}" target="_blank" class="btn btn--primary">
+                                                <span class="material-symbols-outlined" aria-hidden="true">download</span> {{ __('Pobierz film', 'devents') }}
+                                            </a>
+                                        {% endif %}
+                                        {% if order.invoice_url %}
+                                            <a href="{{ order.invoice_url }}" target="_blank" class="btn btn--secondary btn--small" title="{{ __('Faktura', 'devents') }}">
+                                                <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span> {{ __('Faktura', 'devents') }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="6">
+                        <div class="orders-empty">
+                            <span class="material-symbols-outlined" aria-hidden="true">receipt_long</span>
+                            <p>{{ __('Nie masz jeszcze żadnych zamówień.', 'devents') }}</p>
+                            <a class="btn btn--primary btn--small" href="{{ home_url('/panel-uzytkownika/?view=moje-wydarzenia') }}">{{ __('Wyróżnij swoje wydarzenie', 'devents') }}</a>
+                        </div>
+                    </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+    (function ($) {
+        if (typeof $ === 'undefined') return;
+        $(document).on('click', '.btn-pay', function () {
+            var btn = $(this), original = btn.html();
+            if (typeof devents_config === 'undefined') return;
+            btn.prop('disabled', true).text('Przetwarzanie...');
+            $.post(devents_config.ajax_url, {
+                action: 'devents_create_payment',
+                nonce: devents_config.nonce,
+                event_id: btn.data('event-id'),
+                product_type: btn.data('product'),
+                order_id: btn.data('order-id'),
+                payment_mode: 'online'
+            }, function (res) {
+                if (res.success && res.data && res.data.redirect_url) { window.location.href = res.data.redirect_url; }
+                else { alert(res.data && res.data.message ? res.data.message : 'Błąd płatności.'); btn.prop('disabled', false).html(original); }
+            }).fail(function () { alert('Błąd połączenia.'); btn.prop('disabled', false).html(original); });
+        });
+    })(window.jQuery);
+    </script>

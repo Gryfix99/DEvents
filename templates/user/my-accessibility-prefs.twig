@@ -1,0 +1,74 @@
+{# „Moje potrzeby" — profil dostępności użytkownika.
+   Zaznaczone cechy zapisują się w meta i domyślnie filtrują wyszukiwarkę wydarzeń. #}
+<style>
+.dv-a11y{max-width:var(--dv-content-max,1240px);margin:0 auto}
+.dv-a11y__title{font-size:1.6rem;font-weight:800;margin:0 0 6px;color:var(--text-primary,#0f172a)}
+.dv-a11y__lead{margin:0 0 20px;color:var(--text-secondary,#475569);line-height:1.55}
+.a11y-pref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin:0 0 22px}
+.a11y-pref-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--border-primary,#e5e7eb);border-radius:12px;cursor:pointer;background:var(--bg-secondary,#fff);transition:border-color .12s,background .12s}
+.a11y-pref-item:hover{border-color:var(--primary,#00857c)}
+.a11y-pref-item:has(input:checked){border-color:var(--primary,#00857c);background:color-mix(in srgb,var(--primary,#00857c) 8%,transparent)}
+.a11y-pref-item input{width:20px;height:20px;accent-color:var(--primary,#00857c);flex:0 0 auto}
+.a11y-pref-ico{color:var(--primary,#00857c);font-size:24px}
+.a11y-pref-name{font-weight:600;font-size:.94rem;color:var(--text-primary,#0f172a)}
+.dv-a11y__actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.dv-a11y__msg{margin:12px 0 0;font-weight:600;min-height:1.2em}
+.dv-a11y__msg--ok{color:var(--primary,#00857c)}
+.dv-a11y__msg--err{color:#dc2626}
+.dv-a11y__empty{color:var(--text-secondary,#475569)}
+</style>
+
+<section class="dv-a11y" id="devents-main-content">
+    <h1 class="dv-a11y__title">{{ __('Moje potrzeby dostępności', 'devents') }}</h1>
+    <p class="dv-a11y__lead">{{ __('Zaznacz, czego potrzebujesz na wydarzeniach (np. tłumaczenie PJM, napisy, pętla indukcyjna). Wyszukiwarka będzie domyślnie pokazywać tylko wydarzenia spełniające Twoje potrzeby — z opcją „pokaż wszystkie".', 'devents') }}</p>
+
+    {% if types is empty %}
+        <p class="dv-a11y__empty">{{ __('Brak zdefiniowanych cech dostępności.', 'devents') }}</p>
+    {% else %}
+        <form id="a11y-prefs-form" data-ajax="{{ ajax_url }}" data-nonce="{{ nonce }}">
+            <div class="a11y-pref-grid">
+                {% for t in types %}
+                    <label class="a11y-pref-item">
+                        <input type="checkbox" name="prefs[]" value="{{ t.id }}" {{ t.id in prefs ? 'checked' : '' }}>
+                        <span class="a11y-pref-ico material-symbols-outlined" aria-hidden="true">{{ t.icon|default('accessibility_new') }}</span>
+                        <span class="a11y-pref-name">{{ t.name }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+            <div class="dv-a11y__actions">
+                <button type="submit" class="btn btn--primary">{{ __('Zapisz potrzeby', 'devents') }}</button>
+                <a href="{{ events_url }}" class="btn btn--secondary">{{ __('Przeglądaj dopasowane wydarzenia', 'devents') }}</a>
+            </div>
+            <p class="dv-a11y__msg" role="status" aria-live="polite"></p>
+        </form>
+    {% endif %}
+</section>
+
+<script>
+(function () {
+    var form = document.getElementById('a11y-prefs-form');
+    if (!form) return;
+    var msg = form.querySelector('.dv-a11y__msg');
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var btn = form.querySelector('button[type="submit"]');
+        var label = btn.textContent;
+        btn.disabled = true; btn.textContent = 'Zapisywanie...';
+        var fd = new FormData(form);
+        fd.append('action', 'devents_save_accessibility_prefs');
+        fd.append('nonce', form.dataset.nonce);
+        fetch(form.dataset.ajax, { method: 'POST', body: fd, credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (j) {
+                msg.textContent = (j && j.data && j.data.message) ? j.data.message : 'Zapisano.';
+                msg.className = 'dv-a11y__msg dv-a11y__msg--ok';
+                btn.disabled = false; btn.textContent = label;
+            })
+            .catch(function () {
+                msg.textContent = 'Błąd zapisu. Spróbuj ponownie.';
+                msg.className = 'dv-a11y__msg dv-a11y__msg--err';
+                btn.disabled = false; btn.textContent = label;
+            });
+    });
+})();
+</script>

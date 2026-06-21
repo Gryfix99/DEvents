@@ -1,0 +1,59 @@
+{# templates/admin/tabs/reports.twig - Wersja z poprawionymi klasami #}
+<div class="admin-widget">
+    <div class="widget-content" style="padding: 1.5rem;">
+        <div class="table-responsive-wrapper">
+            <table class="my-content-list__table list-table--reports devents-responsive-table devents-table--cards">
+                <thead>
+                    <tr>
+                        <th scope="col">Zgłoszona treść</th>
+                        <th scope="col">Powód</th>
+                        <th scope="col">Zgłaszający</th>
+                        <th scope="col">Data</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" style="text-align: right;">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in data.reports %}
+                        <tr id="report-row-{{ report.id }}">
+                            <td data-label="Treść">
+                                <a href="{{ report.item_link }}" target="_blank" style="font-weight:600; color:var(--primary);">
+                                    {{ report.item_title|slice(0, 50) }}{{ report.item_title|length > 50 ? '...' : '' }}
+                                </a>
+                                <br>
+                                <small style="color:var(--text-secondary);">({{ report.item_type }})</small>
+                            </td>
+                            <td data-label="Powód">{{ report.reason }}</td>
+                            <td data-label="Zgłaszający">
+                                <a href="{{ get_edit_user_link(report.reporter_user_id) }}" target="_blank">{{ report.reporter_name }}</a>
+                            </td>
+                            <td data-label="Data">{{ report.reported_at|date('d.m.Y H:i') }}</td>
+                            <td data-label="Status">
+                                <span class="status-badge {{ report.status == 'resolved' ? 'status-badge--published' : 'status-badge--pending' }}">
+                                    {{ report.status == 'resolved' ? 'Rozwiązane' : 'Nowe' }}
+                                </span>
+                            </td>
+                            <td data-label="Akcje" class="actions-cell">
+                                <div class="actions-group">
+                                    {% if report.status == 'new' %}
+                                        <button type="button" class="btn btn--secondary btn--small btn--icon admin-action-btn" data-action="resolve_report" data-id="{{ report.id }}" title="Oznacz jako rozwiązane" aria-label="Oznacz jako rozwiązane">
+                                            <span class="material-symbols-outlined" aria-hidden="true">done</span>
+                                        </button>
+                                    {% endif %}
+                                    
+                                    <button type="button" class="btn btn--danger btn--small btn--icon admin-action-btn is-danger" data-action="delete_report" data-id="{{ report.id }}" title="Usuń zgłoszenie" aria-label="Usuń zgłoszenie">
+                                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding: 2rem; color: var(--text-secondary);">Brak zgłoszeń do wyświetlenia.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

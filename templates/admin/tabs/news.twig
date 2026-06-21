@@ -1,0 +1,124 @@
+{# templates/admin/tabs/news.twig - Wersja z poprawionym formularzem i ikonami #}
+<div class="admin-widget">
+    <div class="widget-content" style="padding: 1.5rem;">
+        <h3>Dodaj lub edytuj aktualność</h3>
+        
+        <form id="news-item-form" class="devents-form" style="margin-bottom: 2rem;" enctype="multipart/form-data">
+            
+            {# --- POPRAWKA: Pole wymagane dla handlera AJAX --- #}
+            <input type="hidden" name="sub_action" value="save_news_item">
+            
+            <input type="hidden" name="news_id" value="0">
+            
+            <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label for="news-title">Tytuł (do 100 znaków)</label>
+                    <input type="text" id="news-title" name="title" class="form-control" required maxlength="100">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="news-type">Typ aktualności</label>
+                    <select id="news-type" name="news_type" class="form-control">
+                        <option value="ogloszenie">Ogłoszenie</option>
+                        <option value="nowa_funkcja">Nowa funkcja</option>
+                        <option value="poradnik">Poradnik</option>
+                        <option value="wyroznienie">Wyróżnienie</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="news-content">Treść wpisu</label>
+                <textarea id="news-content" name="content" class="form-control" rows="8"></textarea>
+            </div>
+            
+            <div id="media-manager">
+                <label>Media (max 5, plik lub link)</label>
+                <div id="media-items-container"></div>
+                <button type="button" id="add-media-item-btn" class="btn btn--secondary btn--small">Dodaj medium</button>
+            </div>
+            
+            <hr style="margin: 1.5rem 0;">
+            
+            <div class="form-group">
+                <label for="publish-date">Data publikacji (pozostaw puste, aby opublikować teraz)</label>
+                <input type="text" id="publish-date" name="publish_date" class="form-control flatpickr-datetime" placeholder="Wybierz datę i godzinę...">
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group" style="flex: 1;">
+                    <label for="cta-text">Tekst na przycisku (opcjonalnie)</label>
+                    <input type="text" id="cta-text" name="cta_button_text" class="form-control" placeholder="np. Zobacz więcej">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label for="cta-url">Link przycisku (opcjonalnie)</label>
+                    <input type="url" id="cta-url" name="cta_button_url" class="form-control" placeholder="https://...">
+                </div>
+            </div>
+            
+            <div class="form-row" style="align-items: center;">
+                <div class="form-group form-checkbox-group">
+                    <input type="checkbox" id="is-pinned" name="is_pinned" value="1">
+                    <label for="is-pinned">Przypnij na górze listy</label>
+                </div>
+                <div class="form-group form-checkbox-group">
+                    <input type="checkbox" id="visibility" name="visibility" value="logged_in">
+                    <label for="visibility">Widoczne tylko dla zalogowanych</label>
+                </div>
+            </div>
+            
+            <div class="form-actions" style="margin-top: 20px;">
+                <button type="submit" class="btn btn--primary">Zapisz aktualność</button>
+                <button type="button" id="clear-news-form" class="btn btn--secondary" style="display: none;">Anuluj edycję</button>
+            </div>
+        </form>
+
+        <h3>Lista aktualności</h3>
+        <div class="table-responsive-wrapper">
+            <table class="my-content-list__table sortable devents-responsive-table devents-table--cards">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 40px;">📌</th>
+                        <th scope="col">Tytuł</th>
+                        <th scope="col">Typ</th>
+                        <th scope="col">Widoczność</th>
+                        <th scope="col">Data publikacji</th>
+                        <th scope="col" style="text-align: right;">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in tab_data.news_items %}
+                        <tr data-id="{{ item.id }}" data-news='{{ item|json_encode()|e('html_attr') }}'>
+                            <td data-label="Przypięty" style="text-align: center;">
+                                {% if item.is_pinned == 1 %}
+                                    <span class="material-symbols-outlined" style="color: var(--primary); font-size: 18px;">push_pin</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Tytuł"><strong>{{ item.title }}</strong></td>
+                            <td data-label="Typ">
+                                <span class="status-badge status-badge--neutral">{{ item.news_type|replace({'_': ' '})|title }}</span>
+                            </td>
+                            <td data-label="Widoczność">{{ item.visibility == 'public' ? 'Publiczne' : 'Zalogowani' }}</td>
+                            <td data-label="Data publikacji">{{ item.publish_date|date('d.m.Y H:i') }}</td>
+                            
+                            {# --- POPRAWKA: Przyciski Akcji (Ikony) --- #}
+                            <td data-label="Akcje" class="actions-cell">
+                                <div class="actions-group">
+                                    <button type="button" class="btn btn--secondary btn--small btn--icon js-edit-news" title="Edytuj" aria-label="Edytuj">
+                                        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                                    </button>
+                                    <button type="button" class="btn btn--danger btn--small btn--icon" data-action="delete_news" data-id="{{ item.id }}" title="Usuń" aria-label="Usuń">
+                                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px; color: var(--text-secondary);">Brak dodanych aktualności.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

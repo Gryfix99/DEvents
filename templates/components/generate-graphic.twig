@@ -1,0 +1,285 @@
+{# ========================================================================
+   GENERATOR GRAFIKI — v13.5 (STABLE i18n & Slugs)
+   Modal z podglądem grafiki, przełącznikami, tekstem social media
+   ======================================================================== #}
+
+<div class="gfx-gen">
+
+    {# === HEADER === #}
+    <div class="gfx-gen__header">
+        <h3 class="gfx-gen__title">
+            <span class="material-symbols-outlined" aria-hidden="true">brush</span>
+            {{ __('Generator Grafiki', 'devents') }}
+        </h3>
+        <p class="gfx-gen__subtitle">{{ event.title|e }}</p>
+    </div>
+
+    {# === TOOLBAR === #}
+    <div class="gfx-gen__toolbar">
+        {# Orientacja #}
+        <div class="gfx-gen__control">
+            <span class="gfx-gen__control-label">{{ __('Format', 'devents') }}:</span>
+            <div class="gfx-gen__toggle" role="radiogroup" aria-label="{{ __('Format grafiki', 'devents') }}">
+                <button type="button"
+                        class="gfx-gen__toggle-btn gfx-gen__toggle-btn--active"
+                        data-orient="vertical"
+                        role="radio"
+                        aria-checked="true"
+                        title="{{ __('Pionowo (Story)', 'devents') }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">smartphone</span>
+                    Story
+                </button>
+                <button type="button"
+                        class="gfx-gen__toggle-btn"
+                        data-orient="horizontal"
+                        role="radio"
+                        aria-checked="false"
+                        title="{{ __('Poziomo (Post)', 'devents') }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">laptop</span>
+                    Post
+                </button>
+            </div>
+        </div>
+
+        {# Motyw #}
+        <div class="gfx-gen__control">
+            <span class="gfx-gen__control-label">{{ __('Motyw', 'devents') }}:</span>
+            <div class="gfx-gen__toggle" role="radiogroup" aria-label="{{ __('Motyw grafiki', 'devents') }}">
+                <button type="button"
+                        class="gfx-gen__toggle-btn"
+                        id="gfx-light-btn"
+                        data-theme="light"
+                        role="radio"
+                        aria-checked="false">
+                    <span class="material-symbols-outlined" aria-hidden="true">light_mode</span>
+                    {{ __('Jasny', 'devents') }}
+                </button>
+                <button type="button"
+                        class="gfx-gen__toggle-btn gfx-gen__toggle-btn--active"
+                        id="gfx-dark-btn"
+                        data-theme="dark"
+                        role="radio"
+                        aria-checked="true">
+                    <span class="material-symbols-outlined" aria-hidden="true">dark_mode</span>
+                    {{ __('Ciemny', 'devents') }}
+                </button>
+            </div>
+        </div>
+
+        {# Pobierz #}
+        <button type="button" id="gfx-download-btn" class="gfx-gen__download-btn">
+            <span class="material-symbols-outlined" aria-hidden="true">download</span>
+            {{ __('Pobierz grafikę', 'devents') }}
+        </button>
+    </div>
+
+    {# === COLUMNS: Preview + Social Text === #}
+    <div class="gfx-gen__columns">
+
+        {# Podgląd #}
+        <div class="gfx-gen__preview-col">
+            <div class="gfx-gen__preview-wrap">
+                <div id="graphicPreview" class="gfx-canvas vertical dark"></div>
+            </div>
+        </div>
+
+        {# Tekst social media #}
+        <div class="gfx-gen__text-col">
+            <div class="gfx-gen__text-panel">
+                <h4 class="gfx-gen__text-title">
+                    <span class="material-symbols-outlined" aria-hidden="true">share</span>
+                    {{ __('Tekst do social media', 'devents') }}
+                </h4>
+                <textarea class="gfx-gen__textarea"
+                          id="gfx-social-text"
+                          readonly
+                          rows="16"
+                          aria-label="{{ __('Tekst do social media', 'devents') }}">{{ generated_social_text }}</textarea>
+                <button type="button" class="gfx-gen__copy-btn" id="gfx-copy-btn">
+                    <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
+                    <span class="gfx-gen__copy-label">{{ __('Kopiuj tekst', 'devents') }}</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {# === TEKST ALTERNATYWNY (ALT) + GRAFIKI MARKETINGOWE === #}
+    {% if show_marketing_panel %}
+        <div class="dev-mkt"
+             data-event-id="{{ event.id }}"
+             data-has="{{ marketing.has_all ? '1' : '0' }}"
+             data-auto="0"
+             data-busy="0">
+
+            {# --- Tekst alternatywny zdjęcia (ALT dla FB i IG) --- #}
+            <div class="dev-mkt__altbox">
+                <h4 class="dev-mkt__subtitle">
+                    <span class="material-symbols-outlined" aria-hidden="true">accessibility_new</span>
+                    {{ __('Tekst alternatywny zdjęcia (ALT)', 'devents') }}
+                </h4>
+                <p class="dev-mkt__hint">{{ __('Wklej w polu „tekst alternatywny” przy dodawaniu zdjęcia na Facebooku i Instagramie.', 'devents') }}</p>
+                <textarea class="dev-mkt__alt" readonly rows="4"
+                          aria-label="{{ __('Tekst alternatywny zdjęcia', 'devents') }}">{{ generated_image_alt }}</textarea>
+                <button type="button" class="dev-mkt__copy gfx-gen__copy-btn" data-copy-target=".dev-mkt__alt">
+                    <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
+                    <span class="dev-mkt__btn-label gfx-gen__copy-label">{{ __('Kopiuj tekst alternatywny', 'devents') }}</span>
+                </button>
+            </div>
+
+            {# --- Gotowe grafiki (post/story × jasny/ciemny) --- #}
+            <div class="dev-mkt__gallery">
+                <div class="dev-mkt__gallery-head">
+                    <h4 class="dev-mkt__subtitle">
+                        <span class="material-symbols-outlined" aria-hidden="true">photo_library</span>
+                        {{ __('Gotowe grafiki marketingowe', 'devents') }}
+                    </h4>
+                    <button type="button" class="dev-mkt__regenerate gfx-gen__download-btn">
+                        <span class="material-symbols-outlined" aria-hidden="true">autorenew</span>
+                        {{ __('Generuj ponownie', 'devents') }}
+                    </button>
+                </div>
+
+                <p class="dev-mkt__status" role="status" aria-live="polite"></p>
+
+                <div class="dev-mkt__grid">
+                    {% for g in marketing.graphics %}
+                        <div class="dev-mkt__card {{ g.exists ? 'is-ready' : 'is-empty' }}"
+                             data-format="{{ g.format }}" data-theme="{{ g.theme }}">
+                            <div class="dev-mkt__thumb"
+                                 {% if g.url %}style="background-image:url('{{ g.url|e }}');"{% endif %}
+                                 role="img"
+                                 aria-label="{{ (g.format == 'post' ? __('Post', 'devents') : __('Story', 'devents')) ~ ' — ' ~ (g.theme == 'light' ? __('jasny', 'devents') : __('ciemny', 'devents')) }}"></div>
+                            <div class="dev-mkt__card-foot">
+                                <span class="dev-mkt__card-label">
+                                    {{ g.format == 'post' ? __('Post', 'devents') : __('Story', 'devents') }}
+                                    · {{ g.theme == 'light' ? __('jasny', 'devents') : __('ciemny', 'devents') }}
+                                </span>
+                                <a class="dev-mkt__download {{ g.url ? '' : 'is-disabled' }}"
+                                   href="{{ g.url|default('#') }}"
+                                   download="DEvents-{{ g.format }}-{{ g.theme }}.png"
+                                   aria-label="{{ __('Pobierz', 'devents') }} {{ g.format }} {{ g.theme }}">
+                                    <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {# === HIDDEN FULL-RES CANVAS (for html2canvas export) === #}
+    <div id="graphicFull" class="gfx-gen__offscreen" aria-hidden="true">
+        <div class="gfx-canvas vertical dark" data-event-id="{{ event.id }}">
+
+            {# Background image #}
+            <div class="gfx-canvas__bg" style="background-image: url('{{ image_url|e }}');"></div>
+
+            {# Online badge #}
+            {% if is_online %}
+                <div class="gfx-canvas__live-badge">
+                    <span class="gfx-canvas__live-dot"></span>
+                    {{ event.delivery_mode == 'hybrid' ? __('WYDARZENIE HYBRYDOWE', 'devents') : __('TRANSMISJA ONLINE', 'devents') }}
+                </div>
+            {% endif %}
+
+            {# Content overlay #}
+            <div class="gfx-canvas__overlay">
+                <div class="gfx-canvas__content">
+
+                    {# Age badge #}
+                    {% if event.age_rating %}
+                        <div class="gfx-canvas__age">
+                            <span class="material-symbols-outlined" aria-hidden="true">face</span>
+                            {{ event.age_rating|e }}
+                        </div>
+                    {% endif %}
+
+                    {# Title #}
+                    <h2 class="gfx-canvas__title">{{ title|e }}</h2>
+
+                    {# Meta #}
+                    <div class="gfx-canvas__meta">
+                        <div class="gfx-canvas__meta-item">
+                            <span class="material-symbols-outlined" aria-hidden="true">tag</span>
+                            {{ category|e }}
+                        </div>
+                        
+                        <div class="gfx-canvas__meta-item">
+                            <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+                            {{ date_label|e }}
+                        </div>
+                        
+                        {% if time_label %}
+                            <div class="gfx-canvas__meta-item">
+                                <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+                                {{ time_label|e }}
+                            </div>
+                        {% endif %}
+
+                        {# LOKALIZACJA #}
+                        {% if event.location %}
+                            <div class="gfx-canvas__meta-item">
+                                <span class="material-symbols-outlined" aria-hidden="true">
+                                    {{ event.delivery_mode == 'online' ? 'language' : (event.delivery_mode == 'hybrid' ? 'devices_other' : 'location_on') }}
+                                </span>
+                                {{ event.location|e }}
+                            </div>
+                        {% endif %}
+
+                        {# ORGANIZATOR #}
+                        {% if organizer %}
+                            <div class="gfx-canvas__meta-item">
+                                <span class="material-symbols-outlined" aria-hidden="true">person</span>
+                                {{ organizer|e }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {# Accessibility #}
+                    {% if access is not empty %}
+                        <div class="gfx-canvas__access">
+                            {% for a in access %}
+                                <div class="gfx-canvas__access-chip">
+                                    <span class="material-symbols-outlined" aria-hidden="true">{{ a.icon }}</span>
+                                    {{ a.name }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {# CTA — pokazywane WYŁĄCZNIE w grafice STORY (skondensowana zachęta
+                       do wejścia na profil i stronę; w postach ukryte przez CSS). #}
+                    <div class="gfx-canvas__cta">
+                        <div class="gfx-canvas__cta-main">
+                            <span class="material-symbols-outlined" aria-hidden="true">touch_app</span>
+                            <div class="gfx-canvas__cta-text">
+                                <strong>{{ __('Zobacz pełny program', 'devents') }}</strong>
+                                <span>{{ __('Wejdź na nasz profil →', 'devents') }}</span>
+                            </div>
+                        </div>
+                        <div class="gfx-canvas__cta-site">{{ __('Więcej o dostępności:', 'devents') }} <b>devents.pl</b></div>
+                    </div>
+                </div>
+            </div>
+
+            {# Footer: org logo + price + system logo #}
+            <div class="gfx-canvas__footer">
+                <div class="gfx-canvas__footer-left">
+                    {% if organizer_logo_url %}
+                        <img src="{{ organizer_logo_url|e }}" alt="{{ __('Logo organizatora', 'devents') }}" class="gfx-canvas__org-logo">
+                    {% endif %}
+                </div>
+                <div class="gfx-canvas__footer-right">
+                    <span class="gfx-canvas__price gfx-canvas__price--{{ price_class }}">{{ price_label }}</span>
+                    <img src="{{ logo_url|e }}"
+                         data-src-light="{{ logo_light_src|e }}"
+                         data-src-dark="{{ logo_dark_src|e }}"
+                         alt="DEvents"
+                         class="gfx-canvas__sys-logo">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

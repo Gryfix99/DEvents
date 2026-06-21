@@ -1,0 +1,196 @@
+{# ========================================================================
+   REGULAMIN SERWISU — DEvents
+   Treść spójna z funkcjami wtyczki „Wydarzenia DEvents".
+   UWAGA: dokument wzorcowy — przed publikacją zalecana weryfikacja prawna.
+   ======================================================================== #}
+<article class="legal-doc" id="devents-main-content" role="region" aria-labelledby="legal-terms-title">
+
+    <header class="legal-doc__header">
+        <h1 class="legal-doc__title" id="legal-terms-title">
+            <span class="material-symbols-outlined" aria-hidden="true">gavel</span>
+            Regulamin serwisu
+        </h1>
+        <p class="legal-doc__updated">Ostatnia aktualizacja: {{ updated }}</p>
+    </header>
+
+    <p class="legal-doc__intro">
+        Niniejszy Regulamin określa zasady korzystania z serwisu <strong>{{ site_name }}</strong> —
+        platformy poświęconej wydarzeniom dostępnym dla osób z niepełnosprawnościami, w szczególności
+        osób Głuchych i słabosłyszących, osób w spektrum autyzmu oraz osób niewidomych i słabowidzących.
+    </p>
+
+    <h2>§1. Definicje</h2>
+    <ul>
+        <li><strong>Serwis</strong> — platforma {{ site_name }} dostępna pod adresem
+            <a href="{{ home }}">{{ home }}</a>.</li>
+        <li><strong>Administrator</strong> — operator Serwisu, dostępny pod adresem
+            <a href="mailto:{{ contact }}">{{ contact }}</a>.</li>
+        <li><strong>Użytkownik</strong> — każda osoba korzystająca z Serwisu.</li>
+        <li><strong>Uczestnik</strong> — Użytkownik przeglądający i zapisujący się na wydarzenia.</li>
+        <li><strong>Organizator</strong> — Użytkownik lub instytucja publikująca wydarzenia.</li>
+        <li><strong>Wydarzenie</strong> — wpis o wydarzeniu wraz z informacjami o jego dostępności.</li>
+        <li><strong>Usługi płatne</strong> — odpłatne funkcje Serwisu (np. tłumaczenie na PJM,
+            wyróżnienie wydarzenia).</li>
+    </ul>
+
+    <h2>§2. Postanowienia ogólne</h2>
+    <ol>
+        <li>Regulamin określa zasady świadczenia usług drogą elektroniczną w Serwisie.</li>
+        <li>Korzystanie z Serwisu oznacza akceptację Regulaminu.</li>
+        <li>Do korzystania z Serwisu potrzebne jest urządzenie z dostępem do internetu
+            i aktualną przeglądarką obsługującą JavaScript.</li>
+        <li>Misją Serwisu jest promowanie wydarzeń dostępnych oraz ułatwianie dostępu do nich
+            osobom z niepełnosprawnościami zgodnie ze standardem WCAG 2.2 AA.</li>
+    </ol>
+
+    <h2>§3. Konto użytkownika</h2>
+    <ol>
+        <li>Część funkcji wymaga rejestracji i utworzenia konta.</li>
+        <li>Podczas rejestracji należy podać prawdziwe dane i ustanowić bezpieczne hasło.</li>
+        <li>Użytkownik odpowiada za zachowanie poufności danych logowania.</li>
+        <li>Konto jest przypisane do jednej osoby lub instytucji i nie wolno go udostępniać
+            osobom nieuprawnionym.</li>
+        <li>Użytkownik może w każdej chwili usunąć konto, kontaktując się z Administratorem
+            lub korzystając z panelu użytkownika.</li>
+    </ol>
+
+    <h2>§4. Zasady publikowania wydarzeń</h2>
+    <ol>
+        <li>Organizator publikuje wydarzenia wraz z rzetelnymi informacjami o ich dostępności
+            (np. tłumaczenie na PJM, audiodeskrypcja, napisy, pętla indukcyjna, tekst łatwy
+            do czytania, dostępność architektoniczna).</li>
+        <li>Organizator odpowiada za prawdziwość i aktualność publikowanych treści, w tym
+            informacji o udogodnieniach dostępności.</li>
+        <li>Zakazane jest publikowanie treści niezgodnych z prawem, naruszających dobra osobiste,
+            prawa autorskie lub wprowadzających w błąd co do dostępności wydarzenia.</li>
+        <li>Administrator może odmówić publikacji, edytować formatowanie lub usunąć wydarzenie
+            naruszające Regulamin.</li>
+    </ol>
+
+    <h2>§5. Dostępność (PJM i udogodnienia)</h2>
+    <ol>
+        <li>Serwis dąży do zgodności ze standardem WCAG 2.2 AA oraz wspiera komunikację
+            w polskim języku migowym (PJM).</li>
+        <li>Informacje o dostępności pochodzą od Organizatorów; Administrator nie gwarantuje
+            ich kompletności, jednak dokłada starań, by Serwis sprzyjał dostępności.</li>
+        <li>Uwagi dotyczące dostępności Serwisu można zgłaszać pod adresem
+            <a href="mailto:{{ contact }}">{{ contact }}</a>.</li>
+    </ol>
+
+    <h2>§6. Usługi płatne i płatności</h2>
+    <ol>
+        <li>Serwis może oferować usługi płatne, w szczególności zamówienie tłumaczenia wydarzenia
+            na PJM oraz wyróżnienie wydarzenia w Serwisie.</li>
+        <li>Ceny usług prezentowane są przed złożeniem zamówienia i zawierają należne podatki.</li>
+        <li>Płatności online obsługuje operator <strong>Stripe</strong>. Realizując płatność,
+            akceptujesz również zasady tego operatora.</li>
+        <li>Umowa o usługę płatną zostaje zawarta z chwilą potwierdzenia płatności.</li>
+        <li>Po wykonaniu usługi (np. realizacji tłumaczenia) Administrator wystawia odpowiedni
+            dokument rozliczeniowy.</li>
+    </ol>
+
+    <h3>Promocja i zwiększenie widoczności wydarzenia</h3>
+    <ol>
+        <li>Organizator może wykupić <strong>promocję (wyróżnienie) wydarzenia</strong>, która
+            zwiększa jego widoczność w Serwisie — m.in. wyróżnienie wizualne oraz wyższą pozycję
+            na listach wydarzeń i w wynikach wyszukiwania.</li>
+        <li>Promocja dotyczy wskazanego wydarzenia i obowiązuje przez okres podany przy zamówieniu.</li>
+        <li>Promocja zwiększa widoczność wydarzenia, ale nie gwarantuje określonej liczby wyświetleń
+            ani liczby uczestników i nie zmienia treści wydarzenia.</li>
+        <li>Promocja jest aktywowana po potwierdzeniu płatności.</li>
+    </ol>
+
+    <h3>Tłumaczenie informacji o wydarzeniu na polski język migowy (PJM)</h3>
+    <ol>
+        <li>Organizator może zamówić <strong>tłumaczenie informacji o wydarzeniu na PJM</strong>
+            — w postaci nagrania wideo dołączanego do wydarzenia w Serwisie.</li>
+        <li>Tłumaczenie przygotowywane jest na podstawie treści przekazanych przez Organizatora;
+            Organizator odpowiada za ich poprawność i kompletność.</li>
+        <li>Cena ustalana jest zgodnie z cennikiem prezentowanym przed złożeniem zamówienia.</li>
+        <li>Z chwilą dostarczenia gotowego nagrania usługę uznaje się za wykonaną, co ma znaczenie
+            dla prawa odstąpienia od umowy (patrz §7).</li>
+    </ol>
+
+    <h2>§7. Prawo odstąpienia</h2>
+    <ol>
+        <li>Konsument może odstąpić od umowy zawartej na odległość w terminie 14 dni bez podania
+            przyczyny, o ile przepisy nie stanowią inaczej.</li>
+        <li>Prawo odstąpienia nie przysługuje m.in. w przypadku usług w pełni wykonanych za
+            wyraźną zgodą konsumenta przed upływem terminu odstąpienia (np. zrealizowane
+            tłumaczenie na PJM).</li>
+        <li>Oświadczenie o odstąpieniu należy przesłać na adres
+            <a href="mailto:{{ contact }}">{{ contact }}</a>.</li>
+    </ol>
+
+    <h2>§8. Powiadomienia, alerty i zapisane wyszukiwania</h2>
+    <ol>
+        <li>Użytkownik może włączyć powiadomienia push, alerty e-mail oraz zapisywać kryteria
+            wyszukiwania, aby otrzymywać informacje o nowych, pasujących wydarzeniach.</li>
+        <li>Powiadomienia push wymagają zgody w przeglądarce i można je w każdej chwili wyłączyć.</li>
+        <li>Użytkownik może obserwować Organizatorów i otrzymywać informacje o ich nowych
+            wydarzeniach.</li>
+    </ol>
+
+    <h2>§9. Aplikacja webowa (PWA) i działanie offline</h2>
+    <ol>
+        <li>Serwis można dodać do ekranu głównego urządzenia jako aplikację webową (PWA).</li>
+        <li>Wybrane treści mogą być dostępne offline w ograniczonym zakresie; pełna funkcjonalność
+            wymaga połączenia z internetem.</li>
+    </ol>
+
+    <h2>§10. Publikacja w mediach społecznościowych</h2>
+    <ol>
+        <li>Za zgodą Organizatora wydarzenia mogą być publikowane na profilach Serwisu na
+            Facebooku i Instagramie (w tym jako relacje/Stories).</li>
+        <li>Publikując wydarzenie, Organizator oświadcza, że posiada prawa do udostępnianych
+            treści i grafik oraz zgadza się na ich publikację w tych kanałach.</li>
+    </ol>
+
+    <h2>§11. Prawa własności intelektualnej</h2>
+    <ol>
+        <li>Treści udostępniane przez Organizatorów pozostają ich własnością; Organizator udziela
+            Administratorowi niewyłącznej licencji na ich prezentację i promocję w Serwisie oraz
+            w powiązanych kanałach.</li>
+        <li>Elementy Serwisu (układ, kod, znaki) podlegają ochronie i nie mogą być kopiowane bez
+            zgody Administratora.</li>
+    </ol>
+
+    <h2>§12. Odpowiedzialność</h2>
+    <ol>
+        <li>Administrator dokłada starań, aby Serwis działał poprawnie i był dostępny, jednak nie
+            gwarantuje nieprzerwanej dostępności i może prowadzić prace techniczne.</li>
+        <li>Administrator nie jest organizatorem wydarzeń publikowanych przez Organizatorów i nie
+            odpowiada za ich przebieg ani za rzetelność informacji podanych przez Organizatorów.</li>
+        <li>Administrator nie odpowiada za szkody wynikłe z korzystania z Serwisu niezgodnie
+            z Regulaminem lub przepisami prawa.</li>
+    </ol>
+
+    <h2>§13. Reklamacje</h2>
+    <ol>
+        <li>Reklamacje dotyczące działania Serwisu lub usług płatnych można składać na adres
+            <a href="mailto:{{ contact }}">{{ contact }}</a>.</li>
+        <li>Reklamację rozpatrujemy w terminie do 14 dni od jej otrzymania.</li>
+    </ol>
+
+    <h2>§14. Dane osobowe</h2>
+    <p>
+        Zasady przetwarzania danych osobowych opisuje
+        <a href="{{ privacy_url }}">Polityka prywatności</a>.
+    </p>
+
+    <h2>§15. Zmiany Regulaminu</h2>
+    <ol>
+        <li>Administrator może zmienić Regulamin z ważnych przyczyn (np. zmiana funkcji Serwisu
+            lub przepisów prawa).</li>
+        <li>O zmianach informujemy w Serwisie. Aktualna wersja Regulaminu jest zawsze dostępna
+            na tej stronie.</li>
+    </ol>
+
+    <h2>§16. Postanowienia końcowe</h2>
+    <ol>
+        <li>W sprawach nieuregulowanych stosuje się przepisy prawa polskiego.</li>
+        <li>Ewentualne spory strony będą starały się rozwiązać polubownie; konsument może też
+            skorzystać z pozasądowych sposobów rozpatrywania reklamacji i dochodzenia roszczeń.</li>
+    </ol>
+
+</article>

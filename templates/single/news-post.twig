@@ -1,0 +1,102 @@
+{# templates/single/news-post.twig - Wersja ostateczna z i18n #}
+<div class="news-post-wrapper">
+    <article class="news-post">
+        {% set news_meta = {
+            'ogloszenie': { 'icon': 'campaign', 'color': '#1A6EF4', 'label': __('Ogłoszenie', 'devents') },
+            'nowa_funkcja': { 'icon': 'build', 'color': '#178740', 'label': __('Nowa Funkcja', 'devents') },
+            'poradnik': { 'icon': 'school', 'color': '#C45303', 'label': __('Poradnik', 'devents') },
+            'wyroznienie': { 'icon': 'military_tech', 'color': '#A26907', 'label': __('Wyróżnienie', 'devents') }
+        } %}
+        {% set meta = news_meta[news.news_type] ?? news_meta['ogloszenie'] %}
+
+        <header class="news-post-header">
+            <h1>{{ news.title|e }}</h1>
+        </header>
+
+        <div class="news-post-body">
+            <div class="news-post-main">
+                {% set media_items = news.media_items ? news.media_items|json_decode : [] %}
+                {% if media_items is not empty %}
+                    <div class="news-post-gallery">
+                        <div class="gallery-main-image">
+                            {% set first_media = media_items[0] %}
+                            {% if 'youtube.com' in first_media.url or 'youtu.be' in first_media.url %}
+                                <div class="video-responsive">
+                                    <iframe src="{{ first_media.url|replace({'watch?v=': 'embed/'}) }}" 
+                                            frameborder="0" 
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                            allowfullscreen
+                                            title="{{ __('Wideo do wpisu', 'devents') }}"></iframe>
+                                </div>
+                            {% else %}
+                                <img id="main-gallery-image" src="{{ first_media.url|e }}" alt="{{ news.title|e }}">
+                            {% endif %}
+                        </div>
+                        {% if media_items|length > 1 %}
+                            <div class="gallery-thumbnails" role="group" aria-label="{{ __('Galeria zdjęć', 'devents') }}">
+                                {% for media in media_items %}
+                                    <button type="button" aria-label="{{ __('Pokaż zdjęcie', 'devents') }} {{ loop.index }}">
+                                        <img src="{{ media.url|e }}"
+                                             class="thumbnail"
+                                             data-full-src="{{ media.url|e }}"
+                                             alt="{{ __('Miniaturka zdjęcia', 'devents') }} {{ loop.index }}">
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <div class="news-post-content content-typography">
+                    {{ news.content|raw }}
+                </div>
+            </div>
+
+            <aside class="news-post-sidebar">
+                <div class="details-widget">
+                    <h3 class="details-widget__title">{{ __('Szczegóły wpisu', 'devents') }}</h3>
+                    <ul class="details-widget__list">
+                        <li>
+                            <span class="material-symbols-outlined" style="color: {{ meta.color }};" aria-hidden="true">{{ meta.icon }}</span>
+                            <div>
+                                <strong>{{ __('Typ:', 'devents') }}</strong><br>
+                                {{ meta.label }}
+                            </div>
+                        </li>
+                        <li>
+                            <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+                            <div>
+                                <strong>{{ __('Data publikacji:', 'devents') }}</strong><br>
+                                {{ news.publish_date|date('d.m.Y') }}
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </article>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Galeria: handler na przycisku (działa myszą i klawiaturą), a klasę .active
+    // utrzymujemy na <img> by nie psuć stylów CSS celujących w .thumbnail.active.
+    const thumbButtons = document.querySelectorAll('.gallery-thumbnails button');
+    const mainImage = document.getElementById('main-gallery-image');
+
+    if (mainImage && thumbButtons.length > 0) {
+        thumbButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const img = this.querySelector('.thumbnail');
+                if (!img) return;
+                const fullSrc = img.getAttribute('data-full-src');
+                if (fullSrc) mainImage.setAttribute('src', fullSrc);
+                document.querySelectorAll('.gallery-thumbnails .thumbnail').forEach(t => t.classList.remove('active'));
+                img.classList.add('active');
+            });
+        });
+        const firstImg = thumbButtons[0].querySelector('.thumbnail');
+        if (firstImg) firstImg.classList.add('active');
+    }
+});
+</script>

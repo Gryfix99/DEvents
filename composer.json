@@ -1,0 +1,8 @@
+{
+    "require": {
+        "twig/twig": "^3.0",
+        "league/commonmark": "^2.6",
+        "tijsverkoyen/css-to-inline-styles": "^2.2"
+    },
+    "_comment": "Usunięto twig/intl-extra oraz twig/extra-bundle — nieużywane w kodzie, a extra-bundle ciągnął cały framework Symfony (~25 MB, w tym symfony/intl). Nie przywracaj ich bez potrzeby; ponowny composer install znów rozdmucha vendor/."
+}

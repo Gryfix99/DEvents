@@ -1,0 +1,65 @@
+{# templates/macros/address.twig
+
+   Centralne formatowanie adresu wydarzenia.
+   Format: "Nazwa budynku, Ulica numer, Miasto"
+   Puste komponenty są pomijane. Fallback na event.location dla starszych
+   rekordów bez address_json.
+
+   Użycie:
+       {% from 'macros/address.twig' import format_address %}
+       {{ format_address(event) }}
+
+   Z opcjami:
+       {{ format_address(event, { city_only: true }) }}        — tylko miasto
+       {{ format_address(event, { skip_name: true }) }}        — bez nazwy budynku
+#}
+
+{% macro format_address(event, options = {}) %}
+    {%- set city_only = options.city_only|default(false) -%}
+    {%- set skip_name = options.skip_name|default(false) -%}
+
+    {%- if city_only -%}
+        {{- event.address_city|default(event.location)|trim -}}
+    {%- else -%}
+        {%- set street_with_no = event.address_street|default('')|trim -%}
+        {%- if event.address_building|default('')|trim -%}
+            {%- set street_with_no = street_with_no ~ ' ' ~ event.address_building|trim -%}
+        {%- endif -%}
+
+        {%- set parts = [] -%}
+        {%- if not skip_name and event.address_name|default('')|trim -%}
+            {%- set parts = parts|merge([event.address_name|trim]) -%}
+        {%- endif -%}
+        {%- if street_with_no -%}
+            {%- set parts = parts|merge([street_with_no]) -%}
+        {%- endif -%}
+        {%- if event.address_city|default('')|trim -%}
+            {%- set parts = parts|merge([event.address_city|trim]) -%}
+        {%- endif -%}
+
+        {%- if parts is not empty -%}
+            {{- parts|join(', ') -}}
+        {%- elseif event.location|default('')|trim -%}
+            {#- Fallback dla starych rekordów bez rozbitego adresu -#}
+            {{- event.location|trim -}}
+        {%- endif -%}
+    {%- endif -%}
+{% endmacro %}
+
+
+{# =====================================================================
+   Wariant z ikoną i etykietą "Lokalizacja:" dla screen readerów.
+
+   Użycie:
+       {{ format_address_with_icon(event) }}
+   ===================================================================== #}
+
+{% macro format_address_with_icon(event, options = {}) %}
+    {%- import _self as addr -%}
+    {%- set address = addr.format_address(event, options)|trim -%}
+    {%- if address -%}
+        <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+        <span class="sr-only">{{ __('Lokalizacja:', 'devents') }}</span>
+        <span>{{ address }}</span>
+    {%- endif -%}
+{% endmacro %}

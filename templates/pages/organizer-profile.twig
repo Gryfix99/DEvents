@@ -1,0 +1,520 @@
+{# ========================================================================
+   PROFIL ORGANIZATORA — v15.0 (A11Y + Semantyka + Event Cards)
+   ======================================================================== #}
+
+{# ── Zmienne pomocnicze ─────────────────────────────────────────────────── #}
+{% set full_address = [
+    organizer.address_data.street,
+    organizer.address_data.house_number
+]|join(' ')|trim ~ ', ' ~ [
+    organizer.address_data.zip_code,
+    organizer.address_data.city
+]|join(' ')|trim %}
+
+{% set maps_url          = "https://www.google.com/maps/search/?api=1&query=" ~ full_address|url_encode %}
+{% set has_contact       = organizer.website or organizer.email or organizer.phone or organizer.address_data.city %}
+{% set has_coordinator   = organizer.coordinator.first_name is defined and organizer.coordinator.first_name %}
+{% set has_pjm           = organizer.pjm_video_link is defined and organizer.pjm_video_link %}
+{% set total_events      = active_events|length + archived_events|length %}
+{% set followers_count   = organizer.followers_count|default(0) %}
+
+<div class="org-profile"
+     id="devents-main-content"
+     role="region"
+     aria-labelledby="org-profile-name">
+
+    {# Pomijanie nawigacji do sekcji wydarzeń #}
+    <a href="#org-events-section" class="devents-skip-link devents-skip-link--inline">
+        {{ __('Przejdź do wydarzeń organizatora', 'devents') }}
+    </a>
+
+    {# Live region — ogłoszenia zmian stanu (follow/unfollow) dla czytników #}
+    <div id="org-status-announcer"
+         role="status"
+         aria-live="polite"
+         aria-atomic="true"
+         class="sr-only"></div>
+
+    {# ====================================================================
+       BREADCRUMBS
+       ==================================================================== #}
+    <nav class="event-breadcrumbs" aria-label="{{ __('Nawigacja okruszkowa', 'devents') }}">
+        <ol class="event-breadcrumbs__list" role="list">
+            <li class="event-breadcrumbs__item">
+                <a href="{{ home_url('/organizatorzy') }}" class="event-breadcrumbs__link">
+                    {{ __('Organizatorzy', 'devents') }}
+                </a>
+            </li>
+            <li class="event-breadcrumbs__item event-breadcrumbs__item--current"
+                aria-current="page">
+                {{ organizer.name|e }}
+            </li>
+        </ol>
+    </nav>
+
+    {# ====================================================================
+       HERO
+       ==================================================================== #}
+    <header class="org-profile__hero" aria-labelledby="org-profile-name">
+
+        <div class="org-profile__hero-main">
+
+            {# Logo — dekoracyjne, ukryte dla AT #}
+            <div class="org-profile__logo" aria-hidden="true">
+                {% if organizer.logo_url %}
+                    <img src="{{ organizer.logo_url }}"
+                         alt=""
+                         loading="lazy"
+                         width="96" height="96">
+                {% else %}
+                    <span class="material-symbols-outlined">domain</span>
+                {% endif %}
+            </div>
+
+            <div class="org-profile__hero-info">
+
+                {% if organizer.parent_name %}
+                    <span class="org-profile__parent">
+                        <span class="material-symbols-outlined" aria-hidden="true">hub</span>
+                        {{ __('Jednostka sieci:', 'devents') }}&nbsp;{{ organizer.parent_name|e }}
+                    </span>
+                {% endif %}
+
+                <h1 id="org-profile-name" class="org-profile__name">
+                    {{ organizer.name|e }}
+                </h1>
+
+                {# ── Statystyki / Meta chipy ──────────────────────────────── #}
+                <ul class="org-profile__meta"
+                    role="list"
+                    aria-label="{{ __('Statystyki organizatora', 'devents') }}">
+
+                    {# Badge aktywności #}
+                    {% if organizer.activity_badge and organizer.activity_badge.info %}
+                        <li class="org-profile__chip org-profile__chip--badge"
+                            role="listitem"
+                            style="background: {{ organizer.activity_badge.info.bg }}; color: {{ organizer.activity_badge.info.text|default(organizer.activity_badge.info.color) }};"
+                            aria-label="{{ __('Status aktywności:', 'devents') }} {{ organizer.activity_badge.info.label }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">{{ organizer.activity_badge.info.icon }}</span>
+                            <span>{{ organizer.activity_badge.info.label }}</span>
+                        </li>
+                    {% endif %}
+
+                    {# Oceny gwiazdkowe usunięte — zastąpione systemem Pytań do organizatora. #}
+
+                    {# Liczba wydarzeń #}
+                    <li class="org-profile__chip"
+                        role="listitem"
+                        aria-label="{{ __('Liczba wydarzeń:', 'devents') }} {{ organizer.total_events|default(total_events) }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">event_available</span>
+                        <strong aria-hidden="true">{{ organizer.total_events|default(total_events) }}</strong>
+                        <span class="org-profile__chip-muted" aria-hidden="true">{{ __('wydarzeń', 'devents') }}</span>
+                    </li>
+
+                    {# Liczba obserwujących #}
+                    <li class="org-profile__chip"
+                        role="listitem"
+                        aria-label="{{ __('Obserwujący:', 'devents') }} {{ followers_count }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">group</span>
+                        <strong class="stat-followers-count" aria-hidden="true">{{ followers_count }}</strong>
+                        <span class="org-profile__chip-muted" aria-hidden="true">{{ __('obserwujących', 'devents') }}</span>
+                    </li>
+
+                    {# Miasto #}
+                    {% if organizer.address_data.city %}
+                        <li class="org-profile__chip"
+                            role="listitem"
+                            aria-label="{{ __('Lokalizacja:', 'devents') }} {{ organizer.address_data.city|e }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                            <span aria-hidden="true">{{ organizer.address_data.city|e }}</span>
+                        </li>
+                    {% endif %}
+
+                </ul>
+            </div>
+        </div>
+
+        {# ── Akcje (follow + opinia) ────────────────────────────────────── #}
+        <div class="org-profile__hero-actions">
+            {% if is_user_logged_in and user.ID != organizer.id %}
+
+                <button type="button"
+                        class="org-profile__follow-btn btn-follow {{ organizer.is_followed ? 'is-followed' : '' }}"
+                        data-organizer-id="{{ organizer.id }}"
+                        data-nonce="{{ wp_create_nonce('devents_subscription_nonce') }}"
+                        data-name="{{ organizer.name|e }}"
+                        aria-pressed="{{ organizer.is_followed ? 'true' : 'false' }}"
+                        aria-describedby="org-status-announcer">
+                    <span class="state-unfollowed"
+                          aria-hidden="{{ organizer.is_followed ? 'true' : 'false' }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
+                        {{ __('Obserwuj', 'devents') }}
+                    </span>
+                    <span class="state-followed"
+                          aria-hidden="{{ organizer.is_followed ? 'false' : 'true' }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                        {{ __('Obserwujesz', 'devents') }}
+                    </span>
+                </button>
+
+                <a href="#reviews-section"
+                   class="org-profile__review-btn btn-trigger-review"
+                   aria-label="{{ __('Zadaj pytanie organizatorowi', 'devents') }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">help</span>
+                    {{ __('Zadaj pytanie', 'devents') }}
+                </a>
+
+            {% endif %}
+        </div>
+
+    </header>
+
+    {# ====================================================================
+       GRID LAYOUT
+       ==================================================================== #}
+    <div class="org-profile__grid">
+
+        {# ================================================================
+           SIDEBAR
+           ================================================================ #}
+        <aside class="org-profile__sidebar"
+               aria-label="{{ __('Informacje kontaktowe i udostępnianie', 'devents') }}">
+
+            {# ── Kontakt ─────────────────────────────────────────────── #}
+            {% if has_contact %}
+                <div class="sidebar-widget">
+                    <h2 id="sidebar-contact-title" class="sidebar-widget__title">
+                        <span class="material-symbols-outlined" aria-hidden="true">contact_page</span>
+                        {{ __('Kontakt', 'devents') }}
+                    </h2>
+                    <ul class="org-contact-list" role="list" aria-labelledby="sidebar-contact-title">
+
+                        {% if organizer.website %}
+                            <li class="org-contact-list__item">
+                                <span class="material-symbols-outlined" aria-hidden="true">language</span>
+                                <a href="{{ organizer.website }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   aria-label="{{ __('Strona WWW organizatora (otwiera się w nowej karcie)', 'devents') }}">
+                                    {{ __('Strona WWW', 'devents') }}
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% if organizer.email %}
+                            <li class="org-contact-list__item">
+                                <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+                                <a href="mailto:{{ organizer.email }}"
+                                   aria-label="{{ __('Wyślij e-mail:', 'devents') }} {{ organizer.email }}">
+                                    {{ organizer.email }}
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% if organizer.phone %}
+                            <li class="org-contact-list__item">
+                                <span class="material-symbols-outlined" aria-hidden="true">call</span>
+                                <a href="tel:{{ organizer.phone }}"
+                                   aria-label="{{ __('Zadzwoń:', 'devents') }} {{ organizer.phone }}">
+                                    {{ organizer.phone }}
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% if organizer.address_data.city %}
+                            <li class="org-contact-list__item org-contact-list__item--address">
+                                <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                                <a href="{{ maps_url }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   aria-label="{{ __('Zobacz na mapie:', 'devents') }} {{ organizer.address_data.street }} {{ organizer.address_data.house_number }}, {{ organizer.address_data.zip_code }} {{ organizer.address_data.city }} ({{ __('otwiera się w nowej karcie', 'devents') }})">
+                                    <strong>{{ organizer.address_data.street }} {{ organizer.address_data.house_number }}</strong>
+                                    <small>{{ organizer.address_data.zip_code }} {{ organizer.address_data.city }}</small>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                    </ul>
+                </div>
+            {% endif %}
+
+            {# ── Administrator instytucji ──────────────────────────────── #}
+            {% if has_coordinator %}
+                <div class="sidebar-widget">
+                    <h2 class="sidebar-widget__title">
+                        <span class="material-symbols-outlined" aria-hidden="true">accessibility_new</span>
+                        {{ __('Administrator instytucji', 'devents') }}
+                    </h2>
+                    <div class="org-coordinator">
+                        <span class="org-coordinator__name">
+                            {{ organizer.coordinator.first_name|e }}
+                            {{ organizer.coordinator.last_name|e }}
+                        </span>
+                        {% if organizer.coordinator.email %}
+                            <a href="mailto:{{ organizer.coordinator.email }}"
+                               class="org-coordinator__link"
+                               aria-label="{{ __('E-mail administratora instytucji:', 'devents') }} {{ organizer.coordinator.email }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+                                {{ organizer.coordinator.email }}
+                            </a>
+                        {% endif %}
+                        {% if organizer.coordinator.phone %}
+                            <a href="tel:{{ organizer.coordinator.phone }}"
+                               class="org-coordinator__link"
+                               aria-label="{{ __('Telefon administratora instytucji:', 'devents') }} {{ organizer.coordinator.phone }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">call</span>
+                                {{ organizer.coordinator.phone }}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {# ── Udostępnij ──────────────────────────────────────────── #}
+            <div class="sidebar-widget">
+                <h2 class="sidebar-widget__title">
+                    <span class="material-symbols-outlined" aria-hidden="true">share</span>
+                    {{ __('Udostępnij profil', 'devents') }}
+                </h2>
+                <ul class="event-actions" role="list">
+                    <li role="listitem">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ organizer.profile_url|url_encode }}"
+                           target="_blank" rel="noopener noreferrer"
+                           class="event-actions__btn event-actions__btn--social"
+                           aria-label="{{ __('Udostępnij na Facebooku (otwiera się w nowej karcie)', 'devents') }}">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                                <path d="M22.675 0h-21.35C.593 0 0 .593 0 1.325v21.351C0 23.407.593 24 1.325 24h11.495v-9.294H9.691v-3.622h3.129V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.464.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116C23.407 24 24 23.407 24 22.676V1.325C24 .593 23.407 0 22.675 0z"/>
+                            </svg>
+                        </a>
+                    </li>
+                    <li role="listitem">
+                        <a href="https://twitter.com/intent/tweet?url={{ organizer.profile_url|url_encode }}&text={{ organizer.name|url_encode }}"
+                           target="_blank" rel="noopener noreferrer"
+                           class="event-actions__btn event-actions__btn--social"
+                           aria-label="{{ __('Udostępnij na X (Twitter) (otwiera się w nowej karcie)', 'devents') }}">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                            </svg>
+                        </a>
+                    </li>
+                    <li role="listitem">
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ organizer.profile_url|url_encode }}"
+                           target="_blank" rel="noopener noreferrer"
+                           class="event-actions__btn event-actions__btn--social"
+                           aria-label="{{ __('Udostępnij na LinkedIn (otwiera się w nowej karcie)', 'devents') }}">
+                            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </aside>
+
+        {# ================================================================
+           GŁÓWNA TREŚĆ
+           ================================================================ #}
+        <div class="org-profile__main">
+
+            {# ── O ORGANIZACJI (opis jako tekst) + przycisk wizytówki PJM ──────── #}
+            {# Pokazuj sekcję tylko gdy jest opis LUB wizytówka PJM — pusty opis nie wyświetla się. #}
+            {% set has_about = organizer.description|default('')|striptags|trim is not empty %}
+            {% if has_about or has_pjm %}
+                <div class="org-profile__about-block">
+                    <div class="org-profile__about-head">
+                        <h2 class="org-profile__section-title">{{ __('O organizacji', 'devents') }}</h2>
+                        {% if has_pjm %}
+                            <button type="button"
+                                    class="btn btn--secondary org-profile__pjm-btn"
+                                    id="open-pjm-card-modal"
+                                    aria-haspopup="dialog"
+                                    aria-controls="pjm-card-modal">
+                                <span class="material-symbols-outlined" aria-hidden="true">sign_language</span>
+                                {{ __('Wizytówka w PJM', 'devents') }}
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    {% if has_about %}
+                        <div class="org-profile__description content-typography">
+                            {{ organizer.description|raw }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {# Modal: wizytówka w Polskim Języku Migowym (tylko gdy dodana) #}
+            {% if has_pjm %}
+                {% set video_url  = organizer.pjm_video_link %}
+                {% set embed_url  = '' %}
+                {% if 'youtube.com/' in video_url or 'youtu.be/' in video_url %}
+                    {% set video_id  = video_url|split('v=')|last|split('/')|last|split('?')[0]|split('&')[0] %}
+                    {% set embed_url = "https://www.youtube.com/embed/" ~ video_id ~ "?rel=0" %}
+                {% elseif 'vimeo.com/' in video_url %}
+                    {% set video_id  = video_url|split('/')|last %}
+                    {% set embed_url = "https://player.vimeo.com/video/" ~ video_id %}
+                {% endif %}
+
+                <div id="pjm-card-modal" class="modal pjm-card-modal" role="dialog" aria-modal="true" aria-labelledby="pjm-card-modal-title" style="display:none;">
+                    <div class="modal-content">
+                        <button type="button" class="modal-close" aria-label="{{ __('Zamknij', 'devents') }}"><span aria-hidden="true">&times;</span></button>
+                        <h3 id="pjm-card-modal-title">
+                            <span class="material-symbols-outlined" aria-hidden="true">sign_language</span>
+                            {{ __('Wizytówka w Polskim Języku Migowym', 'devents') }}
+                        </h3>
+                        {% if embed_url %}
+                            <div class="org-profile__video-wrap">
+                                <iframe data-src="{{ embed_url }}"
+                                        title="{{ __('Wizytówka w Polskim Języku Migowym —', 'devents') }} {{ organizer.name|e }}"
+                                        frameborder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                                        allowfullscreen
+                                        loading="lazy"
+                                        referrerpolicy="strict-origin-when-cross-origin"></iframe>
+                            </div>
+                        {% else %}
+                            <p class="message-box message-box--warning" role="alert">
+                                {{ __('Nie udało się wczytać wideo PJM. Sprawdź link.', 'devents') }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {# ── NADCHODZĄCE WYDARZENIA ───────────────────────────────── #}
+            <section class="org-profile__events"
+                     id="org-events-section"
+                     tabindex="-1"
+                     aria-labelledby="org-events-heading">
+
+                <div class="org-profile__section-header">
+                    <h2 id="org-events-heading" class="org-profile__section-title">
+                        {{ __('Nadchodzące wydarzenia', 'devents') }}
+                    </h2>
+                    {% if active_events|length > 0 %}
+                        <span class="search-toolbar__badge"
+                              aria-label="{{ __('Liczba nadchodzących wydarzeń:', 'devents') }} {{ active_events|length }}">
+                            {{ active_events|length }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                {% if active_events|length > 0 %}
+                    <ul class="cards_grid" role="list">
+                        {% for event in active_events %}
+                            <li role="listitem">
+                                {% include 'components/event-card.twig' with {
+                                    'event': event,
+                                    'show_organizer': false,
+                                    'is_archived': false
+                                } %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="org-profile__empty-events" role="status" aria-live="polite">
+                        <span class="material-symbols-outlined" aria-hidden="true">event_busy</span>
+                        <p>{{ __('Brak nadchodzących wydarzeń.', 'devents') }}</p>
+                    </div>
+                {% endif %}
+
+                {# Archiwum — collapsible #}
+                {% if archived_events|length > 0 %}
+                    <details class="org-profile__archive">
+                        <summary class="org-profile__archive-toggle">
+                            <span>
+                                {{ __('Archiwum wydarzeń', 'devents') }}
+                                ({{ archived_events|length }})
+                            </span>
+                            <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+                        </summary>
+                        <div class="org-profile__archive-grid">
+                            <ul class="cards_grid" role="list">
+                                {% for event in archived_events %}
+                                    <li role="listitem">
+                                        {% include 'components/event-card.twig' with {
+                                            'event': event,
+                                            'show_organizer': false,
+                                            'is_archived': true
+                                        } %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </details>
+                {% endif %}
+
+            </section>
+
+            {# ── PYTANIA DO ORGANIZATORA ──────────────────────────────── #}
+            <section id="reviews-section"
+                     class="org-profile__reviews"
+                     aria-labelledby="org-reviews-heading"
+                     tabindex="-1">
+
+                <div class="org-profile__section-header">
+                    <h2 id="org-reviews-heading" class="org-profile__section-title">
+                        {{ __('Pytania do organizatora', 'devents') }}
+                    </h2>
+                    <span class="search-toolbar__badge"
+                          aria-label="{{ __('Liczba pytań:', 'devents') }} {{ organizer_reviews|default([])|length }}">
+                        {{ organizer_reviews|default([])|length }}
+                    </span>
+                </div>
+
+                {% include 'components/reviews.twig' with {
+                    'reviews':          organizer_reviews|default([]),
+                    'item':             {'id': organizer.id, 'user_id': organizer.id},
+                    'item_type':        'organizer',
+                    'is_user_logged_in': is_user_logged_in,
+                    'review_nonce':     review_nonce
+                } %}
+
+            </section>
+
+        </div>{# /.org-profile__main #}
+
+    </div>{# /.org-profile__grid #}
+
+</div>{# /.org-profile #}
+
+{# ====================================================================
+   JSON-LD — Schema.org Organization
+   ==================================================================== #}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": {{ organizer.name|e|json_encode|raw }},
+    "url": {{ organizer.profile_url|json_encode|raw }}
+    {% if organizer.logo_url %},
+    "logo": {{ organizer.logo_url|json_encode|raw }}
+    {% endif %}
+    {% if organizer.website %},
+    "sameAs": [{{ organizer.website|json_encode|raw }}]
+    {% endif %}
+    {% if organizer.address_data.city %},
+    "address": {
+        "@type": "PostalAddress",
+        "streetAddress": {{ (organizer.address_data.street ~ ' ' ~ organizer.address_data.house_number)|trim|json_encode|raw }},
+        "postalCode": {{ organizer.address_data.zip_code|json_encode|raw }},
+        "addressLocality": {{ organizer.address_data.city|json_encode|raw }},
+        "addressCountry": "PL"
+    }
+    {% endif %}
+    {% if organizer.email %},
+    "email": {{ organizer.email|json_encode|raw }}
+    {% endif %}
+    {% if organizer.phone %},
+    "telephone": {{ organizer.phone|json_encode|raw }}
+    {% endif %}
+    {% if average_rating > 0 %},
+    "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": {{ average_rating }},
+        "reviewCount": {{ rating_count }}
+    }
+    {% endif %}
+}
+</script>

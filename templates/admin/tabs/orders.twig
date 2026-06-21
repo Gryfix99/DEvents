@@ -1,0 +1,338 @@
+{# templates/admin/tabs/orders.twig #}
+
+{# --- KONFIGURACJA STATUSÓW --- #}
+{% set status_config = {
+    'pending':    { 'label': 'NIEOPŁACONE', 'class': 'status-badge--pending' },
+    'paid':       { 'label': 'OPŁACONE',    'class': 'status-badge--paid' },
+    'processing': { 'label': 'W REALIZACJI','class': 'status-badge--processing' },
+    'completed':  { 'label': 'ZAKOŃCZONE',  'class': 'status-badge--completed' },
+    'cancelled':  { 'label': 'ANULOWANE',   'class': 'status-badge--overdue' },
+    'failed':     { 'label': 'BŁĄD',        'class': 'status-badge--overdue' }
+} %}
+
+<div class="devents-sales-dashboard">
+    
+    {# --- NAWIGACJA ZAKŁADEK --- #}
+    <nav class="nav-tab-wrapper" style="margin-bottom: 20px;">
+        <a href="#tab-orders" class="nav-tab nav-tab-active js-sales-tab" data-target="tab-orders">Lista Zamówień</a>
+        <a href="#tab-pricing" class="nav-tab js-sales-tab" data-target="tab-pricing">Cennik i Omnibus</a>
+        <a href="#tab-coupons" class="nav-tab js-sales-tab" data-target="tab-coupons">Kupony Rabatowe</a>
+    </nav>
+
+    {# --- ZAKŁADKA 1: ZAMÓWIENIA --- #}
+    <div id="tab-orders" class="sales-tab-content active">
+        <div class="admin-card">
+            
+            {# HEADER / FILTRY #}
+            <div class="list-toolbar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span class="admin-widget__chip"><span class="material-symbols-outlined" aria-hidden="true">shopping_cart</span></span>
+                    <h3 class="admin-widget__title" style="margin:0;">Zamówienia</h3>
+                </div>
+
+                <form method="get" style="display:flex; gap:10px; align-items:center;">
+                    <input type="hidden" name="view" value="panel-admina">
+                    <input type="hidden" name="tab" value="orders">
+                    
+                    <input type="text" name="search" value="{{ data.search_query }}" placeholder="Szukaj (nr, email)..." class="form-control" style="max-width: 200px;">
+                    
+                    <button type="submit" class="btn btn--secondary">Szukaj</button>
+                    {% if data.search_query %}
+                        <a href="{{ data.panel_url }}" class="btn btn--outline" aria-label="Wyczyść wyszukiwanie"><span class="material-symbols-outlined" aria-hidden="true">close</span></a>
+                    {% endif %}
+                </form>
+            </div>
+
+            {# TABELA #}
+            <div class="table-responsive-wrapper">
+                <table class="my-content-list__table devents-responsive-table devents-table--cards">
+                    <thead>
+                        <tr>
+                            <th scope="col" style="width: 50px;">ID</th>
+                            <th scope="col" style="width: 140px;">Nr zamówienia</th>
+                            <th scope="col">Klient</th>
+                            <th scope="col">Produkt / Wydarzenie</th>
+                            <th scope="col">Kwota</th>
+                            <th scope="col">Data</th>
+                            <th scope="col">Status / Czas</th>
+                            <th scope="col" style="text-align: right;">Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in data.orders %}
+                            {# Obliczanie Deadline'u (72h) #}
+                            {% set created_ts = order.created_at|date('U') %}
+                            {% set deadline_ts = order.deadline ? order.deadline|date('U') : (created_ts + (72 * 3600)) %}
+                            {% set s = status_config[order.status] ?? { 'label': order.status|upper, 'class': 'status-badge--pending' } %}
+
+                            {# --- GŁÓWNY WIERSZ --- #}
+                            <tr class="order-row {{ order.status == 'completed' ? 'row-completed' : '' }}">
+                                <td data-label="ID">{{ order.id }}</td>
+                                <td data-label="Nr">
+                                    <strong>#{{ order.order_number }}</strong>
+                                    {% if order.stripe_session_id %}
+                                        <div style="font-size:10px; color:var(--text-secondary); margin-top:2px;">Stripe</div>
+                                    {% endif %}
+                                </td>
+                                <td data-label="Klient">
+                                    {% if order.user_id > 0 %}
+                                        <span style="font-weight:600;">{{ order.user_name|default('Użytkownik') }}</span>
+                                    {% else %}
+                                        <span class="text-muted">Gość</span>
+                                    {% endif %}
+                                    <br>
+                                    <small><a href="mailto:{{ order.user_email }}">{{ order.user_email }}</a></small>
+                                </td>
+                                <td data-label="Produkt">
+                                    <span style="font-weight:600; color:var(--primary);">{{ order.product_type|replace({'_': ' '})|capitalize }}</span>
+                                    {% if order.event_title %}<br><small class="text-muted">{{ order.event_title|e }}</small>{% endif %}
+                                </td>
+                                <td data-label="Kwota">
+                                    <span class="price-tag">{{ order.amount|number_format(2, ',', ' ') }} zł</span>
+                                </td>
+                                <td data-label="Data">{{ order.created_at|date('d.m.Y H:i') }}</td>
+                                
+                                <td data-label="Status">
+                                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 5px;">
+                                        <span class="status-badge {{ s.class }}">{{ s.label }}</span>
+
+                                        {# TIMER: Tylko dla opłaconych i w realizacji #}
+                                        {% if order.status == 'paid' or order.status == 'processing' %}
+                                            <div class="order-timer js-order-timer" data-deadline="{{ deadline_ts }}">
+                                                <span class="material-symbols-outlined" style="font-size:14px;" aria-hidden="true">schedule</span>
+                                                <span class="timer-display">Obliczanie...</span>
+                                            </div>
+                                        {% endif %}
+
+                                        {# LINKI: Dla zakończonych #}
+                                        {% if order.status == 'completed' %}
+                                            <div style="font-size:11px;">
+                                                {% if order.delivery_url %}
+                                                    <a href="{{ order.delivery_url }}" target="_blank" class="button-link">
+                                                        <span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle;" aria-hidden="true">download</span> Plik
+                                                    </a>
+                                                {% endif %}
+                                                {% if order.invoice_url %}
+                                                    <span style="color:var(--text-secondary); margin:0 3px;">|</span>
+                                                    <a href="{{ order.invoice_url }}" target="_blank" class="button-link">
+                                                        <span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle;" aria-hidden="true">receipt</span> FV
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </td>
+
+                                <td style="text-align: right;" class="actions-cell">
+                                    <div class="actions-group" style="justify-content: flex-end;">
+                                        
+                                        {# Toggle Details (jeśli są dane w JSON pjm_details) #}
+                                        {% if order.pjm_details %}
+                                            <button type="button" class="btn btn--secondary btn--small btn--icon js-toggle-details"
+                                                    data-target="#details-{{ order.id }}" title="Pokaż wytyczne" aria-label="Pokaż wytyczne">
+                                                <span class="material-symbols-outlined" aria-hidden="true">text_compare</span>
+                                            </button>
+                                        {% endif %}
+
+                                        {# 0. Oznacz jako opłacone (np. po przelewie z proformy) #}
+                                        {% if order.status == 'pending' %}
+                                            <button type="button" class="btn btn--secondary btn--small btn--icon js-mark-paid"
+                                                    data-order-id="{{ order.id }}"
+                                                    title="Oznacz jako opłacone" aria-label="Oznacz jako opłacone">
+                                                <span class="material-symbols-outlined" aria-hidden="true">paid</span>
+                                            </button>
+                                        {% endif %}
+
+                                        {# 1. Zrealizuj #}
+                                        {% if order.status == 'paid' or order.status == 'processing' %}
+                                            <button type="button" class="btn btn--secondary btn--small btn--icon js-open-completion-modal"
+                                                    data-order-id="{{ order.id }}"
+                                                    data-mode="complete"
+                                                    title="Zrealizuj" aria-label="Zrealizuj">
+                                                <span class="material-symbols-outlined" aria-hidden="true">download_done</span>
+                                            </button>
+                                        {% endif %}
+
+                                        {# 2. Edytuj #}
+                                        {% if order.status == 'completed' %}
+                                            <button type="button" class="btn btn--secondary btn--small btn--icon js-open-completion-modal"
+                                                    data-order-id="{{ order.id }}"
+                                                    data-mode="edit"
+                                                    data-delivery="{{ order.delivery_url }}"
+                                                    data-invoice="{{ order.invoice_url }}"
+                                                    title="Edytuj" aria-label="Edytuj">
+                                                <span class="material-symbols-outlined" aria-hidden="true">edit_document</span>
+                                            </button>
+                                        {% endif %}
+
+                                        {# Usuń #}
+                                        <button type="button" class="btn btn--danger btn--small btn--icon js-delete-order" data-order-id="{{ order.id }}" title="Usuń" aria-label="Usuń">
+                                            <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            {# --- WIERSZ SZCZEGÓŁÓW (PJM / Wytyczne) --- #}
+                            {# Parsujemy JSON jeśli jest stringiem, lub używamy bezpośrednio #}
+                            {% set details = order.pjm_details is iterable ? order.pjm_details : order.pjm_details|json_decode %}
+                            
+                            {% if details %}
+                            <tr id="details-{{ order.id }}" class="order-details-row hidden" style="background-color: var(--bg-hover);">
+                                <td colspan="8" style="padding: 20px;">
+                                    <div class="details-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:30px;">
+                                        <div class="details-column">
+                                            <h4 style="margin-top:0;">Wytyczne PJM</h4>
+                                            
+                                            {% if details.text %}
+                                                <div style="margin-bottom:10px;">
+                                                    <strong>Tekst:</strong>
+                                                    <div style="background:var(--bg-secondary); padding:10px; border-radius:4px; margin-top:5px; border:1px solid var(--border-primary);">
+                                                        {{ details.text|nl2br }}
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+
+                                            <ul style="list-style:none; padding:0;">
+                                                <li><strong>Tło:</strong> {{ details.bg_color|default('Domyślne') }}</li>
+                                                <li><strong>Napisy:</strong> {{ details.add_subtitles ? 'TAK' : 'NIE' }}</li>
+                                                <li><strong>Format:</strong> {{ details.format|default('16:9') }}</li>
+                                            </ul>
+                                        </div>
+
+                                        <div class="details-column">
+                                            <h4 style="margin-top:0;">Pliki Klienta</h4>
+                                            {% if details.files %}
+                                                {% for key, file_url in details.files %}
+                                                    <div style="margin-bottom:8px;">
+                                                        <strong>{{ key|capitalize }}:</strong> 
+                                                        <a href="{{ file_url }}" target="_blank" style="text-decoration:underline;">Pobierz plik</a>
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <span class="text-muted">Brak plików.</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+
+                        {% else %}
+                            <tr><td colspan="8" style="text-align:center; padding:40px; color:var(--text-secondary);">Brak zamówień do wyświetlenia.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {# Paginacja #}
+            {% if data.pagination_links %}
+                <div class="tablenav bottom">
+                    <div class="tablenav-pages">{{ data.pagination_links|raw }}</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# --- ZAKŁADKA 2: CENNIK --- #}
+    <div id="tab-pricing" class="sales-tab-content" style="display:none;">
+        <div class="admin-card pricing-card">
+            <div class="pricing-card__head">
+                <span class="material-symbols-outlined pricing-card__icon" aria-hidden="true">sell</span>
+                <div>
+                    <h3 class="pricing-card__title">Zarządzanie cenami (Omnibus)</h3>
+                    <p class="pricing-card__desc">Każda zmiana ceny jest zapisywana zgodnie z dyrektywą Omnibus.</p>
+                </div>
+            </div>
+
+            <form id="pricing-form" class="pricing-form">
+                <div class="pricing-grid">
+                    {% for key, p in {
+                        'featured_3_days':  {'label': 'Wyróżnienie (3 dni)',     'icon': 'star',          'hint': 'Promocja wydarzenia'},
+                        'featured_7_days':  {'label': 'Wyróżnienie (7 dni)',     'icon': 'star_half',     'hint': 'Promocja wydarzenia'},
+                        'featured_14_days': {'label': 'Wyróżnienie (14 dni)',    'icon': 'auto_awesome',  'hint': 'Promocja wydarzenia'},
+                        'translation_pjm':  {'label': 'Tłumaczenie PJM (Baza)',  'icon': 'sign_language', 'hint': 'Polski Język Migowy'},
+                        'subtitle_addon':   {'label': 'Dodatek: Napisy .SRT',    'icon': 'closed_caption','hint': 'Napisy do filmu'},
+                        'report':           {'label': 'Raport wydarzeń',         'icon': 'summarize',     'hint': 'Płatne zestawienie dla instytucji'}
+                    } %}
+                        <div class="pricing-product">
+                            <div class="pricing-product__head">
+                                <span class="material-symbols-outlined pricing-product__icon" aria-hidden="true">{{ p.icon }}</span>
+                                <div class="pricing-product__titles">
+                                    <label for="adm-price-{{ key }}" class="pricing-product__label">{{ p.label }}</label>
+                                    <span class="pricing-product__hint">{{ p.hint }}</span>
+                                </div>
+                            </div>
+                            <div class="pricing-input">
+                                <input type="number" step="0.01" min="0" id="adm-price-{{ key }}" name="prices[{{ key }}]" value="{{ data.prices[key] }}" class="form-control" inputmode="decimal">
+                                <span class="pricing-input__suffix">PLN</span>
+                            </div>
+                            <div class="pricing-product__omnibus" title="Najniższa cena z 30 dni przed obniżką (dyrektywa Omnibus)">
+                                <span class="material-symbols-outlined" aria-hidden="true">history</span>
+                                <span>Najniższa cena z 30 dni:</span>
+                                <strong>{% if data.omnibus_lowest[key] is defined and data.omnibus_lowest[key] %}{{ data.omnibus_lowest[key] }} zł{% else %}—{% endif %}</strong>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="pricing-form__actions">
+                    <button type="submit" class="btn btn--primary">
+                        <span class="material-symbols-outlined" aria-hidden="true">save</span>
+                        Zapisz ceny
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# --- ZAKŁADKA 3: KUPONY --- #}
+    <div id="tab-coupons" class="sales-tab-content" style="display:none;">
+        {# Plik coupons.twig musi istnieć w tej lokalizacji #}
+        {% include 'admin/tabs/coupons.twig' %}
+    </div>
+
+    {# === MODAL REALIZACJI / EDYCJI (Obsługiwany przez admin-orders.js) === #}
+    <div id="order-completion-modal" class="devents-modal hidden">
+        <div class="devents-modal-content">
+            <div class="devents-modal-header">
+                <h3 id="modal-title">Realizacja zamówienia</h3>
+                <button type="button" class="close-modal btn btn--icon" aria-label="Zamknij"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+            </div>
+            <div class="devents-modal-body">
+                <form id="completion-form" enctype="multipart/form-data">
+                    {# WAŻNE: Pola dostosowane do kontrolera DEvents_Admin_Actions_Controller #}
+                    <input type="hidden" name="action" value="devents_admin_general_action">
+                    <input type="hidden" name="sub_action" value="complete_order">
+                    
+                    {# ID zamówienia w formacie payload[order_id] #}
+                    <input type="hidden" name="payload[order_id]" id="comp_order_id">
+                    
+                    <div class="form-group">
+                        <label for="comp_delivery_url">Link do gotowego pliku (URL) <span class="req" aria-hidden="true">*</span></label>
+                        <input type="url" name="payload[delivery_url]" id="comp_delivery_url" class="form-control" placeholder="https://..." required>
+                        <p class="description" style="color:var(--text-secondary); font-size:12px;">Link zostanie wysłany do klienta w e-mailu.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comp_invoice_file">Faktura VAT (PDF)</label>
+                        {# Plik nie idzie w payload[], bo to $_FILES #}
+                        <input type="file" name="invoice_file" id="comp_invoice_file" accept="application/pdf" class="form-control">
+                        
+                        <div id="current-invoice-preview" class="hidden" style="margin-top:10px;">
+                            <a href="#" target="_blank" id="invoice-link" class="btn btn--small btn--secondary">
+                                <span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle;" aria-hidden="true">description</span>
+                                Pobierz obecną fakturę
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="devents-modal-footer">
+                        <button type="button" class="btn btn--secondary close-modal">Anuluj</button>
+                        <button type="submit" class="btn btn--primary" id="btn-save-completion">Zapisz i Wyślij</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>

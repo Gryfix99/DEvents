@@ -1,0 +1,52 @@
+{# templates/emails/base-email.twig - Nowy, uniwersalny szablon dla wszystkich e-maili #}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <title>{{ title_text }}</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            supported-color-schemes: light dark;
+        }
+        /* Style dla Dark Mode, które działają w Gmailu */
+        @media (prefers-color-scheme: dark) {
+            .body { background-color: #18181b !important; }
+            .container, .header, .footer { background-color: #27272a !important; }
+            .content { color: #f1f5f9 !important; }
+            h1, h2, h3 { color: #facc15 !important; }
+            a { color: #14b8a6 !important; }
+            .button { background-color: #14b8a6 !important; border-color: #14b8a6 !important; }
+        }
+    </style>
+</head>
+<body class="body" style="width:100%; margin:0; padding:20px 0; background-color:{{ colors.bg_primary }}; font-family: sans-serif;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td align="center">
+                <table class="container" width="600" border="0" cellspacing="0" cellpadding="0" style="width:100%; max-width:600px; margin:0 auto; background-color:{{ colors.bg_secondary }}; border-radius:12px; overflow:hidden;">
+                    <tr>
+                        <td class="header" align="center" style="padding:25px; background-color:{{ header_bg_color }};">
+                            <img src="{{ header_logo_url }}" alt="{{ site_name }} Logo" style="max-height:60px;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="content" style="padding:30px; color:{{ colors.text_secondary }};">
+                            {{ content_html|raw }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="footer" align="center" style="padding:20px; background-color:{{ colors.primary }}; color:#ffffff; font-size:14px;">
+                            &copy; {{ "now"|date("Y") }} {{ site_name }}. Wszystkie prawa zastrzeżone.<br>
+                            <a href="{{ site_url }}" style="color:#ffffff; text-decoration:none;">{{ site_url|replace({'http://': '', 'https://': ''}) }}</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

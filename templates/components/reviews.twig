@@ -1,0 +1,69 @@
+{# templates/components/reviews.twig — v14.0 (Pytania do organizatora)
+   Bez gwiazdek. Pytać może każdy (niezalogowany = anonimowo). Odpowiadać — zalogowani. #}
+<div class="reviews-wrapper" id="questions-wrapper">
+
+    {# 1. GŁÓWNY FORMULARZ PYTANIA — dostępny dla wszystkich #}
+    <div id="main-review-form-container" class="main-review-form-container" style="display: none; margin-bottom: 2rem;">
+        {% include 'components/review-form.twig' with {
+            'item': item,
+            'item_type': item_type,
+            'review_nonce': review_nonce,
+            'parent_id': 0
+        } %}
+    </div>
+
+    {# 2. LISTA PYTAŃ #}
+    <div class="reviews-list">
+        {% if reviews is empty %}
+            <div class="empty-state-reviews">
+                <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+                <p>{{ __('Brak pytań. Zadaj pierwsze, korzystając z przycisku powyżej.', 'devents') }}</p>
+            </div>
+        {% else %}
+            {% for review in reviews %}
+                <div class="review-item" id="review-{{ review.id }}">
+                    <div class="review-header">
+                        <strong>{{ review.author }}</strong>
+                        <span class="review-date">{{ review.created_at }}</span>
+                    </div>
+                    <div class="review-content">{{ review.comment }}</div>
+
+                    {# Odpowiedzi organizatora #}
+                    {% if review.replies is defined and review.replies is not empty %}
+                        <div class="review-replies">
+                            {% for reply in review.replies %}
+                                <div class="review-reply" id="review-{{ reply.id }}">
+                                    <div class="review-header">
+                                        <strong>{{ reply.author }}</strong>
+                                        <span class="review-badge">{{ __('Odpowiedź', 'devents') }}</span>
+                                        <span class="review-date">{{ reply.created_at }}</span>
+                                    </div>
+                                    <div class="review-content">{{ reply.comment }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {# Akcje (Odpowiedz / Usuń) #}
+                    <div class="review-actions">
+                        {% if is_user_logged_in %}
+                            <button class="btn-text btn-reply" data-review-id="{{ review.id }}">
+                                {{ __('Odpowiedz', 'devents') }}
+                            </button>
+                        {% endif %}
+
+                        {# Autor (zalogowany) lub administrator może usunąć #}
+                        {% if (user.ID is defined and review.user_id and user.ID == review.user_id) or current_user_can('manage_options') %}
+                            <button class="btn-text btn-delete-review" data-review-id="{{ review.id }}" data-nonce="{{ review_nonce }}">
+                                {{ __('Usuń', 'devents') }}
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    {# Kontener na formularz odpowiedzi #}
+                    <div id="reply-container-for-{{ review.id }}" class="reply-form-container"></div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>

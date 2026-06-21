@@ -1,0 +1,70 @@
+{# templates/admin/admin-panel.twig
+   v2.0 — Usunięto bezwarunkowy include generatora grafiki,
+          który był renderowany POZA modalem i wyświetlał się na dole strony.
+          Generator jest teraz ładowany wyłącznie on-demand przez AJAX
+          (devents_run_graphic_generator) do #graphic-modal-body.
+#}
+<div class="devents-admin-panel-wrapper">
+    
+    {# --- NAGŁÓWEK PANELU (Tytuł + Menu) --- #}
+    <div class="admin-panel-header">
+        <div class="admin-panel-title-area">
+            <h1><span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span>Panel Administratora</h1>
+            <p>Zarządzanie systemem wydarzeń</p>
+        </div>
+        {# Nawigacja - Dynamicznie z PHP #}
+        <nav class="nav-tab-wrapper">
+            {% for key, item in menu_items %}
+                <a href="{{ panel_base }}&tab={{ key }}" class="nav-tab {{ active_tab == key ? 'nav-tab-active' : '' }}" {{ active_tab == key ? 'aria-current="page"' : '' }}>
+                    {% if item.icon %}
+                        <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+                    {% endif %}
+                    {{ item.title }}
+                </a>
+            {% endfor %}
+        </nav>
+    </div>
+    {# --- GŁÓWNA TREŚĆ ZAKŁADKI --- #}
+    <div class="admin-panel-content">
+        {# Dynamiczne ładowanie treści zakładki #}
+        {# Przekazujemy 'data' (czyli tab_data) oraz zmienne globalne kontekstu #}
+        {% include 'admin/tabs/' ~ active_tab ~ '.twig' with { 'data': tab_data } %}
+    </div>
+</div>
+
+{# --- MODALE GLOBALNE (Dla konkretnych zakładek) --- #}
+
+{# Modal importu CSV (tylko dla zakładki events) #}
+{% if active_tab == 'events' %}
+    {% include 'admin/import-csv-modal.twig' with {'data': tab_data} %}
+    
+    {#
+        UWAGA: Generator grafiki (components/generate-graphic.twig) NIE jest
+        includowany tutaj bezpośrednio. Był to bug — Twig renderował go poza
+        #graphic-modal, przez co wyświetlał się na dole strony.
+
+        Generator jest ładowany on-demand przez AJAX gdy user klika
+        przycisk "Generuj grafikę" w wierszu tabeli:
+        - admin-events.js sekcja 10 → devents_admin_general_action
+          → sub_action=generate_graphic → devents_run_graphic_generator()
+          → response.data.html → wstrzyknięcie do #graphic-modal-body.
+
+        Sam modal #graphic-modal jest zdefiniowany w admin/tabs/events.twig
+        na końcu pliku (pusty kontener czekający na HTML z AJAX).
+    #}
+{% endif %}
+
+{# Modal podglądu kadry (używany w Instytucjach i Użytkownikach) #}
+{% if active_tab == 'institutions' or active_tab == 'users' %}
+    <div id="unit-staff-modal" class="modal devents-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="unit-staff-modal-title">
+        <div class="modal-overlay"></div>
+        <div class="modal-content" style="max-width: 600px;">
+            <button type="button" class="modal-close close-modal" aria-label="Zamknij"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+            <div class="modal-header-wrapper">
+                <h3 id="unit-staff-modal-title">Kadra Jednostki</h3>
+            </div>
+            <div class="modal-body-scrollable" id="unit-staff-list-container">
+            </div>
+        </div>
+    </div>
+{% endif %}

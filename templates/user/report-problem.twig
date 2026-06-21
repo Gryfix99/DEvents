@@ -1,0 +1,36 @@
+{# templates/user/report-problem.twig — Zgłoś problem (zalogowani) #}
+<div class="settings-card report-problem">
+    <div class="card-header-small">
+        <h2>{{ __('Zgłoś problem', 'devents') }}</h2>
+        <p style="font-size:.9rem; color: var(--text-secondary); margin-top:6px;">
+            {{ __('Opisz, co nie działa lub co możemy poprawić. Możesz dołączyć zrzut ekranu, zdjęcie lub plik PDF (do 15 MB).', 'devents') }}
+        </p>
+    </div>
+
+    <div class="form-messages" role="status" aria-live="polite"></div>
+
+    <form id="devents-report-problem-form" class="devents-form" enctype="multipart/form-data">
+        <div class="form-group">
+            <label class="form-label" for="rp-subject">{{ __('Temat (opcjonalnie)', 'devents') }}</label>
+            <input type="text" id="rp-subject" name="subject" class="form-control" maxlength="255"
+                   placeholder="{{ __('np. Nie mogę dodać wydarzenia', 'devents') }}">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="rp-message">{{ __('Opis problemu', 'devents') }} *</label>
+            <textarea id="rp-message" name="message" class="form-control" rows="6" required maxlength="5000"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="rp-attachment">{{ __('Załącznik — zrzut ekranu / zdjęcie / PDF (max 15 MB)', 'devents') }}</label>
+            <input type="file" id="rp-attachment" name="attachment" class="form-control" accept="image/*,application/pdf">
+        </div>
+
+        <div class="form-actions-right">
+            <button type="submit" class="btn btn--primary">
+                <span class="material-symbols-outlined" aria-hidden="true">send</span>
+                {{ __('Wyślij zgłoszenie', 'devents') }}
+            </button>
+        </div>
+    </form>
+</div>

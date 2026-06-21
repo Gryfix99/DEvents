@@ -1,0 +1,330 @@
+{# templates/user/my-units.twig — v13.0 (i18n ready) #}
+
+<div class="card-header-small flex-row flex-between flex-align-center mb-20">
+    <div>
+        <h2 class="section-title">{{ __('Jednostki Organizacyjne', 'devents') }}</h2>
+        <p class="section-subtitle">{{ __('Zarządzaj siecią swoich placówek i ich uprawnieniami.', 'devents') }}</p>
+    </div>
+    <button class="btn btn--primary" id="open-add-unit-modal" aria-label="{{ __('Dodaj jednostkę', 'devents') }}">
+        <span class="material-symbols-outlined v-align-middle mr-5" aria-hidden="true">add_business</span>
+        <span class="hide-mobile">{{ __('Dodaj jednostkę', 'devents') }}</span>
+    </button>
+</div>
+
+<div class="dv-netcode mb-30">
+    <span class="dv-netcode__ico material-symbols-outlined" aria-hidden="true">vpn_key</span>
+    <div class="dv-netcode__text">
+        <span class="dv-netcode__label">{{ __('Kod zaproszenia do sieci', 'devents') }}</span>
+        <span class="dv-netcode__hint">{{ __('Przekaż go jednostce, aby dołączyła do Twojej sieci.', 'devents') }}</span>
+    </div>
+    <strong class="dv-netcode__code js-copy-code">{{ user_code }}</strong>
+    <button class="dv-netcode__copy js-copy-btn" title="{{ __('Kopiuj kod', 'devents') }}" aria-label="{{ __('Kopiuj kod', 'devents') }}">
+        <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
+    </button>
+</div>
+
+{# --- 1. OCZEKUJĄCE PROŚBY O DOŁĄCZENIE --- #}
+{% if pending_units %}
+<div class="dashboard-section mb-30 pjm-promo-banner--warning">
+    <div class="flex-row flex-align-center gap-10 mb-15">
+        <span class="material-symbols-outlined v-danger" aria-hidden="true">notification_important</span>
+        <h3 class="v-danger bold">{{ __('Oczekujące prośby do Twojej sieci', 'devents') }} ({{ pending_units|length }})</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="devents-table">
+            <tbody>
+                {% for unit in pending_units %}
+                <tr>
+                    <td data-label="{{ __('Jednostka', 'devents') }}">
+                        <div class="member-meta">
+                            <strong>{{ unit.display_name|e }}</strong>
+                            <small>{{ unit.user_email|e }}</small>
+                        </div>
+                    </td>
+                    <td class="text-right" data-label="{{ __('Akcje', 'devents') }}">
+                        <div class="flex-row gap-10 flex-justify-end">
+                            <button class="btn btn--small btn--success action-manage-unit" data-id="{{ unit.ID }}" data-decision="accept" data-nonce="{{ org_action_nonce }}">{{ __('Akceptuj', 'devents') }}</button>
+                            <button class="btn btn--small btn--danger action-manage-unit" data-id="{{ unit.ID }}" data-decision="reject" data-nonce="{{ org_action_nonce }}">{{ __('Odrzuć', 'devents') }}</button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{# --- 2. TWOJA SIEĆ JEDNOSTEK --- #}
+<div class="units-grid-wrapper">
+    <h3 class="mb-20">{{ __('Aktywne placówki w sieci', 'devents') }}</h3>
+    {% if my_units %}
+    <div class="table-responsive">
+        <table class="devents-table">
+            <thead>
+                <tr>
+                    <th>{{ __('Jednostka', 'devents') }}</th>
+                    <th class="text-center">{{ __('Status', 'devents') }}</th>
+                    <th class="text-right">{{ __('Akcje', 'devents') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for unit in my_units %}
+                <tr class="unit-row">
+                    <td data-label="{{ __('Jednostka', 'devents') }}">
+                        <div class="unit-cell flex-row flex-align-center gap-15">
+                            <div class="member-avatar-init"><span class="material-symbols-outlined" aria-hidden="true">domain</span></div>
+                            <div class="member-meta">
+                                <strong class="unit-name">{{ unit.display_name|e }}</strong>
+                                <small>{{ unit.user_email|e }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-center" data-label="{{ __('Status', 'devents') }}">
+                        <span class="status-badge status-badge--success">{{ __('Aktywna', 'devents') }}</span>
+                    </td>
+                    <td class="text-right actions-cell">
+                        <div class="flex-row gap-5 flex-justify-end">
+                            <button class="btn--icon action-manage-staff" data-unit-id="{{ unit.inst_id }}" data-unit-name="{{ unit.display_name|e }}" title="{{ __('Zarządzaj kadrą', 'devents') }}" aria-label="{{ __('Zarządzaj kadrą', 'devents') }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">group</span>
+                            </button>
+                            <button type="button" class="btn--icon dev-inst-poster-btn" data-inst-id="{{ unit.inst_id }}" title="{{ __('Pobierz plakat instytucji', 'devents') }}" aria-label="{{ __('Pobierz plakat instytucji', 'devents') }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">wallpaper</span>
+                            </button>
+                            <button class="btn--icon btn--danger action-unlink-unit" data-id="{{ unit.inst_id }}" data-nonce="{{ org_action_nonce }}" title="{{ __('Odłącz jednostkę', 'devents') }}" aria-label="{{ __('Odłącz jednostkę', 'devents') }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">link_off</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="empty-state-card text-center p-30 highlighted-box-gray">
+            <span class="material-symbols-outlined network-icon-large opacity-5 mb-15" aria-hidden="true">hub</span>
+            <p class="empty-list-msg">{{ __('Brak podpiętych jednostek. Udostępnij kod sieci lub dodaj placówkę ręcznie.', 'devents') }}</p>
+        </div>
+    {% endif %}
+</div>
+
+<script type="text/javascript">
+    var devents_config = {{ js_config|json_encode|raw }};
+</script>
+
+{# --- MODAL 1: TWORZENIE NOWEJ JEDNOSTKI --- #}
+<div id="modal-add-unit" class="devents-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-add-unit-title">
+    <div class="modal-overlay"></div>
+    <div class="devents-modal-content pjm-modal-layout">
+        <button type="button" class="modal-close close-modal" aria-label="{{ __('Zamknij', 'devents') }}"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+
+        <div class="card-header-small mb-20">
+            <h3 id="modal-add-unit-title">{{ __('Nowa Jednostka Organizacyjna', 'devents') }}</h3>
+            <p class="section-subtitle">{{ __('Wypełnij dane, aby utworzyć nową placówkę w Twojej sieci.', 'devents') }}</p>
+        </div>
+
+        <div class="modal-body-scrollable pr-10">
+            <form id="form-create-unit" class="devents-form" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="action" value="devents_create_unit">
+                
+                <div class="form-row logo-row-wrapper flex-align-center">
+                    <div class="logo-upload-section">
+                        <div class="avatar-circle">
+                            <span class="material-symbols-outlined" aria-hidden="true" id="unit-logo-icon">domain</span>
+                            <img src="" alt="{{ __('Podgląd', 'devents') }}" id="unit-logo-preview" class="hidden">
+                        </div>
+                        <div class="logo-actions mt-10">
+                            <label for="unit_logo" class="btn btn--small btn--secondary pointer">{{ __('Dodaj logo', 'devents') }}</label>
+                            <input type="file" id="unit_logo" name="unit_logo" class="hidden-input" accept="image/*">
+                        </div>
+                    </div>
+
+                    <div class="form-group flex-grow-1">
+                        <label class="form-label" for="unit-name">{{ __('Pełna nazwa placówki / jednostki', 'devents') }} <span class="required" aria-hidden="true">*</span></label>
+                        <input type="text" id="unit-name" name="unit_name" class="form-control check-empty" placeholder="{{ __('np. Dom Kultury - Filia nr 1', 'devents') }}" required>
+                    </div>
+                </div>
+
+                <div class="form-group mt-20">
+                    <label class="form-label" for="unit-description">{{ __('Opis działalności', 'devents') }}</label>
+                    <textarea id="unit-description" name="unit_description" class="form-textarea check-empty" rows="4" placeholder="{{ __('Krótki opis czym zajmuje się ta placówka...', 'devents') }}"></textarea>
+                </div>
+
+                <div class="form-group pjm-highlight-box mt-20">
+                    <label class="form-label pjm-label-flex">
+                        <span class="material-symbols-outlined" aria-hidden="true">sign_language</span>
+                        {{ __('Wideo wizytówka w języku migowym (PJM)', 'devents') }}
+                    </label>
+                    <p class="pjm-field-desc">
+                        {{ __('Dodaj link do filmu (YouTube/Vimeo) z wizytówką placówki w PJM.', 'devents') }}
+                    </p>
+                    <div class="pjm-input-group flex-row gap-10">
+                        <input type="url" name="unit_pjm_link" id="unit_pjm_link" class="form-control check-empty flex-grow-1" placeholder="https://www.youtube.com/watch?v=...">
+                        <button type="button" class="btn btn--outline js-preview-pjm-video pjm-preview-btn hidden" id="unit-pjm-preview">
+                            <span class="material-symbols-outlined" aria-hidden="true">play_circle</span> {{ __('Podgląd', 'devents') }}
+                        </button>
+                    </div>
+
+                    <div class="pjm-promo-banner pjm-promo-banner--warning mt-10">
+                        <div class="pjm-promo-banner__icon">
+                            <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                        </div>
+                        <div class="pjm-promo-banner__content">
+                            <p class="pjm-promo-title">{{ __('Brak opisu działalności w PJM?', 'devents') }}</p>
+                            <p>{{ __('Możesz go u nas zamówić! Przygotujemy tłumaczenie opisu (do 1800 znaków) na %spolski język migowy%s i napisami za %s300 zł%s.', 'devents')|replace({
+                                '%spolski język migowy%s': '<strong>' ~ __('polski język migowy', 'devents') ~ '</strong>',
+                                '%s300 zł%s': '<strong>' ~ __('300 zł', 'devents') ~ '</strong>'
+                            })|raw }}</p>
+                            <p>{{ __('Napisz do nas:', 'devents') }} <a href="mailto:janusz@januszmigowego.pl" class="pjm-promo-link">janusz@januszmigowego.pl</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row two-cols mt-20">
+                    <div class="form-group">
+                        <label class="form-label" for="unit-nip">{{ __('NIP', 'devents') }}</label>
+                        <input type="text" id="unit-nip" name="unit_nip" class="form-control check-empty" placeholder="{{ __('Np. 5223259430', 'devents') }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="unit-phone">{{ __('Telefon ogólny', 'devents') }}</label>
+                        <input type="text" id="unit-phone" name="unit_phone" class="form-control check-empty" placeholder="{{ __('Np. +48 123 456 789', 'devents') }}">
+                    </div>
+                </div>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label class="form-label" for="unit-email">{{ __('E-mail ogólny', 'devents') }} <span class="required" aria-hidden="true">*</span></label>
+                        <input type="email" id="unit-email" name="unit_email" class="form-control check-empty" placeholder="placowka@instytucja.pl" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="unit-website">{{ __('Strona WWW', 'devents') }}</label>
+                        <input type="url" id="unit-website" name="unit_website" class="form-control check-empty" placeholder="https://">
+                    </div>
+                </div>
+
+                <div class="address-section-card mt-20">
+                    <label class="form-label section-label bold mb-15">
+                        <span class="material-symbols-outlined v-align-middle" aria-hidden="true">location_on</span> {{ __('Adres siedziby', 'devents') }}
+                    </label>
+
+                    <div class="form-grid address-grid-main mb-15">
+                        <div class="form-group">
+                            <small class="form-label">{{ __('Ulica', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span></small>
+                            <input type="text" name="unit_street" class="form-control check-empty" placeholder="{{ __('Ulica', 'devents') }}" aria-label="{{ __('Ulica', 'devents') }}" required>
+                        </div>
+                        <div class="form-group">
+                            <small class="form-label">{{ __('Nr budynku', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span></small>
+                            <input type="text" name="unit_house_number" class="form-control check-empty" placeholder="{{ __('Nr', 'devents') }}" aria-label="{{ __('Nr budynku', 'devents') }}" required>
+                        </div>
+                    </div>
+                    <div class="form-grid address-grid-geo">
+                        <div class="form-group">
+                            <small class="form-label">{{ __('Kod pocztowy', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span></small>
+                            <input type="text" name="unit_zip_code" class="form-control check-empty" placeholder="00-000" aria-label="{{ __('Kod pocztowy', 'devents') }}" required>
+                        </div>
+                        <div class="form-group">
+                            <small class="form-label">{{ __('Miasto', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span></small>
+                            <input type="text" name="unit_city" class="form-control check-empty" placeholder="{{ __('Miasto', 'devents') }}" aria-label="{{ __('Miasto', 'devents') }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="coordinator-section-static mt-30">
+                    <h4 class="form-section-title mb-15">{{ __('Dane administratora instytucji (właściciel)', 'devents') }}</h4>
+                    <div class="form-row two-cols">
+                        <div class="form-group">
+                            <label class="form-label" for="unit-coord-first-name">{{ __('Imię', 'devents') }}</label>
+                            <input type="text" id="unit-coord-first-name" name="unit_coord_first_name" class="form-control" placeholder="{{ __('Imię', 'devents') }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="unit-coord-last-name">{{ __('Nazwisko', 'devents') }}</label>
+                            <input type="text" id="unit-coord-last-name" name="unit_coord_last_name" class="form-control" placeholder="{{ __('Nazwisko', 'devents') }}">
+                        </div>
+                    </div>
+                    <div class="form-row two-cols">
+                        <div class="form-group">
+                            <label class="form-label" for="unit-coord-email">{{ __('E-mail', 'devents') }}</label>
+                            <input type="email" id="unit-coord-email" name="unit_coord_email" class="form-control" placeholder="{{ __('Email administratora instytucji', 'devents') }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="unit-coord-phone">{{ __('Telefon', 'devents') }}</label>
+                            <input type="text" id="unit-coord-phone" name="unit_coord_phone" class="form-control" placeholder="{{ __('Telefon administratora instytucji', 'devents') }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions-footer mt-30 text-right">
+                    <input type="hidden" name="_wpnonce" value="{{ create_unit_nonce }}">
+                    <button type="submit" class="btn btn--primary btn-lg">
+                        <span class="material-symbols-outlined v-align-middle mr-5" aria-hidden="true">save</span> {{ __('Utwórz i dodaj jednostkę', 'devents') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# --- MODAL 2: ZARZĄDZANIE KADRĄ --- #}
+<div id="unit-staff-modal" class="devents-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-unit-name">
+    <div class="modal-overlay"></div>
+    <div class="devents-modal-content pjm-modal-layout">
+        <button type="button" class="modal-close close-modal" aria-label="{{ __('Zamknij', 'devents') }}"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+
+        <div class="card-header-small mb-20">
+            <h3 id="modal-unit-name">{{ __('Zarządzanie kadrą jednostki', 'devents') }}</h3>
+            <p class="section-subtitle">{{ __('Dodawaj i usuwaj pracowników wybranej placówki.', 'devents') }}</p>
+        </div>
+
+        <div class="modal-body-scrollable">
+            <div class="invite-staff-box highlighted-box-gray p-20 mb-30">
+                <h4 class="mb-15">{{ __('Zaproś nowego pracownika', 'devents') }}</h4>
+                <form id="add-staff-to-unit-form" class="devents-form">
+                    <input type="hidden" name="target_unit_id" id="modal_target_unit_id">
+                    
+                    <div class="form-row two-cols mb-15">
+                        <div class="form-group">
+                            <input type="text" name="first_name" class="form-control" placeholder="{{ __('Imię (np. Jan)', 'devents') }}" aria-label="{{ __('Imię (np. Jan)', 'devents') }}" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" name="email" class="form-control" placeholder="{{ __('E-mail', 'devents') }}" aria-label="{{ __('E-mail', 'devents') }}" required>
+                        </div>
+                    </div>
+
+                    <div class="role-selection-container mb-20">
+                        <p class="form-label">{{ __('Uprawnienia pracownika:', 'devents') }}</p>
+                        <div class="role-cards-grid">
+                            <label class="role-radio-card">
+                                <input type="radio" name="is_admin" value="1">
+                                <div class="role-card-content">
+                                    <strong>{{ __('Administrator', 'devents') }}</strong>
+                                    <small>{{ __('Zarządzanie profilem i kadrą', 'devents') }}</small>
+                                </div>
+                            </label>
+                            <label class="role-radio-card">
+                                <input type="radio" name="is_admin" value="0" checked>
+                                <div class="role-card-content">
+                                    <strong>{{ __('Moderator', 'devents') }}</strong>
+                                    <small>{{ __('Tylko zarządzanie ofertami', 'devents') }}</small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" name="action" value="devents_add_staff_to_unit">
+                    <input type="hidden" name="_wpnonce" value="{{ team_nonce }}">
+
+                    <button type="submit" class="btn btn--secondary btn--full-width">
+                        <span class="material-symbols-outlined v-align-middle mr-5" aria-hidden="true">send</span>
+                        {{ __('Wyślij zaproszenie do zespołu', 'devents') }}
+                    </button>
+                </form>
+            </div>
+
+            <h4 class="team-section-title mb-15">{{ __('Obecny zespół placówki', 'devents') }}</h4>
+            <div id="unit-staff-list-container">
+                <p class="empty-list-msg text-center opacity-5">{{ __('Wybierz jednostkę, aby zobaczyć zespół.', 'devents') }}</p>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,234 @@
+{# ========================================================================
+   WYSZUKIWARKA ORGANIZATORÓW — v13.0
+   Spójny z event-search: search bar, chipy, toolbar, paginacja, i18n
+   ======================================================================== #}
+
+{% set has_active_filters = (search_name or search_location) %}
+{% set total_results = organizers|length %}
+
+<div class="search-page" id="devents-main-content">
+
+    {# ==================== NAGŁÓWEK ==================== #}
+    <header class="search-header">
+        <h1 class="search-header__title">{{ __('Wyszukiwarka Organizatorów', 'devents') }}</h1>
+        <p class="search-header__subtitle">{{ __('Przeglądaj profile zweryfikowanych organizacji i instytucji.', 'devents') }}</p>
+    </header>
+
+
+    {# ==================== SEARCH BAR ==================== #}
+    <form method="GET"
+          action=""
+          class="search-bar devents-form"
+          id="organizer-search-form"
+          role="search"
+          aria-label="{{ __('Wyszukiwanie organizatorów', 'devents') }}">
+
+        <div class="search-bar__main">
+
+            {# Nazwa #}
+            <div class="search-bar__field">
+                <span class="material-symbols-outlined search-bar__icon" aria-hidden="true">search</span>
+                <input type="search"
+                       name="search_name"
+                       class="search-bar__input"
+                       placeholder="{{ __('Nazwa organizacji...', 'devents') }}"
+                       value="{{ search_name|default('')|e }}"
+                       aria-label="{{ __('Szukaj po nazwie organizacji', 'devents') }}"
+                       autocomplete="off">
+            </div>
+
+            {# Lokalizacja #}
+            <div class="search-bar__field">
+                <span class="material-symbols-outlined search-bar__icon" aria-hidden="true">location_city</span>
+                <input type="search"
+                       name="search_location"
+                       class="search-bar__input"
+                       placeholder="{{ __('Miasto...', 'devents') }}"
+                       value="{{ search_location|default('')|e }}"
+                       aria-label="{{ __('Szukaj po lokalizacji', 'devents') }}"
+                       autocomplete="off">
+            </div>
+
+            {# Szukaj #}
+            <button type="submit" class="search-bar__submit">
+                {{ __('Szukaj', 'devents') }}
+            </button>
+        </div>
+    </form>
+
+
+    {# ==================== AKTYWNE FILTRY (CHIPY) ==================== #}
+    {% if has_active_filters %}
+        <div class="search-chips" aria-label="{{ __('Aktywne filtry', 'devents') }}">
+            {% if search_name %}
+                <a href="?{{ search_location ? 'search_location=' ~ search_location|url_encode : '' }}"
+                   class="search-chip"
+                   aria-label="{{ __('Usuń filtr:', 'devents') }} {{ search_name|e }}">
+                    „{{ search_name|e }}"
+                    <span class="material-symbols-outlined search-chip__remove" aria-hidden="true">close</span>
+                </a>
+            {% endif %}
+
+            {% if search_location %}
+                <a href="?{{ search_name ? 'search_name=' ~ search_name|url_encode : '' }}"
+                   class="search-chip"
+                   aria-label="{{ __('Usuń filtr:', 'devents') }} {{ search_location|e }}">
+                    <span class="material-symbols-outlined search-chip__icon" aria-hidden="true">location_city</span>
+                    {{ search_location|e }}
+                    <span class="material-symbols-outlined search-chip__remove" aria-hidden="true">close</span>
+                </a>
+            {% endif %}
+
+            <a href="?" class="search-chip search-chip--clear" aria-label="{{ __('Wyczyść wszystkie filtry', 'devents') }}">
+                <span class="material-symbols-outlined search-chip__icon" aria-hidden="true">delete_sweep</span>
+                {{ __('Wyczyść', 'devents') }}
+            </a>
+        </div>
+    {% endif %}
+
+
+    {# ==================== TOOLBAR ==================== #}
+    <div class="search-toolbar">
+        <div class="search-toolbar__left">
+            <span class="search-toolbar__count">
+                {{ __('Organizatorzy', 'devents') }}
+                <span class="search-toolbar__badge">{{ total_results }}</span>
+            </span>
+        </div>
+
+        <div class="search-toolbar__right">
+            <label for="org-sort" class="sr-only">{{ __('Sortuj', 'devents') }}</label>
+            <select id="org-sort" class="search-toolbar__sort" data-sort-target="organizer-results-grid">
+                <option value="name_asc">{{ __('Nazwa A–Z', 'devents') }}</option>
+                <option value="name_desc">{{ __('Nazwa Z–A', 'devents') }}</option>
+                <option value="events_desc">{{ __('Najwięcej wydarzeń', 'devents') }}</option>
+                <option value="rating_desc">{{ __('Najwyższa ocena', 'devents') }}</option>
+                <option value="followers_desc">{{ __('Najwięcej obserwujących', 'devents') }}</option>
+            </select>
+        </div>
+    </div>
+
+
+    {# ==================== WYNIKI ==================== #}
+    <div class="search-results" aria-live="polite">
+        <div class="org-grid" id="organizer-results-grid">
+            {% if organizers is not empty %}
+                {% for organizer in organizers %}
+
+                    <article class="org-card"
+                             data-name="{{ organizer.name|e|lower }}"
+                             data-events="{{ organizer.total_events_count }}"
+                             data-rating="{{ organizer.average_rating }}"
+                             data-followers="{{ organizer.followers_count }}">
+
+                        {# Odznaka aktywności #}
+                        {% if organizer.activity_badge and organizer.activity_badge.info %}
+                            <div class="org-card__badge"
+                                 style="background: {{ organizer.activity_badge.info.bg }}; color: {{ organizer.activity_badge.info.text|default(organizer.activity_badge.info.color) }};"
+                                 title="{{ organizer.activity_badge.info.label }} — {{ organizer.activity_badge.count }} {{ __('wydarzeń', 'devents') }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">{{ organizer.activity_badge.info.icon }}</span>
+                            </div>
+                        {% endif %}
+
+                        {# Typ: Master / Unit #}
+                        {% if organizer.type == 'master' %}
+                            <span class="org-card__type-badge org-card__type-badge--master">
+                                <span class="material-symbols-outlined" aria-hidden="true">hub</span>
+                                {{ __('Sieć', 'devents') }}
+                            </span>
+                        {% endif %}
+
+                        {# Body #}
+                        <div class="org-card__body">
+                            {# Logo #}
+                            <a href="{{ organizer.profile_url }}" class="org-card__logo-link">
+                                <div class="org-card__logo">
+                                    {% if organizer.logo_url %}
+                                        <img src="{{ organizer.logo_url }}"
+                                             alt="{{ organizer.name|e }}"
+                                             loading="lazy">
+                                    {% else %}
+                                        <span class="material-symbols-outlined" aria-hidden="true">domain</span>
+                                    {% endif %}
+                                </div>
+                            </a>
+
+                            {# Nazwa + miasto #}
+                            <h2 class="org-card__name">
+                                <a href="{{ organizer.profile_url }}">{{ organizer.name|e }}</a>
+                            </h2>
+                            {% if organizer.city %}
+                                <span class="org-card__city">
+                                    <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                                    {{ organizer.city|e }}
+                                </span>
+                            {% endif %}
+
+                            {# Ocena #}
+                            {% if organizer.average_rating > 0 %}
+                                <div class="org-card__rating">
+                                    <span class="material-symbols-outlined org-card__star" aria-hidden="true">star</span>
+                                    <strong>{{ organizer.average_rating }}</strong>
+                                    <span class="org-card__rating-count">({{ organizer.rating_count }})</span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {# Statystyki #}
+                        <div class="org-card__stats">
+                            <div class="org-card__stat" title="{{ __('Nadchodzące wydarzenia', 'devents') }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">event</span>
+                                <span class="org-card__stat-value">{{ organizer.upcoming_events_count }}</span>
+                            </div>
+                            <div class="org-card__stat" title="{{ __('Łącznie wydarzeń', 'devents') }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">history</span>
+                                <span class="org-card__stat-value">{{ organizer.total_events_count }}</span>
+                            </div>
+                            <div class="org-card__stat" title="{{ __('Obserwujących', 'devents') }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">group</span>
+                                <span class="org-card__stat-value">{{ organizer.followers_count }}</span>
+                            </div>
+                        </div>
+
+                        {# Stopka #}
+                        <div class="org-card__footer">
+                            <a href="{{ organizer.profile_url }}" class="org-card__cta">
+                                {{ __('Profil', 'devents') }}
+                            </a>
+                            {% if is_user_logged_in is defined and is_user_logged_in %}
+                                <button type="button"
+                                        class="org-card__follow btn-follow {{ organizer.is_followed ? 'is-followed' : '' }}"
+                                        data-organizer-id="{{ organizer.user_id }}"
+                                        data-nonce="{{ wp_create_nonce('devents_subscription_nonce') }}"
+                                        aria-pressed="{{ organizer.is_followed ? 'true' : 'false' }}"
+                                        aria-label="{{ organizer.is_followed ? __('Przestań obserwować', 'devents') : __('Obserwuj', 'devents') }} {{ organizer.name|e }}">
+                                    <span class="state-unfollowed"><span class="material-symbols-outlined" aria-hidden="true">person_add</span></span>
+                                    <span class="state-followed"><span class="material-symbols-outlined" aria-hidden="true">person_remove</span></span>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </article>
+
+                {% endfor %}
+            {% else %}
+                {# Pusty stan #}
+                <div class="search-empty" id="org-empty-state">
+                    <div class="search-empty__illustration">
+                        <span class="material-symbols-outlined search-empty__icon" aria-hidden="true">domain_disabled</span>
+                    </div>
+                    <h3 class="search-empty__title">{{ __('Nie znaleziono organizatorów', 'devents') }}</h3>
+                    <p class="search-empty__text">{{ __('Spróbuj zmienić kryteria wyszukiwania:', 'devents') }}</p>
+                    <ul class="search-empty__suggestions">
+                        <li>{{ __('Sprawdź pisownię nazwy', 'devents') }}</li>
+                        <li>{{ __('Spróbuj innego miasta', 'devents') }}</li>
+                        <li>{{ __('Wyczyść filtry', 'devents') }}</li>
+                    </ul>
+                    <a href="?" class="btn btn--secondary search-empty__btn">
+                        <span class="material-symbols-outlined" aria-hidden="true">restart_alt</span>
+                        {{ __('Wyczyść filtry', 'devents') }}
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

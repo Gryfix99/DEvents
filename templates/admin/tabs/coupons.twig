@@ -1,0 +1,113 @@
+{# templates/admin/tabs/coupons.twig #}
+
+<div class="tab-pane" id="tab-coupons">
+    
+    {# KARTA DODAWANIA KUPONU #}
+    <div class="admin-card" style="background: var(--bg-secondary); padding: 25px; border-radius: var(--border-radius-large); box-shadow: var(--shadow-light); border-left: 4px solid var(--primary); margin-bottom: 30px;">
+        <h3 style="display:flex; align-items:center; gap:10px; margin-top: 0; color: var(--text-primary);">
+            <span class="material-symbols-outlined" style="color: var(--primary); font-size: 28px;">local_activity</span> 
+            Nowy Kupon Rabatowy
+        </h3>
+        <p class="description" style="color: var(--text-secondary);">Kupony działają natychmiast po dodaniu. Możesz ograniczyć je czasowo lub ilościowo.</p>
+
+        <form id="add-coupon-form" style="margin-top: 25px;">
+            
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:20px; align-items:end;">
+                
+                {# KOD KUPONU #}
+                <div class="form-group">
+                    <label class="form-label">Kod kuponu</label>
+                    <input type="text" name="code" class="form-control" placeholder="np. LATO2025" required 
+                           style="text-transform:uppercase; font-weight:700; letter-spacing:1px; border-color: var(--primary);">
+                </div>
+
+                {# WARTOSC I TYP #}
+                <div class="form-group">
+                    <label class="form-label">Wartość zniżki</label>
+                    <div style="display:flex;">
+                        <input type="number" name="amount" class="form-control" placeholder="0.00" step="0.01" required 
+                               style="border-top-right-radius:0; border-bottom-right-radius:0; flex: 1;">
+                        <select name="type" class="form-control" style="width:90px; border-top-left-radius:0; border-bottom-left-radius:0; border-left:0; background: var(--bg-primary);">
+                            <option value="percent">%</option>
+                            <option value="fixed">PLN</option>
+                        </select>
+                    </div>
+                </div>
+
+                {# LIMIT UZYC #}
+                <div class="form-group">
+                    <label class="form-label">Limit użyć (0 = brak)</label>
+                    <input type="number" name="usage_limit" class="form-control" value="0">
+                </div>
+
+                {# DATA WAZNOSCI #}
+                <div class="form-group">
+                    <label class="form-label">Ważny do (opcjonalnie)</label>
+                    <input type="text" name="expiry_date" class="form-control flatpickr-date-only" placeholder="RRRR-MM-DD">
+                </div>
+                
+            </div>
+
+            {# DODATKOWE OPCJE #}
+            <div style="margin-top: 20px; border-top: 1px solid var(--border-primary); padding-top: 15px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; color: var(--text-primary);">
+                    <input type="checkbox" name="usage_per_user" id="usage-per-user-checkbox" value="1" style="transform: scale(1.2);">
+                    <span style="font-weight: 600;">Ogranicz do 1 użycia na użytkownika (Wymaga zalogowania)</span>
+                </label>
+            </div>
+
+            {# DOTYCZY PRODUKTOW #}
+            <div class="form-group" style="margin-top: 20px;">
+                <label class="form-label">Dotyczy produktów</label>
+                <select name="products[]" class="form-control" multiple style="height: auto; min-height: 120px; padding: 10px;">
+                    <option value="all" selected>Wszystkie produkty</option>
+                    <option value="translation_pjm">Tłumaczenie PJM</option>
+                    <option value="featured_3_days">Wyróżnienie (3 dni)</option>
+                    <option value="featured_7_days">Wyróżnienie (7 dni)</option>
+                    <option value="featured_14_days">Wyróżnienie (14 dni)</option>
+                </select>
+                <p class="description" style="margin-top:5px; font-size:12px; color: var(--text-light);">Przytrzymaj CTRL (CMD), aby zaznaczyć wiele.</p>
+            </div>
+
+            <div style="margin-top: 25px; text-align: right;">
+                <button type="submit" class="btn btn--primary btn--large btn--icon" title="Utwórz kupon">
+                    <span class="material-symbols-outlined">add_circle</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {# LISTA AKTYWNYCH KUPONÓW #}
+    <div class="my-content-list">
+        <div class="list-toolbar">
+            <h3 style="display:flex; align-items:center; gap:10px;">
+                <span class="material-symbols-outlined" style="color: var(--primary);">confirmation_number</span>
+                Aktywne Kupony
+            </h3>
+        </div>
+        
+        <div class="table-responsive-wrapper">
+            <table class="my-content-list__table devents-responsive-table" id="coupons-list-table"> 
+                <thead>
+                    <tr>
+                        <th>Kod</th>
+                        <th>Zniżka</th>
+                        <th class="desktop-only">Dotyczy</th>
+                        <th>Użycia / Limit</th>
+                        <th class="desktop-only">Ważność</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Akcja</th>
+                    </tr>
+                </thead>
+                <tbody id="coupons-table-body">
+                    {# Zawartość ładowana przez JS: admin-coupons.js #}
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                            Ładowanie listy kuponów...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

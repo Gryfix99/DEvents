@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style>
+        /* ZMIENNE CSS (Skopiowane i dostosowane z Base.css) 
+           Dzięki temu strona maintenance ma identyczne kolory jak reszta serwisu.
+        */
+        :root {
+            /* === Kolory Marki === */
+            --primary: #00857C;
+            --primary-hover: #008575;
+            --secondary: #3e3d40;
+            --accent: #956F28;
+            --danger: #dc2626;
+
+            /* === Kolory Tła (Light) === */
+            --bg-primary: #f9f9f9;
+            --bg-secondary: #ffffff;
+            
+            /* === Kolory Tekstu (Light) === */
+            --text-primary: #333333;
+            --text-secondary: #595959;
+            --text-light: #767676;
+
+            /* === Inne === */
+            --border-primary: #e2e8f0;
+            --shadow-medium: 0 4px 10px rgba(0, 0, 0, 0.1);
+            
+            /* === UI === */
+            --font-family-base: 'Dosis', sans-serif;
+            --border-radius-large: 8px;
+        }
+
+        /* Automatyczny Dark Mode (na podstawie ustawień systemu) */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #14b8a6;
+                --primary-hover: #008575;
+                --secondary: #94a3b8;
+                --accent: #956F28;
+
+                /* === Kolory Tła (Dark) === */
+                --bg-primary: #18181b;
+                --bg-secondary: #27272a;
+
+                /* === Kolory Tekstu (Dark) === */
+                --text-primary: #f1f5f9;
+                --text-secondary: #A9ABBC;
+                --text-light: #ABABAB;
+
+                /* === Inne === */
+                --border-primary: #3f3f46;
+                --shadow-medium: 0 4px 10px rgba(0, 0, 0, 0.4);
+            }
+        }
+        
+        /* --- STYLE BAZOWE --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family-base);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* --- KONTENER KARTY --- */
+        .maintenance-container {
+            background: var(--bg-secondary);
+            padding: 3rem;
+            border-radius: var(--border-radius-large);
+            box-shadow: var(--shadow-medium);
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-primary);
+        }
+
+        /* Dekoracyjny pasek na górze (Używa kolorów marki) */
+        .maintenance-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        /* --- IKONA --- */
+        .icon-wrapper {
+            margin-bottom: 1.5rem;
+        }
+
+        .material-symbols-outlined.huge-icon {
+            font-size: 80px;
+            color: var(--primary); /* Użycie koloru głównego */
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        /* --- TEKSTY --- */
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+            color: var(--text-primary);
+        }
+
+        .content {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .content p {
+            margin-bottom: 1rem;
+        }
+
+        /* --- STOPKA --- */
+        .footer {
+            margin-top: 2rem;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            border-top: 1px solid var(--border-primary);
+            padding-top: 1rem;
+        }
+
+        /* --- ANIMACJA --- */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="maintenance-container">
+        <div class="icon-wrapper">
+            <span class="material-symbols-outlined huge-icon">engineering</span>
+        </div>
+        
+        <h1>{{ title }}</h1>
+        
+        <div class="content">
+            {{ message|raw }}
+        </div>
+
+        <div class="footer">
+            &copy; {{ "now"|date("Y") }} {{ site_name }}. Wszystkie prawa zastrzeżone.
+        </div>
+    </div>
+
+</body>
+</html>

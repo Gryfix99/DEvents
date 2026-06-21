@@ -1,0 +1,55 @@
+{# templates/user/my-saved-searches.twig — zapisane wyszukiwania + alerty #}
+<div class="panel-page">
+    {# Nagłówek sekcji generuje teraz powłoka panelu (panel.twig) z pozycji menu. #}
+
+    {% if items is empty %}
+        <div class="panel-card">
+            <div class="panel-empty">
+                <div class="panel-empty__icon">
+                    <span class="material-symbols-outlined" aria-hidden="true">saved_search</span>
+                </div>
+                <p class="panel-empty__title">{{ __('Nie masz jeszcze zapisanych wyszukiwań', 'devents') }}</p>
+                <p class="panel-empty__text">
+                    {{ __('Wejdź w wyszukiwarkę, ustaw filtry (kategoria, dostępność, język, miasto…) i kliknij „Zapisz to wyszukiwanie".', 'devents') }}
+                </p>
+                <a href="{{ search_url }}" class="panel-btn panel-btn--primary">
+                    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                    {{ __('Przejdź do wyszukiwarki', 'devents') }}
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <div class="saved-search-list">
+            {% for it in items %}
+                <div class="panel-card saved-search-item" data-saved-search>
+                    <div class="saved-search-item__head">
+                        <h2 class="saved-search-item__title">{{ it.label }}</h2>
+                        <button type="button" class="saved-search-del js-delete-saved-search" data-id="{{ it.id }}"
+                                aria-label="{{ __('Usuń zapisane wyszukiwanie', 'devents') }}" title="{{ __('Usuń', 'devents') }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                        </button>
+                    </div>
+
+                    {% if it.chips is not empty %}
+                        <div class="saved-search-item__chips">
+                            {% for c in it.chips %}
+                                <span class="saved-search-chip">{{ c }}</span>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="saved-search-item__foot">
+                        <a href="{{ it.url|e('html_attr') }}" class="panel-btn">
+                            <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                            {{ __('Zobacz wyniki', 'devents') }}
+                        </a>
+                        <label class="saved-search-alert">
+                            <input type="checkbox" class="js-toggle-saved-search" data-id="{{ it.id }}" {{ it.alerts ? 'checked' : '' }}>
+                            <span>{{ __('Alerty o nowych', 'devents') }}</span>
+                        </label>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

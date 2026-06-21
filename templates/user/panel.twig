@@ -1,0 +1,134 @@
+{# templates/user/panel.twig — v13.0 (i18n ready) #}
+<div class="devents-user-panel-wrapper">
+    
+    {# --- SIDEBAR (LEWY PASEK) --- #}
+    <aside class="devents-panel-sidebar" id="devents-panel-sidebar">
+        <div class="sidebar-inner">
+            <div class="sidebar-top">
+                {# Pill profilu = skrót do Pulpitu (Pulpit jest też w menu). #}
+                <a href="{{ panel_url }}?view=pulpit" class="sidebar-profile"{{ current_view == 'pulpit' ? ' aria-current="page"' : '' }}>
+                    <div class="profile-avatar">
+                        <div class="avatar-circle">
+                            {% if profile_card.logo_url %}
+                                <img src="{{ profile_card.logo_url|e }}" alt="{{ __('Logo użytkownika', 'devents') }}">
+                            {% else %}
+                                {% if is_business_user %}
+                                    <span class="material-symbols-outlined" aria-hidden="true">domain</span>
+                                {% else %}
+                                    <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <span class="profile-name">{{ profile_card.display_name|e }}</span>
+                        <span class="profile-role">{{ role_label|default(__('Użytkownik', 'devents')) }}</span>
+                    </div>
+                </a>
+                {# Panel administratora dostępny z nagłówka strony (devents_header), nie z panelu. #}
+
+                <nav class="panel-nav" aria-label="{{ __('Menu panelu', 'devents') }}">
+                    {% if menu_groups is defined and menu_groups is not empty %}
+                        {% for group_slug, group in menu_groups %}
+                            {% if group.label %}
+                                <p class="panel-nav__label">{{ group.label }}</p>
+                            {% endif %}
+                            <ul>
+                                {% for slug, item in group.items %}
+                                    <li class="nav-item {{ current_view == slug ? 'active' : '' }}">
+                                        <a href="{{ panel_url }}?view={{ slug }}" class="nav-link"{{ current_view == slug ? ' aria-current="page"' : '' }}>
+                                            <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+                                            <span class="link-text">{{ item.title }}</span>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endfor %}
+                    {% else %}
+                        <ul>
+                            {% for slug, item in menu_items %}
+                                <li class="nav-item {{ current_view == slug ? 'active' : '' }}">
+                                    <a href="{{ panel_url }}?view={{ slug }}" class="nav-link"{{ current_view == slug ? ' aria-current="page"' : '' }}>
+                                        <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+                                        <span class="link-text">{{ item.title }}</span>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </nav>
+            </div>
+
+            <div class="sidebar-bottom">
+                <ul class="panel-nav">
+                    <li class="nav-item logout">
+                        <a href="{{ wp_logout_url(home_url()) }}" class="nav-link">
+                            <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+                            <span class="link-text">{{ __('Wyloguj się', 'devents') }}</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </aside>
+
+    {# --- GŁÓWNA ZAWARTOŚĆ --- #}
+    <main class="devents-panel-content">
+
+        {# Pomijanie nawigacji (WCAG 2.4.1) — dla klawiatury i czytników ekranu #}
+        <a href="#panel-main-content" class="devents-skip-link">{{ __('Przejdź do treści', 'devents') }}</a>
+
+        {# Menu panelu na telefonie — pasek przyklejony NA DOLE ekranu (otwiera szufladę
+           z menu). Dzwonek powiadomień jest teraz w nagłówku strony (devents_header),
+           nie tutaj. Na desktopie pasek jest ukryty — sidebar jest stale widoczny,
+           więc nie ma już górnego paska istniejącego tylko dla dzwonka. #}
+        <div class="panel-mobile-menubar">
+            <button type="button" class="mobile-menu-toggle" aria-expanded="false" aria-controls="devents-panel-sidebar" aria-label="{{ __('Menu panelu', 'devents') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+                <span>{{ __('Menu', 'devents') }}</span>
+            </button>
+        </div>
+
+        {# --- BANER STRASZAK --- #}
+        {% if show_profile_nag %}
+            <div class="profile-warning-banner" role="alert">
+                <div class="warning-banner-icon">
+                    <span class="material-symbols-outlined pulse-animation" aria-hidden="true">priority_high</span>
+                </div>
+                <div class="warning-banner-text">
+                    <strong>{{ __('Twój profil instytucji jest niekompletny!', 'devents') }}</strong>
+                </div>
+                <div class="warning-banner-action">
+                    <a href="{{ panel_url }}?view=moja-instytucja" class="btn btn--white btn--small">
+                        {{ __('Uzupełnij profil teraz', 'devents') }}
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        {# Modal powiadomień jest renderowany RAZ — w nagłówku strony (site-header.twig).
+           my-notifications.js obsługuje dzwonek i modal na całej witrynie, także tutaj. #}
+
+        {# Treść dynamiczna #}
+        <div class="panel-page-container" id="panel-main-content" tabindex="-1">
+            {# Wspólny nagłówek sekcji generowany z pozycji menu (ikona + tytuł) — dzięki temu
+               KAŻDA zakładka ma identyczną „górę", a ikona ZAWSZE zgadza się z menu.
+               Panel admina ma własny nagłówek z zakładkami, więc go pomijamy. #}
+            {% set cur_item = menu_items[current_view] is defined ? menu_items[current_view] : null %}
+            {% if cur_item and current_view != 'panel-admina' %}
+                <div class="panel-page-header">
+                    <div class="panel-page-header__text">
+                        <h1 class="panel-page-header__title">
+                            {% if cur_item.icon %}<span class="material-symbols-outlined" aria-hidden="true">{{ cur_item.icon }}</span>{% endif %}
+                            {{ cur_item.title }}
+                        </h1>
+                        {% if cur_item.subtitle is defined and cur_item.subtitle %}
+                            <p class="panel-page-header__subtitle">{{ cur_item.subtitle }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            {{ page_content|raw }}
+        </div>
+    </main>
+</div>

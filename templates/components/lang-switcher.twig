@@ -1,0 +1,27 @@
+{# ========================================================================
+   Przełącznik języka (komponent). Renderowany w nagłówku i jako [devents_lang_switcher].
+   Zmienne: active_ui_lang (kod 2-literowy), ui_languages (assoc), switch_url.
+   Bez JS — używa natywnego <details> (dostępny dla klawiatury i czytników).
+   ======================================================================== #}
+{% set active = ui_languages[active_ui_lang]|default(ui_languages['pl']) %}
+<details class="devents-lang">
+    <summary class="devents-lang__toggle" aria-label="{{ active.name }} — {{ __('zmień język', 'devents') }}">
+        <span class="material-symbols-outlined devents-lang__globe" aria-hidden="true">translate</span>
+        <span class="devents-lang__name">{{ active.name }}</span>
+        <span class="material-symbols-outlined devents-lang__caret" aria-hidden="true">expand_more</span>
+    </summary>
+    <ul class="devents-lang__menu" role="list">
+        {% for code, lang in ui_languages %}
+            {% if lang.status in ['stable', 'beta'] %}
+                <li>
+                    <a href="{{ switch_url }}{{ code }}"
+                       class="devents-lang__item {{ code == active_ui_lang ? 'is-active' : '' }}"
+                       hreflang="{{ code }}"{{ code == active_ui_lang ? ' aria-current="true"' : '' }}>
+                        <span class="devents-lang__label">{{ lang.name }}</span>
+                        {% if lang.status == 'beta' %}<span class="devents-lang__badge">beta</span>{% endif %}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</details>

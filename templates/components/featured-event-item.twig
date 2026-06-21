@@ -1,0 +1,83 @@
+{# templates/components/featured-event-item.twig — v14.0 (A11Y + Address Macro)
+
+   Zmiany v14.0:
+   - Adres przez makro format_address (DRY) — zamiast surowego event.location
+   - event.category → event.category_label (spójność z event-card)
+   - aria-hidden + tabindex="-1" na image link (drugi link do tego samego URL)
+   - aria-label na arrow-action zawiera tytuł wydarzenia (kontekst dla SR)
+   - article aria-labelledby wskazujący tytuł
+#}
+
+{% from 'macros/address.twig' import format_address %}
+
+{% set address = format_address(event) %}
+
+<article class="feat-card" aria-labelledby="feat-card-title-{{ event.id }}">
+
+    {# === Obrazek — link ukryty dla SR (drugi link do tego samego URL pod tytułem) === #}
+    <a href="{{ event.permalink }}" class="feat-card__image" tabindex="-1" aria-hidden="true">
+        {% if event.image_url %}
+            <img src="{{ event.image_url|e }}"
+                 alt="{{ event.image_alt_text|default(event.title)|e }}"
+                 loading="lazy">
+        {% else %}
+            <div class="feat-card__placeholder">
+                <span class="material-symbols-outlined" aria-hidden="true">image</span>
+            </div>
+        {% endif %}
+
+        {# Złoty badge "Polecane" #}
+        <span class="feat-card__badge">
+            <span class="material-symbols-outlined" aria-hidden="true">verified</span>
+            {{ __('Polecane', 'devents') }}
+        </span>
+
+        {# Date badge #}
+        <span class="feat-card__date" aria-hidden="true">
+            <strong>{{ event.start_datetime|date('d') }}</strong>
+            <small>{{ event.start_datetime|date('M') }}</small>
+        </span>
+    </a>
+
+    {# === Content === #}
+    <div class="feat-card__body">
+        {# Spójność z event-card: category_label zamiast surowego slug #}
+        <span class="feat-card__category">{{ event.category_label|default(event.category)|e }}</span>
+
+        <h3 class="feat-card__title">
+            <a href="{{ event.permalink }}" id="feat-card-title-{{ event.id }}">{{ event.title|e }}</a>
+        </h3>
+
+        {# Pełna data dla SR — date badge wyżej jest aria-hidden #}
+        <span class="sr-only">
+            {{ __('Data:', 'devents') }} {{ event.start_datetime|date('d.m.Y') }}
+        </span>
+
+        {# LOKALIZACJA — przez makro #}
+        {% if address %}
+            <span class="feat-card__location">
+                <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                <span class="sr-only">{{ __('Lokalizacja:', 'devents') }}</span>
+                <span class="text-truncate" title="{{ address|e }}">{{ address|e }}</span>
+            </span>
+        {% endif %}
+    </div>
+
+    {# === Footer === #}
+    <div class="feat-card__footer">
+        <span class="feat-card__price">
+            {% if event.price == 0 or event.price is empty %}
+                <strong class="feat-card__price--free">{{ __('Bezpłatne', 'devents') }}</strong>
+            {% else %}
+                <small>{{ __('od', 'devents') }}</small>
+                <strong>{{ event.price|number_format(0, ',', ' ') }} zł</strong>
+            {% endif %}
+        </span>
+
+        <a href="{{ event.permalink }}"
+           class="feat-card__action"
+           aria-label="{{ __('Zobacz szczegóły:', 'devents') }} {{ event.title|e }}">
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+        </a>
+    </div>
+</article>

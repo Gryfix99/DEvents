@@ -1,0 +1,255 @@
+{# templates/forms/register-form.twig — v15.0
+   Zmiany v15.0:
+   - Rejestracja maksymalnie uproszczona: dane instytucji to tylko nazwa + NIP.
+     Adres, telefon, e-mail, www, logo oraz Koordynatora Dostępności użytkownik
+     uzupełnia PO założeniu konta (w panelu „Moja instytucja").
+   - Usunięto nieprawdziwą informację o obowiązkowej weryfikacji.
+   - Lista wymagań hasła: jakość + min. 8 znaków + mała + wielka litera + cyfra.
+#}
+
+<main class="auth-container" id="devents-main-content">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="auth-title">{{ __('Utwórz nowe konto', 'devents') }}</h1>
+            <p class="auth-subtitle">{{ __('Wybierz typ konta, aby rozpocząć', 'devents') }}</p>
+        </div>
+
+        {# Komunikaty AJAX — role="alert" + aria-live już są #}
+        <div id="form-messages" role="alert" aria-live="polite" aria-atomic="true"></div>
+
+        <form id="register-form"
+              method="POST"
+              enctype="multipart/form-data"
+              class="devents-form auth-form"
+              novalidate
+              aria-label="{{ __('Formularz rejestracji', 'devents') }}">
+
+            <input type="hidden" name="nonce" value="{{ js_config.register_nonce }}">
+
+            {# Hidden username field — pomaga password managerom skojarzyć hasło z kontem #}
+            <input type="text"
+                   name="username_hidden"
+                   autocomplete="username"
+                   value=""
+                   aria-hidden="true"
+                   tabindex="-1"
+                   class="visually-hidden-input">
+
+            {# ===================== ROLA ===================== #}
+            <fieldset class="auth-subsection form-group">
+                <legend class="auth-section-title">
+                    {{ __('Wybierz typ konta', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span>
+                </legend>
+                <div class="auth-radio-group">
+                    <label class="auth-radio-label">
+                        <input type="radio" name="role" value="subscriber" checked required>
+                        <span class="radio-custom" aria-hidden="true"></span>
+                        <span class="radio-text">{{ __('Uczestnik', 'devents') }}</span>
+                    </label>
+                    <label class="auth-radio-label">
+                        <input type="radio" name="role" value="unit" required>
+                        <span class="radio-custom" aria-hidden="true"></span>
+                        <span class="radio-text">{{ __('Niezależny organizator wydarzeń', 'devents') }}</span>
+                    </label>
+                    <label class="auth-radio-label">
+                        <input type="radio" name="role" value="master" required>
+                        <span class="radio-custom" aria-hidden="true"></span>
+                        <span class="radio-text">{{ __('Instytucja kierująca innymi jednostkami', 'devents') }}</span>
+                    </label>
+                </div>
+            </fieldset>
+
+            {# ===================== SEKCJA INSTYTUCJI (warunkowa) ===================== #}
+            {# Tylko podstawowe dane na start — resztę uzupełnia się po założeniu konta. #}
+            <div id="section-institution"
+                 class="auth-section-animate auth-section--hidden"
+                 role="region"
+                 aria-labelledby="section-institution-title"
+                 aria-hidden="true">
+
+                <fieldset class="auth-subsection">
+                    <legend id="section-institution-title" class="auth-section-title">{{ __('Dane Instytucji', 'devents') }}</legend>
+
+                    <div class="form-group">
+                        <label for="org_name" class="form-label">
+                            <span id="org_name-label-text">{{ __('Nazwa organizacji / instytucji', 'devents') }}</span>
+                            <span class="form-required-field" aria-hidden="true">*</span>
+                        </label>
+                        <input type="text"
+                               id="org_name"
+                               name="org_name"
+                               class="form-control"
+                               required
+                               aria-describedby="org_name-error"
+                               autocomplete="organization"
+                               disabled>
+                        <span id="org_name-error" class="field-error-msg" role="alert" aria-live="polite"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="org_nip" class="form-label">
+                            {{ __('NIP', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span>
+                        </label>
+                        <input type="text"
+                               id="org_nip"
+                               name="org_nip"
+                               class="form-control"
+                               required
+                               aria-describedby="org_nip-hint org_nip-error"
+                               pattern="\d{10}"
+                               inputmode="numeric"
+                               maxlength="10"
+                               disabled>
+                        <small id="org_nip-hint" class="add-form-input-info">
+                            {{ __('10 cyfr, bez kresek i spacji.', 'devents') }}
+                        </small>
+                        <span id="org_nip-error" class="field-error-msg" role="alert" aria-live="polite"></span>
+
+                        <div class="form-checkbox-group" style="margin-top:10px;">
+                            <label>
+                                <input type="checkbox" id="org_no_nip" name="org_no_nip" value="1">
+                                <span>{{ __('Nie posiadam numeru NIP', 'devents') }}</span>
+                            </label>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            {# ===================== AVATAR DLA SUBSCRIBERA ===================== #}
+            <div class="form-group" id="section-subscriber-avatar">
+                <label for="user_avatar" class="form-label">{{ __('Zdjęcie profilowe', 'devents') }}</label>
+                <input type="file"
+                       id="user_avatar"
+                       name="user_avatar"
+                       class="form-control"
+                       accept="image/jpeg,image/png"
+                       aria-describedby="avatar-hint">
+                <small id="avatar-hint" class="add-form-input-info">
+                    {{ __('Format JPG lub PNG, maksymalnie 2 MB. Opcjonalne.', 'devents') }}
+                </small>
+            </div>
+
+            <hr class="auth-hr" aria-hidden="true">
+
+            {# ===================== DANE OSOBY ===================== #}
+            <fieldset class="auth-subsection">
+                <legend class="auth-section-title">{{ __('Dane osoby zakładającej konto', 'devents') }}</legend>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label for="name" class="form-label">
+                            {{ __('Imię', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span>
+                        </label>
+                        <input type="text"
+                               id="name"
+                               name="name"
+                               class="form-control"
+                               required
+                               aria-describedby="name-error"
+                               autocomplete="given-name"
+                               placeholder="{{ __('Jan', 'devents') }}">
+                        <span id="name-error" class="field-error-msg" role="alert" aria-live="polite"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="surname" class="form-label">{{ __('Nazwisko', 'devents') }}</label>
+                        <input type="text"
+                               id="surname"
+                               name="surname"
+                               class="form-control"
+                               autocomplete="family-name"
+                               placeholder="{{ __('Kowalski', 'devents') }}">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">
+                        {{ __('E-mail (Login)', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span>
+                    </label>
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           class="form-control"
+                           required
+                           aria-describedby="email-error"
+                           autocomplete="email"
+                           placeholder="twoj@email.com">
+                    <span id="email-error" class="field-error-msg" role="alert" aria-live="polite"></span>
+                </div>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            {{ __('Hasło', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span>
+                        </label>
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               class="form-control"
+                               required
+                               aria-describedby="password-requirements password-error"
+                               autocomplete="new-password"
+                               placeholder="••••••••">
+                        <span id="password-error" class="field-error-msg" role="alert" aria-live="polite"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password" class="form-label">
+                            {{ __('Powtórz hasło', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span>
+                        </label>
+                        <input type="password"
+                               id="confirm_password"
+                               name="confirm_password"
+                               class="form-control"
+                               required
+                               aria-describedby="confirm-password-error"
+                               autocomplete="new-password"
+                               placeholder="••••••••">
+                        <span id="confirm-password-error" class="field-error-msg" role="alert" aria-live="polite"></span>
+                    </div>
+                </div>
+            </fieldset>
+
+            {# ===================== SIŁA HASŁA ===================== #}
+            <div class="password-strength-wrapper form-group">
+                <meter max="4"
+                       value="0"
+                       id="password-strength-meter"
+                       aria-label="{{ __('Siła hasła', 'devents') }}"
+                       aria-valuemin="0"
+                       aria-valuemax="4"
+                       aria-valuenow="0"
+                       aria-valuetext="{{ __('Brak hasła', 'devents') }}"></meter>
+                <p id="password-strength-text" class="form-input-info" aria-live="polite"></p>
+                <ul id="password-requirements" class="password-requirements-list" aria-label="{{ __('Wymagania hasła', 'devents') }}">
+                    <li id="length">{{ __('Min. 8 znaków', 'devents') }}</li>
+                    <li id="lowercase">{{ __('Mała litera', 'devents') }}</li>
+                    <li id="uppercase">{{ __('Wielka litera', 'devents') }}</li>
+                    <li id="digit">{{ __('Cyfra', 'devents') }}</li>
+                </ul>
+            </div>
+
+            {# ===================== AKCEPTACJA REGULAMINU ===================== #}
+            <div class="form-group">
+                <label class="form-checkbox-group">
+                    <input type="checkbox"
+                           id="accept_policy"
+                           name="accept_policy"
+                           required
+                           aria-describedby="policy-error">
+                    <span>
+                        {{ __('Akceptuję %sRegulamin%s i %sPolitykę Prywatności%s', 'devents')|replace({
+                            '%sRegulamin%s': '<a href="/regulamin" target="_blank" rel="noopener noreferrer" aria-label="' ~ __('Regulamin (otwiera się w nowej karcie)', 'devents') ~ '">' ~ __('Regulamin', 'devents') ~ '</a>',
+                            '%sPolitykę Prywatności%s': '<a href="/polityka-prywatnosci" target="_blank" rel="noopener noreferrer" aria-label="' ~ __('Politykę Prywatności (otwiera się w nowej karcie)', 'devents') ~ '">' ~ __('Politykę Prywatności', 'devents') ~ '</a>'
+                        })|raw }}
+                    </span>
+                </label>
+                <span id="policy-error" class="field-error-msg" role="alert" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group auth-actions">
+                <button type="submit" class="btn btn--primary btn--full-width btn-lg">
+                    {{ __('Utwórz konto', 'devents') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</main>

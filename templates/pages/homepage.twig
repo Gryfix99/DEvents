@@ -1,0 +1,117 @@
+{# ========================================================================
+   STRONA GŁÓWNA — DEvents ([homepage])
+   ======================================================================== #}
+{% set upcoming = featured_events is not empty ? featured_events : all_events %}
+
+<div class="dv-home" id="devents-main-content">
+
+    {# ===== HERO: najbliższe wydarzenie ===== #}
+    {% if next_event %}
+        {% include 'components/hero-event.twig' with {'event': next_event} %}
+    {% endif %}
+
+    {# ===== NAJBLIŻSZE / WYRÓŻNIONE WYDARZENIA ===== #}
+    {% if upcoming is not empty %}
+        <section class="dv-home__section">
+            <div class="dv-home__section-head">
+                <h2 class="dv-home__h2">{{ featured_events is not empty ? __('Wyróżnione wydarzenia', 'devents') : __('Najbliższe wydarzenia', 'devents') }}</h2>
+                <a href="{{ urls.events }}" class="dv-home__more">{{ __('Zobacz wszystkie', 'devents') }} <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>
+            </div>
+            <div class="cards_grid">
+                {% for ev in upcoming|slice(0, 6) %}
+                    {% include 'components/event-card.twig' with {'event': ev} %}
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
+
+    {# ===== O SERWISIE (przeniesione z hero) ===== #}
+    <section class="dv-home__hero dv-home__hero--band">
+        <div class="dv-home__hero-inner">
+            <span class="dv-home__eyebrow">
+                <span class="material-symbols-outlined" aria-hidden="true">diversity_3</span>
+                {{ __('Dostępne wydarzenia dla każdego', 'devents') }}
+            </span>
+            <h2 class="dv-home__title">{{ __('Prosto i bez barier', 'devents') }}</h2>
+            <p class="dv-home__lead">{{ __('Znajdź wydarzenia dopasowane do Twoich potrzeb — z tłumaczeniem na polski język migowy, napisami, audiodeskrypcją czy pętlą indukcyjną. Wszystko w jednym miejscu.', 'devents') }}</p>
+            <div class="dv-home__cta">
+                <a href="{{ urls.events }}" class="btn btn--primary btn-lg">{{ __('Przeglądaj wydarzenia', 'devents') }}</a>
+                {% if not is_user_logged_in %}
+                    <a href="{{ urls.register }}" class="btn btn--secondary btn-lg">{{ __('Załóż bezpłatne konto', 'devents') }}</a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    {# ===== JAK TO DZIAŁA ===== #}
+    <section class="dv-home__section dv-home__how">
+        <div class="dv-home__section-head dv-home__section-head--center">
+            <p class="dv-home__kicker">{{ __('Jak to działa', 'devents') }}</p>
+            <h2 class="dv-home__h2">{{ __('Trzy kroki dzielą Cię od dostępnego wydarzenia', 'devents') }}</h2>
+        </div>
+        <div class="dv-home__steps">
+            <div class="dv-home__step">
+                <span class="dv-home__step-ico"><span class="material-symbols-outlined" aria-hidden="true">search</span></span>
+                <h3 class="dv-home__step-title">{{ __('Znajdź', 'devents') }}</h3>
+                <p>{{ __('Przeglądaj wydarzenia i filtruj je po mieście, kategorii i formie dostępności — PJM, napisy, pętla.', 'devents') }}</p>
+            </div>
+            <div class="dv-home__step">
+                <span class="dv-home__step-ico"><span class="material-symbols-outlined" aria-hidden="true">person_add</span></span>
+                <h3 class="dv-home__step-title">{{ __('Załóż konto', 'devents') }}</h3>
+                <p>{{ __('Bezpłatne konto pozwala polubić wydarzenia, obserwować ulubione instytucje i pisać bezpośrednio do organizatorów.', 'devents') }}</p>
+            </div>
+            <div class="dv-home__step">
+                <span class="dv-home__step-ico"><span class="material-symbols-outlined" aria-hidden="true">notifications_active</span></span>
+                <h3 class="dv-home__step-title">{{ __('Bądź na bieżąco', 'devents') }}</h3>
+                <p>{{ __('Obserwuj organizatorów i otrzymuj informacje o ich nowych, dostępnych wydarzeniach.', 'devents') }}</p>
+            </div>
+        </div>
+    </section>
+
+    {# ===== STATYSTYKI ===== #}
+    <section class="dv-home__stats" aria-label="{{ __('Statystyki', 'devents') }}">
+        <div class="dv-home__stat">
+            <span class="dv-home__stat-num">{{ stats.events|number_format(0, ',', ' ') }}</span>
+            <span class="dv-home__stat-label">{{ __('wydarzeń', 'devents') }}</span>
+        </div>
+        <div class="dv-home__stat">
+            <span class="dv-home__stat-num">{{ stats.institutions|number_format(0, ',', ' ') }}</span>
+            <span class="dv-home__stat-label">{{ __('instytucji', 'devents') }}</span>
+        </div>
+        <div class="dv-home__stat">
+            <span class="dv-home__stat-num">{{ stats.views|number_format(0, ',', ' ') }}</span>
+            <span class="dv-home__stat-label">{{ __('wyświetleń', 'devents') }}</span>
+        </div>
+    </section>
+
+    {# ===== MAPA WYDARZEŃ ===== #}
+    {% if map_html %}
+        <section class="dv-home__section">
+            <div class="dv-home__section-head">
+                <h2 class="dv-home__h2">{{ __('Wydarzenia na mapie', 'devents') }}</h2>
+            </div>
+            {{ map_html|raw }}
+        </section>
+    {% endif %}
+
+    {# ===== DLA ORGANIZATORÓW ===== #}
+    <section class="dv-home__org">
+        <div class="dv-home__org-inner">
+            <div class="dv-home__org-text">
+                <p class="dv-home__kicker dv-home__kicker--light">{{ __('Dla organizatorów', 'devents') }}</p>
+                <h2 class="dv-home__h2 dv-home__h2--light">{{ __('Organizujesz wydarzenia? Dotrzyj do właściwych osób', 'devents') }}</h2>
+                <p class="dv-home__org-lead">{{ __('Dodaj wydarzenie tylko raz — a my automatycznie opublikujemy je na naszych profilach na Facebooku i Instagramie. Twoje wydarzenie trafia do znacznie większej grupy odbiorców, a Ty zajmujesz się tym, co najważniejsze.', 'devents') }}</p>
+                <div class="dv-home__cta">
+                    <a href="{{ urls.register_org }}" class="btn btn--gold btn-lg">{{ __('Załóż konto organizatora', 'devents') }}</a>
+                    <a href="{{ urls.about }}" class="dv-home__org-link">{{ __('Dowiedz się więcej', 'devents') }} <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>
+                </div>
+            </div>
+            <ul class="dv-home__org-features">
+                <li><span class="material-symbols-outlined" aria-hidden="true">thumb_up</span> {{ __('Auto-publikacja na Facebooku', 'devents') }}</li>
+                <li><span class="material-symbols-outlined" aria-hidden="true">photo_camera</span> {{ __('Auto-publikacja na Instagramie', 'devents') }}</li>
+                <li><span class="material-symbols-outlined" aria-hidden="true">groups</span> {{ __('Większy zasięg', 'devents') }}</li>
+            </ul>
+        </div>
+    </section>
+
+</div>

@@ -1,0 +1,65 @@
+{# templates/admin/tabs/problem_reports.twig — zgłoszone problemy od użytkowników #}
+<div class="admin-widget">
+    <div class="widget-content" style="padding: 1.5rem;">
+        <div class="table-responsive-wrapper">
+            <table class="my-content-list__table devents-responsive-table devents-table--cards">
+                <thead>
+                    <tr>
+                        <th scope="col">Zgłaszający</th>
+                        <th scope="col">Temat</th>
+                        <th scope="col">Opis</th>
+                        <th scope="col">Załącznik</th>
+                        <th scope="col">Data</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" style="text-align:right;">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in data.problem_reports %}
+                        <tr id="problem-row-{{ r.id }}">
+                            <td data-label="Zgłaszający">
+                                <strong>{{ r.reporter_name|default('—') }}</strong>
+                                {% if r.reporter_email %}<br><small style="color:var(--text-secondary);">{{ r.reporter_email }}</small>{% endif %}
+                            </td>
+                            <td data-label="Temat">{{ r.subject|default('—') }}</td>
+                            <td data-label="Opis">
+                                <div style="max-width:420px; white-space:pre-wrap;">{{ r.message }}</div>
+                            </td>
+                            <td data-label="Załącznik">
+                                {% if r.attachment_url %}
+                                    <a href="{{ r.attachment_url }}" target="_blank" rel="noopener noreferrer" class="btn btn--secondary btn--small btn--icon" title="Otwórz załącznik" aria-label="Otwórz załącznik">
+                                        <span class="material-symbols-outlined" aria-hidden="true">attach_file</span>
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td data-label="Data">{{ r.created_at|date('d.m.Y H:i') }}</td>
+                            <td data-label="Status">
+                                <span class="status-badge {{ r.status == 'resolved' ? 'status-badge--published' : 'status-badge--pending' }}">
+                                    {{ r.status == 'resolved' ? 'Rozwiązane' : 'Nowe' }}
+                                </span>
+                            </td>
+                            <td data-label="Akcje" class="actions-cell">
+                                <div class="actions-group">
+                                    {% if r.status != 'resolved' %}
+                                        <button type="button" class="btn btn--secondary btn--small btn--icon admin-action-btn" data-action="resolve_problem" data-id="{{ r.id }}" title="Oznacz jako rozwiązane" aria-label="Oznacz jako rozwiązane">
+                                            <span class="material-symbols-outlined" aria-hidden="true">done</span>
+                                        </button>
+                                    {% endif %}
+                                    <button type="button" class="btn btn--danger btn--small btn--icon admin-action-btn is-danger" data-action="delete_problem" data-id="{{ r.id }}" title="Usuń zgłoszenie" aria-label="Usuń zgłoszenie">
+                                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" style="text-align:center; padding:2rem; color:var(--text-secondary);">Brak zgłoszonych problemów.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

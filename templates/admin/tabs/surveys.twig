@@ -1,0 +1,97 @@
+{# templates/admin/tabs/surveys.twig — przegląd odpowiedzi z ankiety satysfakcji #}
+<style>
+.dv-svy-stars{color:#f5a623;letter-spacing:1px;white-space:nowrap}
+.dv-svy-stars .empty{color:#d1d5db}
+.dv-svy-dist{display:flex;flex-direction:column;gap:8px;margin:6px 0}
+.dv-svy-dist__row{display:flex;align-items:center;gap:10px;font-size:.9rem}
+.dv-svy-dist__lab{width:54px;color:var(--text-secondary,#475569);white-space:nowrap}
+.dv-svy-dist__bar{flex:1;height:10px;background:var(--bg-hover,#eef2f4);border-radius:999px;overflow:hidden}
+.dv-svy-dist__fill{height:100%;background:#f5a623;border-radius:999px}
+.dv-svy-dist__n{width:34px;text-align:right;color:var(--text-secondary,#475569)}
+.dv-svy-table{width:100%;border-collapse:collapse;margin-top:8px}
+.dv-svy-table th,.dv-svy-table td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border-primary,#e5e7eb);font-size:.92rem;vertical-align:top}
+.dv-svy-table th{color:var(--text-secondary,#475569);font-weight:700}
+.dv-svy-pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.8rem;background:var(--bg-hover,#eef2f4);color:var(--text-primary,#0f172a)}
+</style>
+
+<div class="admin-dashboard-grid">
+
+    <div class="admin-stats-grid">
+        <div class="stat-card stat-card--info">
+            <span class="material-symbols-outlined" aria-hidden="true">reviews</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ data.survey_count|default(0) }}</span>
+                <span class="stat-card__label">Wypełnionych ankiet</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card--accent">
+            <span class="material-symbols-outlined" aria-hidden="true">star</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ data.survey_avg|default(0)|number_format(2, ',', ' ') }} / 5</span>
+                <span class="stat-card__label">Średnia ocena ogólna</span>
+            </div>
+        </div>
+    </div>
+
+    {# --- Rozkład ocen --- #}
+    <div class="admin-widget">
+        <h3>Rozkład ocen</h3>
+        <div class="admin-widget-body">
+            <div class="dv-svy-dist">
+                {% for n in [5,4,3,2,1] %}
+                    {% set cnt = data.survey_distribution[n]|default(0) %}
+                    {% set pct = (data.survey_count|default(0) > 0) ? (cnt * 100 / data.survey_count)|round : 0 %}
+                    <div class="dv-svy-dist__row">
+                        <span class="dv-svy-dist__lab">{{ n }} ★</span>
+                        <span class="dv-svy-dist__bar"><span class="dv-svy-dist__fill" style="width:{{ pct }}%"></span></span>
+                        <span class="dv-svy-dist__n">{{ cnt }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {# --- Lista odpowiedzi --- #}
+    <div class="admin-widget">
+        <h3>Odpowiedzi ({{ data.survey_count|default(0) }})</h3>
+        {% if data.survey_responses is not empty %}
+            <div class="admin-widget-body" style="overflow-x:auto;">
+                <table class="dv-svy-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Autor</th>
+                            <th>Ocena</th>
+                            <th>Łatwość</th>
+                            <th>Znajduje wydarzenia</th>
+                            <th>Komentarz</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in data.survey_responses %}
+                            {% set found = r.answers_arr.found|default('') %}
+                            <tr>
+                                <td>{{ r.created_at_fmt }}</td>
+                                <td>{{ r.author }}</td>
+                                <td class="dv-svy-stars">
+                                    {% for i in 1..5 %}<span class="{{ i <= r.rating ? '' : 'empty' }}">★</span>{% endfor %}
+                                </td>
+                                <td>{{ r.answers_arr.ease|default('—') }}{{ r.answers_arr.ease is defined and r.answers_arr.ease ? ' / 5' : '' }}</td>
+                                <td>
+                                    {% if found == 'tak' %}<span class="dv-svy-pill">Tak</span>
+                                    {% elseif found == 'czesciowo' %}<span class="dv-svy-pill">Częściowo</span>
+                                    {% elseif found == 'nie' %}<span class="dv-svy-pill">Nie</span>
+                                    {% else %}—{% endif %}
+                                </td>
+                                <td>{{ r.comment ? r.comment : '—' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="admin-widget-body"><p style="color: var(--text-secondary); margin: 0;">Brak wypełnionych ankiet. Umieść skrót <code>[devents_ankieta]</code> na stronie, aby zbierać opinie.</p></div>
+        {% endif %}
+    </div>
+
+</div>

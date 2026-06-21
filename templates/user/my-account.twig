@@ -1,0 +1,237 @@
+{# templates/user/my-account.twig — v14.0 (minimalistyczny układ, bez stylów inline) #}
+<div class="account-settings-container">
+    <div id="settings-messages"></div>
+
+    {# Nagłówek sekcji generuje teraz powłoka panelu (panel.twig) z pozycji menu. #}
+
+    {# Zakładki: KONTO | ZMIANA HASŁA | MOJE POTRZEBY | USUŃ KONTO #}
+    <nav class="settings-tabs" role="tablist" aria-label="{{ __('Sekcje ustawień konta', 'devents') }}">
+        <a href="#tab-konto" class="nav-tab active" role="tab" aria-selected="true" data-tab="tab-konto">
+            <span class="material-symbols-outlined" aria-hidden="true">person</span> {{ __('Konto', 'devents') }}
+        </a>
+        <a href="#tab-haslo" class="nav-tab" role="tab" aria-selected="false" data-tab="tab-haslo">
+            <span class="material-symbols-outlined" aria-hidden="true">lock</span> {{ __('Zmiana hasła', 'devents') }}
+        </a>
+        <a href="#tab-dostepnosc" class="nav-tab" role="tab" aria-selected="false" data-tab="tab-dostepnosc">
+            <span class="material-symbols-outlined" aria-hidden="true">accessibility_new</span> {{ __('Moje potrzeby', 'devents') }}
+        </a>
+        <a href="#tab-usun" class="nav-tab nav-tab--danger" role="tab" aria-selected="false" data-tab="tab-usun">
+            <span class="material-symbols-outlined" aria-hidden="true">delete</span> {{ __('Usuń konto', 'devents') }}
+        </a>
+    </nav>
+
+    {# --- SEKCJA 1: DANE OSOBOWE I PREFERENCJE --- #}
+    <div id="tab-konto" class="settings-card settings-tab-panel active">
+        <div class="settings-subhead">
+            <h3>{{ __('Twoje dane osobiste', 'devents') }}</h3>
+        </div>
+
+        <form id="personal-data-form" class="devents-form" enctype="multipart/form-data">
+
+            {# Awatar + upload #}
+            <div class="avatar-settings">
+                <div class="profile-avatar">
+                    <div class="avatar-circle">
+                        {% set personal_avatar = get_user_meta(user.ID, '_devents_user_logo', true) %}
+                        {% if personal_avatar %}
+                            <img src="{{ personal_avatar|e }}" id="user-avatar-preview" alt="{{ __('Twój awatar', 'devents') }}">
+                        {% else %}
+                            <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="avatar-settings__info">
+                    <label class="form-label" for="user_avatar_input">{{ __('Twój osobisty awatar', 'devents') }}</label>
+                    <input type="file" name="user_avatar" id="user_avatar_input" class="form-control" accept="image/*">
+                    <p class="avatar-settings__hint">
+                        {{ __('To zdjęcie będzie widoczne tylko w Twoim panelu oraz przy Twoich komentarzach.', 'devents') }}<br>
+                        <strong>{{ __('Zalecany format:', 'devents') }}</strong> {{ __('Kwadrat (np. 500x500px), max 2MB.', 'devents') }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label class="form-label" for="acc-first-name">{{ __('Imię', 'devents') }}</label>
+                    <input type="text" id="acc-first-name" name="first_name" value="{{ user.first_name|e }}" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="acc-last-name">{{ __('Nazwisko', 'devents') }}</label>
+                    <input type="text" id="acc-last-name" name="last_name" value="{{ user.last_name|e }}" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="acc-email">{{ __('Adres e-mail (Login)', 'devents') }}</label>
+                <input type="email" id="acc-email" value="{{ user.user_email|e }}" class="form-control form-control--readonly" disabled>
+                <p class="form-hint">{{ __('Adres e-mail służy do logowania i nie może być zmieniony samodzielnie.', 'devents') }}</p>
+            </div>
+
+            {# --- PREFERENCJE UŻYTKOWNIKA --- #}
+            <hr class="settings-divider">
+
+            <div class="settings-subhead">
+                <h3>{{ __('Twoje preferencje (domyślne filtry)', 'devents') }}</h3>
+                <p class="form-hint">{{ __('Te ustawienia będą domyślnie wybierane podczas przeglądania wyszukiwarki wydarzeń.', 'devents') }}</p>
+            </div>
+
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label class="form-label" for="acc-country">{{ __('Domyślny kraj', 'devents') }}</label>
+                    <select id="acc-country" name="default_country" class="form-control form-select">
+                        <option value="">{{ __('Brak / Cały świat', 'devents') }}</option>
+                        {% for code, name in countries %}
+                            <option value="{{ code }}" {{ user.default_country == code ? 'selected' : '' }}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="acc-spoken">{{ __('Domyślny język foniczny', 'devents') }}</label>
+                    <select id="acc-spoken" name="default_spoken_lang" class="form-control form-select">
+                        <option value="">{{ __('Brak', 'devents') }}</option>
+                        {% for code, lang_data in spoken_languages %}
+                            <option value="{{ code }}" {{ user.default_spoken_lang == code ? 'selected' : '' }}>{{ lang_data.name|default(lang_data) }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="acc-sign">{{ __('Domyślny język migowy', 'devents') }}</label>
+                <select id="acc-sign" name="default_sign_lang" class="form-control form-select">
+                    <option value="">{{ __('Brak', 'devents') }}</option>
+                    {% for code, lang_data in sign_languages %}
+                        <option value="{{ code }}" {{ user.default_sign_lang == code ? 'selected' : '' }}>{{ lang_data.name|default(lang_data) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {# --- ZGODY E-MAIL --- #}
+            <hr class="settings-divider">
+
+            <div class="settings-subhead">
+                <h3>{{ __('Powiadomienia e-mail', 'devents') }}</h3>
+                <p class="form-hint">{{ __('Decydujesz, jakie wiadomości chcesz od nas otrzymywać. Zmiany zapisują się razem z profilem.', 'devents') }}</p>
+            </div>
+
+            <div class="form-group form-checkbox-group">
+                <label>
+                    <input type="checkbox" name="notify_followed_events" value="1" {{ notify_followed_events != '0' ? 'checked' : '' }}>
+                    <span>{{ __('Powiadomienia o nowych wydarzeniach od obserwowanych organizatorów', 'devents') }}</span>
+                </label>
+            </div>
+
+            <div class="form-group form-checkbox-group">
+                <label>
+                    <input type="checkbox" name="marketing_consent" value="1" {{ marketing_consent ? 'checked' : '' }}>
+                    <span>{{ __('Wiadomości marketingowe i newsletter (nowości, promocje)', 'devents') }}</span>
+                </label>
+            </div>
+
+            <div class="form-actions-right">
+                <input type="hidden" name="action" value="devents_update_account">
+                <input type="hidden" name="_wpnonce" value="{{ details_nonce }}">
+                <button type="submit" class="btn btn--primary">{{ __('Zapisz zmiany w profilu', 'devents') }}</button>
+            </div>
+        </form>
+    </div>
+
+    {# --- SEKCJA 2: ZMIANA HASŁA --- #}
+    <div id="tab-haslo" class="settings-card settings-tab-panel">
+        <div class="settings-subhead">
+            <h3>{{ __('Zmiana hasła', 'devents') }}</h3>
+            <p class="form-hint">{{ __('Użyj silnego hasła — min. 8 znaków, z małą i wielką literą oraz cyfrą.', 'devents') }}</p>
+        </div>
+        <form id="change-password-form" class="devents-form">
+            <div class="form-group">
+                <label class="form-label">{{ __('Bieżące hasło', 'devents') }}</label>
+                <input type="password" name="current_pass" class="form-control" required autocomplete="current-password">
+            </div>
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label class="form-label">{{ __('Nowe hasło', 'devents') }}</label>
+                    <input type="password" id="pass1" name="pass1" class="form-control" required autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ __('Powtórz nowe hasło', 'devents') }}</label>
+                    <input type="password" name="pass2" class="form-control" required autocomplete="new-password">
+                </div>
+            </div>
+
+            <div class="password-strength-wrapper">
+                <meter max="4" id="password-strength-meter" class="password-strength-meter"></meter>
+                <p id="password-strength-text" class="form-hint" aria-live="polite"></p>
+                <ul id="password-requirements" class="password-requirements-list">
+                    <li id="length">{{ __('Min. 8 znaków', 'devents') }}</li>
+                    <li id="lowercase">{{ __('Mała litera', 'devents') }}</li>
+                    <li id="uppercase">{{ __('Wielka litera', 'devents') }}</li>
+                    <li id="digit">{{ __('Cyfra', 'devents') }}</li>
+                </ul>
+            </div>
+
+            <div class="form-actions-right">
+                <input type="hidden" name="_wpnonce_pass" value="{{ password_nonce }}">
+                <button type="submit" class="btn btn--secondary">{{ __('Zmień hasło', 'devents') }}</button>
+            </div>
+        </form>
+    </div>
+
+    {# --- SEKCJA: MOJE POTRZEBY (profil dostępności) --- #}
+    <div id="tab-dostepnosc" class="settings-card settings-tab-panel">
+        <div class="settings-subhead">
+            <h3>{{ __('Moje potrzeby dostępności', 'devents') }}</h3>
+            <p class="form-hint">
+                {{ __('Zaznacz, czego potrzebujesz na wydarzeniach (np. tłumaczenie PJM, napisy, pętla indukcyjna). Wyszukiwarka będzie domyślnie pokazywać tylko wydarzenia spełniające Twoje potrzeby — z opcją „pokaż wszystkie".', 'devents') }}
+            </p>
+        </div>
+
+        {% if a11y_types is empty %}
+            <p class="form-hint">{{ __('Brak zdefiniowanych cech dostępności.', 'devents') }}</p>
+        {% else %}
+            <form id="account-a11y-form" class="devents-form" data-ajax="{{ ajax_url }}" data-nonce="{{ a11y_nonce }}">
+                <div class="account-a11y-grid">
+                    {% for t in a11y_types %}
+                        <label class="account-a11y-item">
+                            <input type="checkbox" name="prefs[]" value="{{ t.id }}" {{ t.id in a11y_prefs ? 'checked' : '' }}>
+                            <span class="account-a11y-ico material-symbols-outlined" aria-hidden="true">{{ t.icon|default('accessibility_new') }}</span>
+                            <span class="account-a11y-name">{{ t.name }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+                <div class="form-actions-right">
+                    <button type="submit" class="btn btn--primary">{{ __('Zapisz potrzeby', 'devents') }}</button>
+                </div>
+                <p class="account-a11y-msg" role="status" aria-live="polite"></p>
+            </form>
+        {% endif %}
+    </div>
+
+    {# --- SEKCJA 3: USUWANIE KONTA --- #}
+    <div id="tab-usun" class="settings-card danger-card settings-tab-panel">
+        <div class="settings-subhead">
+            <h3 class="settings-subhead__danger">
+                <span class="material-symbols-outlined" aria-hidden="true">warning</span>
+                {{ __('Strefa niebezpieczna', 'devents') }}
+            </h3>
+            <p class="form-hint">
+                {{ __('Usunięcie konta jest operacją %snieodwracalną%s. Wszystkie Twoje dane zostaną trwale usunięte z systemu.', 'devents')|replace({
+                    '%snieodwracalną%s': '<strong>' ~ __('nieodwracalną', 'devents') ~ '</strong>'
+                })|raw }}
+            </p>
+        </div>
+
+        <form id="delete-account-form" class="devents-form">
+            <div class="form-group">
+                <label class="form-label">{{ __('Wpisz hasło, aby potwierdzić usunięcie konta', 'devents') }}</label>
+                <input type="password" name="delete_pass" class="form-control form-control--danger" required autocomplete="off">
+            </div>
+            <input type="hidden" name="_wpnonce_delete" value="{{ delete_nonce }}">
+            <div class="form-actions-right">
+                <button type="submit" class="btn btn--danger">
+                    {{ __('Usuń konto na zawsze', 'devents') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>{# /.account-settings-container #}

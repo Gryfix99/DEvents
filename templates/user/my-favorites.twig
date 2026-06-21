@@ -1,0 +1,21 @@
+{% if events is not empty %}
+        {# Siatka kart wydarzeń #}
+        <div class="cards_grid">
+            {% for event in events %}
+                {% include 'components/event-card.twig' with {
+                    'event': event, 
+                    'is_user_logged_in': true,
+                    'is_current': event.is_current|default(false)
+                } %}
+            {% endfor %}
+        </div>
+    {% else %}
+        {# Pusty stan #}
+        <div class="message-box message-box--info">
+            <span class="material-symbols-outlined" aria-hidden="true">favorite_border</span>
+            <div class="message-content">
+                <p>{{ __('Nie masz jeszcze żadnych ulubionych wydarzeń.', 'devents') }}</p>
+                <a href="{{ home_url('/wydarzenia/') }}" class="btn btn--primary btn--small">{{ __('Przeglądaj wydarzenia', 'devents') }}</a>
+            </div>
+        </div>
+    {% endif %}

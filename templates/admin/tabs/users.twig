@@ -1,0 +1,244 @@
+{# templates/admin/tabs/users.twig #}
+<div class="my-content-list">
+    <div class="admin-tab-head">
+        <span class="admin-widget__chip"><span class="material-symbols-outlined" aria-hidden="true">group</span></span>
+        <h2 class="admin-widget__title">Użytkownicy</h2>
+        {% if data.total_items %}<span class="admin-tab-count">{{ data.total_items }} kont</span>{% endif %}
+    </div>
+    <form id="users-list-form" method="GET">
+        {# --- KLUCZOWE INPUTY (Zachowują stan formularza) --- #}
+        <input type="hidden" name="view" value="panel-admina">
+        <input type="hidden" name="tab" value="users">
+        
+        {# NAPRAWA PAGINACJI: To sprawia, że przy zmianie 'per_page' rola się nie resetuje #}
+        <input type="hidden" name="role" value="{{ data.filters.role|default('all') }}">
+
+        {# --- PASEK NARZĘDZI (Akcje masowe + Szukaj) --- #}
+        <div class="list-toolbar" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+            
+            {# 1. AKCJE ZBIOROWE #}
+            <div class="bulk-actions" style="display: flex; gap: 10px; align-items: center;">
+                {% if data.bulk_actions %}
+                    <select name="bulk_action" class="form-control devents-select" style="width: auto; min-width: 180px;">
+                        <option value="">- Masowe działania -</option>
+                        {% for key, label in data.bulk_actions %}
+                            <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" id="doaction" class="btn btn--secondary" onclick="return confirm('Czy na pewno chcesz wykonać tę akcję dla zaznaczonych elementów?')">Zastosuj</button>
+                {% endif %}
+            </div>
+
+            {# 2. WYSZUKIWARKA #}
+            <div class="search-form" style="display: flex; gap: 10px;">
+                <input type="text" name="search" value="{{ data.search_query }}" placeholder="Szukaj użytkownika..." class="form-control">
+                <button type="submit" class="btn btn--primary">Szukaj</button>
+                {% if data.search_query %}
+                    <a href="{{ data.panel_url }}" class="btn btn--outline" title="Wyczyść"><span class="material-symbols-outlined" aria-hidden="true">close</span></a>
+                {% endif %}
+            </div>
+        </div>
+
+        {# --- FILTRY RÓL (Zakładki) --- #}
+        <div class="filter-pills" style="margin-bottom: 20px;">
+            <a href="{{ data.clear_filters_url }}&role=all" class="filter-pill {{ data.filters.role == 'all' ? 'active' : '' }}">Wszyscy</a>
+            <a href="{{ data.clear_filters_url }}&role=administrator" class="filter-pill {{ data.filters.role == 'administrator' ? 'active' : '' }}">Administratorzy</a>
+            <a href="{{ data.clear_filters_url }}&role=organizer" class="filter-pill {{ data.filters.role == 'organizer' ? 'active' : '' }}">Organizatorzy</a>
+            <a href="{{ data.clear_filters_url }}&role=subscriber" class="filter-pill {{ data.filters.role == 'subscriber' ? 'active' : '' }}">Uczestnicy</a>
+        </div>
+
+        {# --- TABELA --- #}
+        <div class="table-responsive-wrapper">
+            <table class="my-content-list__table sortable devents-responsive-table devents-table--cards" id="users-table">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 40px; text-align: center;">
+                            <label class="checkbox-wrapper">
+                                <input type="checkbox" id="cb-select-all-1" class="select-all">
+                            </label>
+                        </th>
+                        <th scope="col" class="desktop-only" style="width: 50px;">ID</th>
+                        <th scope="col">Użytkownik</th>
+                        <th scope="col">E-mail</th>
+                        <th scope="col">Instytucja / Rola</th>
+                        <th scope="col" class="desktop-only" style="text-align: right;">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody id="the-list">
+                    {% for user in data.users %}
+                        <tr>
+                            <td style="text-align: center;">
+                                <label class="checkbox-wrapper">
+                                    {# Checkbox do akcji masowych (name="ids[]") #}
+                                    <input type="checkbox" name="ids[]" value="{{ user.ID }}" class="subscriber-checkbox" data-email="{{ user.user_email }}">
+                                </label>
+                            </td>
+                            
+                            <td data-label="ID" class="desktop-only"><strong>{{ user.ID }}</strong></td>
+                            
+                            <td class="responsive-main-info" data-label="Użytkownik">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <img src="{{ user.logo_url }}" alt="Avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                                    <div>
+                                        <strong style="font-size:0.95rem; display:block;">{{ user.display_name_final }}</strong>
+                                        
+                                        {# MOBILE META #}
+                                        <div class="mobile-meta">
+                                            {{ user.user_email }}<br>
+                                            <span class="status-badge">{{ user.roles[0]|capitalize }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td data-label="Email" class="desktop-only">
+                                <a href="mailto:{{ user.user_email }}" class="text-muted">{{ user.user_email }}</a>
+                            </td>
+
+                            <td data-label="Instytucja / Rola">
+                                <div style="display:flex; flex-direction:column; gap:5px;">
+                                    {% if user.institution_name %}
+                                        <span class="badge badge--secondary" title="Instytucja">
+                                            <span class="material-symbols-outlined" style="font-size:14px; vertical-align:middle;" aria-hidden="true">domain</span>
+                                            {{ user.institution_name }}
+                                        </span>
+                                    {% endif %}
+                                    
+                                    {% if 'administrator' in user.roles %}
+                                        <span class="status-badge status-badge--master_organizer">ADMINISTRATOR</span>
+                                    {% elseif 'organizer' in user.roles %}
+                                        <span class="status-badge status-badge--organizer">ORGANIZATOR</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--subscriber">UCZESTNIK</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <td data-label="Akcje" class="actions-cell">
+                                <div class="actions-group">
+                                    <button type="button" class="btn btn--small btn--secondary btn--icon btn-action"
+                                            data-action="open_change_role_modal" 
+                                            data-id="{{ user.ID }}" 
+                                            data-current-role="{{ user.roles[0] }}"
+                                            title="Zmień rolę" aria-label="Zmień rolę użytkownika">
+                                        <span class="material-symbols-outlined" aria-hidden="true">manage_accounts</span>
+                                    </button>
+
+                                    <button type="button" class="btn btn--small btn--secondary btn--icon btn-action" 
+                                            data-action="send_email_user" 
+                                            data-id="{{ user.ID }}" 
+                                            data-email="{{ user.user_email }}" 
+                                            title="Email" aria-label="Wyślij email do użytkownika">
+                                        <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+                                    </button>
+
+                                    <button type="button" class="btn btn--small btn--danger btn--icon btn-action action-delete-user" 
+                                        data-id="{{ user.ID }}" 
+                                        data-nonce="{{ wp_create_nonce('devents_admin_general_nonce') }}"
+                                        title="Usuń" aria-label="Usuń użytkownika">
+                                    <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                                </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="6" style="text-align:center; padding: 40px;">Brak użytkowników.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            {# PAGINACJA #}
+            <div class="tablenav bottom">
+                 <div class="pagination-per-page-selector">
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Pokaż:</span>
+                    {# Zmiana tego selecta wywoła submit formularza. Dzięki hidden input 'role', filtr roli zostanie zachowany #}
+                    <select name="per_page" class="form-control devents-select" style="width: auto; padding: 2px 5px;" onchange="this.form.submit()" aria-label="Wybierz liczbę elementów na stronę">
+                        <option value="20" {{ data.filters.per_page == 20 ? 'selected' : '' }}>20</option>
+                        <option value="50" {{ data.filters.per_page == 50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ data.filters.per_page == 100 ? 'selected' : '' }}>100</option>
+                        <option value="-1" {{ data.filters.per_page == -1 ? 'selected' : '' }}>Wszystkie</option>
+                    </select>
+                 </div>
+
+                 {% if data.pagination_links %}
+                 <div class="tablenav-pages">
+                    <span class="displaying-num">{{ data.total_items }} użytkowników</span>
+                    {{ data.pagination_links|raw }}
+                 </div>
+                 {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+
+{# 1. EMAIL #}
+<div id="send-email-modal" class="devents-modal" style="display: none;">
+    <div class="devents-modal-content">
+        <div class="devents-modal-header">
+            <h3>Wyślij e-mail</h3>
+            <button type="button" class="close-modal btn btn--icon" aria-label="Zamknij"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+        </div>
+        <div class="devents-modal-body">
+            <form id="send-email-form">
+                <input type="hidden" name="payload[user_id]" id="email-user-id">
+                <div class="form-group">
+                    <label for="email-recipient">Odbiorca:</label>
+                    <input type="email" id="email-recipient" class="form-control" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="adm-email-subject">Temat:</label>
+                    <input type="text" id="adm-email-subject" name="payload[subject]" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="adm-email-message">Wiadomość:</label>
+                    <textarea id="adm-email-message" name="payload[message]" class="form-control" rows="5" required></textarea>
+                </div>
+                <div class="devents-modal-footer">
+                    <button type="submit" class="btn btn--primary">Wyślij</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# 2. ZMIANA ROLI #}
+<div id="change-role-modal" class="devents-modal" style="display: none;">
+    <div class="devents-modal-content">
+        <div class="devents-modal-header">
+            <h3>Zmień rolę</h3>
+            <button type="button" class="close-modal btn btn--icon" aria-label="Zamknij"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+        </div>
+        <div class="devents-modal-body">
+            <form id="change-role-form">
+                <input type="hidden" name="user_id" id="role-modal-user-id">
+                <div class="role-radio-group">
+                    <label class="role-radio-card">
+                        <input type="radio" name="new_role" value="subscriber">
+                        <span class="material-symbols-outlined role-radio-card__icon" aria-hidden="true">person</span>
+                        <span class="role-radio-card__text">
+                            <strong>Uczestnik</strong>
+                            <small>Zwykły użytkownik serwisu</small>
+                        </span>
+                        <span class="material-symbols-outlined role-radio-card__check" aria-hidden="true">check_circle</span>
+                    </label>
+                    <label class="role-radio-card">
+                        <input type="radio" name="new_role" value="organizer">
+                        <span class="material-symbols-outlined role-radio-card__icon" aria-hidden="true">event</span>
+                        <span class="role-radio-card__text">
+                            <strong>Organizator</strong>
+                            <small>Dodaje i zarządza wydarzeniami</small>
+                        </span>
+                        <span class="material-symbols-outlined role-radio-card__check" aria-hidden="true">check_circle</span>
+                    </label>
+                    {# „Master" to TYP INSTYTUCJI (nie rola WP) — zmienia się w profilu instytucji. #}
+                    <p class="form-hint" style="margin:6px 2px 0;">Typ instytucji (jednostka / kierująca) ustawiasz w profilu instytucji.</p>
+                </div>
+                <div class="devents-modal-footer">
+                    <button type="submit" class="btn btn--primary">Zapisz</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# Podgląd użytkownika usunięty — modal #user-details-modal wycofany na życzenie. #}

@@ -1,0 +1,356 @@
+{# templates/admin/settings-page.twig - Wersja 8.0 (Aktualizacja Bazy, Dostępność, Logi) #}
+<div class="wrap devents-settings-page">
+    <h1 class="wp-heading-inline">Ustawienia DEvents</h1>
+    <hr class="wp-header-end">
+
+    {# 1. POWIADOMIENIA SYSTEMOWE #}
+    {% for msg in messages %}
+        <div class="notice notice-{{ msg.type }} is-dismissible">
+            <p>{{ msg.text }}</p>
+        </div>
+    {% endfor %}
+
+    {# 2. NAWIGACJA ZAKŁADEK #}
+    <nav class="nav-tab-wrapper wp-clearfix mb-20">
+        <a href="{{ page_url }}&tab=events" class="nav-tab {{ active_tab == 'events' ? 'nav-tab-active' : '' }}">Wydarzenia</a>
+        <a href="{{ page_url }}&tab=videos" class="nav-tab {{ active_tab == 'videos' ? 'nav-tab-active' : '' }}">Materiały (PJM)</a>
+        <a href="{{ page_url }}&tab=payments" class="nav-tab {{ active_tab == 'payments' ? 'nav-tab-active' : '' }}">Płatności (Stripe)</a>
+        <a href="{{ page_url }}&tab=emails" class="nav-tab {{ active_tab == 'emails' ? 'nav-tab-active' : '' }}">E-maile</a>
+        <a href="{{ page_url }}&tab=tools" class="nav-tab {{ active_tab == 'tools' ? 'nav-tab-active' : '' }}">Narzędzia i Naprawa</a>
+    </nav>
+
+    <div class="settings-content-wrapper">
+
+        {# --- TAB: WYDARZENIA LUB MATERIAŁY --- #}
+        {% if active_tab == 'events' or active_tab == 'videos' %}
+            <div class="flex-row gap-20">
+                {# Lewa kolumna: Dodawanie #}
+                <div class="settings-add-form card p-0 flex-grow-1" style="max-width: 450px;">
+                    <h2 class="card-header-bg p-15 border-bottom m-0">Dodaj nową wartość</h2>
+                    <div class="p-20">
+                        <form method="post" action="{{ page_url }}&tab={{ active_tab }}">
+                            {{ wp_nonce_field('devents_add_setting_nonce', '_wpnonce', true, false)|raw }}
+                            <input type="hidden" name="devents_add_setting" value="1">
+                            
+                            <div class="form-group mb-15">
+                                <label class="bold mb-5 block" for="adm-setting-value">Nazwa wyświetlana:</label>
+                                <input type="text" id="adm-setting-value" name="setting_value" required class="regular-text w-100" placeholder="np. Koncert lub Pętla indukcyjna">
+                            </div>
+
+                            <div class="form-group mb-20">
+                                <label class="bold mb-5 block" for="adm-setting-type">Typ pola:</label>
+                                <select id="adm-setting-type" name="setting_type" class="w-100 p-5">
+                                    {% if active_tab == 'events' %}
+                                        <option value="event_category">Kategoria wydarzenia</option>
+                                        <option value="event_method">Sposób realizacji (Wydarzenia)</option>
+                                        <option value="event_accessibility">Dostępność (Wydarzenia)</option>
+                                    {% else %}
+                                        <option value="video_category">Kategoria wideo</option>
+                                        <option value="video_accessibility">Dostępność (Wideo PJM)</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+
+                            <button type="submit" class="button button-primary w-100">Dodaj do listy</button>
+                        </form>
+                    </div>
+                </div>
+
+                {# Prawa kolumna: Listy z bazy #}
+                <div class="settings-lists flex-grow-1 flex-row gap-20" style="flex-wrap: wrap;">
+                    {% set settings_to_show = (active_tab == 'events') ? event_settings : video_settings %}
+                    
+                    {# Zdefiniowane Etykiety Nagłówków #}
+                    {% set labels = {
+                        'event_category': 'Kategorie Wydarzeń', 
+                        'event_method': 'Realizacja',
+                        'event_accessibility': 'Dostępność Wydarzeń',
+                        'video_category': 'Kategorie Wideo',
+                        'video_accessibility': 'Dostępność Wideo'
+                    } %}
+
+                    {% for type, items in settings_to_show %}
+                        <div class="setting-list-card card p-0" style="min-width: 250px; flex: 1;">
+                            <h3 class="p-10 m-0 border-bottom text-center small-text uppercase bold text-light">{{ labels[type]|default(type) }}</h3>
+                            <ul class="settings-list-ul p-10 m-0">
+                                {% for item in items %}
+                                    <li class="flex-row flex-between flex-align-center mb-5 p-5 border-bottom-dashed">
+                                        <span class="bold">{{ item.setting_value }}</span>
+                                        <a href="{{ wp_nonce_url(page_url ~ '&tab=' ~ active_tab ~ '&action=delete&setting_id=' ~ item.id, 'devents_delete_setting_' ~ item.id) }}"
+                                           class="text-red-500"
+                                           style="font-size: 18px; text-decoration: none;"
+                                           aria-label="Usuń"
+                                           onclick="return confirm('Usunąć tę opcję?');"><span class="material-symbols-outlined" aria-hidden="true">delete</span></a>
+                                    </li>
+                                {% else %}
+                                    <li class="opacity-5 text-center p-10">Brak danych w bazie</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        {# --- TAB: PŁATNOŚCI --- #}
+        {% elseif active_tab == 'payments' %}
+            <div class="card p-0" style="max-width: 800px;">
+                <h2 class="card-header-bg p-15 border-bottom m-0">Konfiguracja Bramki Stripe</h2>
+                <div class="p-20">
+                    <form method="post" action="options.php">
+                        {{ settings_fields_html|raw }}
+                        <table class="form-table">
+                            <tr>
+                                <th scope="row">Secret Key</th>
+                                <td><input type="password" name="devents_stripe_secret_key" value="{{ stripe.secret_key }}" class="regular-text"></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Webhook Secret</th>
+                                <td><input type="password" name="devents_stripe_webhook_secret" value="{{ stripe.webhook_secret }}" class="regular-text"></td>
+                            </tr>
+                        </table>
+                        
+                        <div class="alert alert--info mt-20">
+                            <p class="bold mb-5"><span class="material-symbols-outlined v-align-middle" aria-hidden="true">link</span> Webhook URL:</p>
+                            <code>{{ stripe.webhook_url }}</code>
+                        </div>
+                        
+                        <p class="submit"><button type="submit" class="button button-primary">Zapisz ustawienia Stripe</button></p>
+                    </form>
+                </div>
+            </div>
+
+        {# --- TAB: E-MAILE --- #}
+        {% elseif active_tab == 'emails' %}
+            <div class="card p-0">
+                <h2 class="card-header-bg p-15 border-bottom m-0">Wygląd wiadomości e-mail</h2>
+                <div class="p-20">
+                    <form method="post" action="">
+                        {{ email_nonce_field|raw }}
+                        <input type="hidden" name="devents_save_email_templates" value="1">
+                        
+                        <div class="mb-20">
+                            <label class="bold block mb-10" for="adm-email-header-img">Obrazek w nagłówku (Logo URL):</label>
+                            <input type="url" id="adm-email-header-img" name="devents_email_header_img" value="{{ email_header_img }}" class="large-text" placeholder="https://...">
+                            {% if email_header_img %}
+                                <div class="mt-10 p-10 border" style="background: #f0f0f0;">
+                                    <img src="{{ email_header_img }}" style="max-height: 50px;">
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-20">
+                            <label class="bold block mb-10">Stopka e-mail (HTML):</label>
+                            {{ footer_editor_html|raw }}
+                        </div>
+
+                        <button type="submit" class="button button-primary">Zapisz szablon</button>
+                    </form>
+                </div>
+            </div>
+
+        {# --- TAB: NARZĘDZIA (DATA FIX TOOLS) --- #}
+        {% elseif active_tab == 'tools' %}
+            
+            {# Statystyki Ogólne #}
+            <div class="flex-row gap-20 mb-20">
+                <div class="card flex-grow-1 border-left-primary">
+                    <div class="flex-row flex-between">
+                        <div>
+                            <p class="m-0 opacity-5 bold uppercase small-text">Baza Events List</p>
+                            <h2 class="m-0" style="font-size: 2.5rem;">{{ stats.db_count }}</h2>
+                        </div>
+                        <span class="material-symbols-outlined opacity-2" style="font-size: 48px;" aria-hidden="true">database</span>
+                    </div>
+                </div>
+                <div class="card flex-grow-1 border-left-success">
+                    <div class="flex-row flex-between">
+                        <div>
+                            <p class="m-0 opacity-5 bold uppercase small-text">Posty WordPress</p>
+                            <h2 class="m-0 {{ stats.post_count != stats.db_count ? 'text-red-500' : '' }}" style="font-size: 2.5rem;">{{ stats.post_count }}</h2>
+                        </div>
+                        <span class="material-symbols-outlined opacity-2" style="font-size: 48px;" aria-hidden="true">article</span>
+                    </div>
+                </div>
+                <div class="card flex-grow-1 border-left-danger">
+                    <div class="flex-row flex-between">
+                        <div>
+                            <p class="m-0 opacity-5 bold uppercase small-text">Status spójności</p>
+                            <h2 class="m-0" style="font-size: 1.2rem; padding-top: 10px;">
+                                {% if stats.db_count == stats.post_count %}
+                                    <span class="status-bg-success p-5 border-radius-5" style="color: white;">IDEALNA</span>
+                                {% else %}
+                                    <span class="status-bg-danger p-5 border-radius-5" style="color: white;">WYMAGA NAPRAWY</span>
+                                {% endif %}
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# GRID NARZĘDZI #}
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                
+                {# ETAP 0: AKTUALIZACJA SQL (Nowość) #}
+                <div class="card p-0 border-top-danger" style="border-top-color: #dc2626; box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.1);">
+                    <h3 class="p-15 m-0 border-bottom bg-light bold" style="color: #991b1b;">Etap 0: Aktualizacja bazy (SQL)</h3>
+                    <div class="p-15">
+                        <p class="description mb-15">
+                            <strong>Bezpieczna aktualizacja schematu:</strong><br>
+                            Dodaje do bazy nowe kolumny (np. <code>age_rating</code>, <code>institution_id</code>), jeśli ich jeszcze brakuje.
+                        </p>
+                        <form method="post">
+                            <input type="hidden" name="_wpnonce" value="{{ tools_nonce }}">
+                            <button type="submit" name="run_db_update" class="button w-100" style="background: #dc2626; color: white; border: none; font-weight: bold;">ZAKTUALIZUJ STRUKTURĘ SQL</button>
+                        </form>
+                    </div>
+                </div>
+
+                {# ETAP I #}
+                <div class="card p-0 border-top-primary">
+                    <h3 class="p-15 m-0 border-bottom bg-light">Etap I: Migracja Biletów</h3>
+                    <div class="p-15">
+                        <p class="description mb-15">Konwertuje ceny z formatu liczbowego na strukturę JSON (ticket_types).</p>
+                        <form method="post">
+                            <input type="hidden" name="_wpnonce" value="{{ tools_nonce }}">
+                            <button type="submit" name="run_migration_tickets" class="button button-secondary w-100">Uruchom migrację cen</button>
+                        </form>
+                    </div>
+                </div>
+
+                {# ETAP II #}
+                <div class="card p-0 border-top-purple">
+                    <h3 class="p-15 m-0 border-bottom bg-light">Etap II: Naprawa Instytucji</h3>
+                    <div class="p-15">
+                        <p class="description mb-15">Przypisuje brakujące institution_id na podstawie metadanych autora.</p>
+                        <form method="post">
+                            <input type="hidden" name="_wpnonce" value="{{ tools_nonce }}">
+                            <button type="submit" name="run_fix_institutions" class="button button-secondary w-100">Napraw powiązania</button>
+                        </form>
+                    </div>
+                </div>
+
+                {# ETAP III: Totalna Synchronizacja #}
+                <div class="card p-0 border-top-success">
+                    <h3 class="p-15 m-0 border-bottom bg-light bold">Etap III: Synchronizacja Postów</h3>
+                    <div class="p-15">
+                        <p class="description mb-15">
+                            <strong>Naprawia błąd 467 vs 411:</strong><br>
+                            Usuwa posty bez ID w tabeli i tworzy brakujące.
+                        </p>
+                        <form method="post">
+                            <input type="hidden" name="_wpnonce" value="{{ tools_nonce }}">
+                            <button type="submit" name="run_total_sync" class="button button-primary w-100" style="background: #10b981; border-color: #10b981;">SYNCHRONIZUJ WSZYSTKO</button>
+                        </form>
+                    </div>
+                </div>
+
+                {# ETAP IV: MIGRACJA NAGRÓD I CZYSZCZENIE #}
+                <div class="card p-0 border-top-gold" style="border-top-color: #d97706; box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.1);">
+                    <h3 class="p-15 m-0 border-bottom bg-light bold" style="color: #b45309;">Etap IV: Nagrody i Porządki</h3>
+                    <div class="p-15">
+                        <p class="description mb-15">
+                            <strong>Głębokie czyszczenie usermeta:</strong><br>
+                            1. Przenosi nagrody do tabeli instytucji.<br>
+                            2. Usuwa 14 zbędnych kluczy (NIP, adresy, stare kody).
+                        </p>
+                        <form method="post">
+                            <input type="hidden" name="_wpnonce" value="{{ tools_nonce }}">
+                            <button type="submit" name="run_reward_migration" class="button w-100" style="background: #f59e0b; color: white; border: none; font-weight: bold;">MIGRUJ I CZYŚĆ BAZĘ</button>
+                        </form>
+                    </div>
+                </div>
+
+                {# ETAP V: MIGRACJA SLUGÓW #}
+                <div class="card p-0 border-top-purple" style="border-top-color: #9333ea; box-shadow: 0 4px 6px -1px rgba(147, 51, 234, 0.1);">
+                    <h3 class="p-15 m-0 border-bottom bg-light bold" style="color: #6b21a8;">Etap V: Migracja do i18n (Slugi)</h3>
+                    <div class="p-15">
+                        <p class="description mb-15">
+                            <strong>Naprawa tłumaczeń:</strong><br>
+                            Zmienia polskie nazwy kategorii i metod w bazie danych na techniczne slugi (np. "Koncert" -> "concert"). 
+                            <br><br>
+                            <span class="v-danger bold">Wymagane, aby pliki .po poprawnie tłumaczyły nazwy na EN/DE.</span>
+                        </p>
+                        <form method="post">
+                            <input type="hidden" name="_wpnonce" value="{{ tools_nonce }}">
+                            <button type="submit" name="run_slug_migration" class="button w-100" style="background: #9333ea; color: white; border: none; font-weight: bold;">URUCHOM MIGRACJĘ SLUGÓW</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+            {# DEBUG LOG VIEW #}
+            <div class="card mt-20 p-0">
+                <h3 class="p-15 m-0 border-bottom bg-dark text-white flex-row flex-between flex-align-center">
+                    <span>Podgląd Debug Log (Ostatnie 200 linii)</span>
+                    <form method="post" style="margin:0;">
+                        <input type="hidden" name="_wpnonce" value="{{ tools_nonce }}">
+                        <button type="submit" name="devents_clear_debug_log" class="button button-small" style="background:#dc2626; color:white; border:none;" onclick="return confirm('Na pewno wyczyścić plik logów?');">Wyczyść log</button>
+                    </form>
+                </h3>
+                <textarea class="large-text code w-100" rows="12" readonly style="background: #1a1a1a; color: #00ff00; font-family: monospace; border: none; padding: 15px;">{{ debug_log_content }}</textarea>
+            </div>
+
+            {# MAINTENANCE MODE #}
+            <div class="card mt-20 border-left-danger">
+                <h2>Tryb Konserwacji Serwisu</h2>
+                <form method="post" action="options.php">
+                    {{ settings_fields_html|raw }}
+                    <label class="flex-row flex-align-center gap-10 pointer">
+                        <input type="checkbox" name="devents_maintenance_mode" value="1" {{ maintenance_mode ? 'checked' : '' }}>
+                        <span class="bold v-danger">Włącz blokadę dostępu dla użytkowników</span>
+                    </label>
+                    <p class="description">Gdy aktywne, tylko administratorzy mogą przeglądać frontend portalu.</p>
+                    <p class="submit"><button type="submit" class="button">Zapisz status serwisu</button></p>
+                </form>
+            </div>
+
+        {% endif %}
+        
+    </div>
+</div>
+
+<style>
+    .card-header-bg { background: #f9fafb; }
+    .border-bottom-dashed { border-bottom: 1px dashed #e5e7eb; }
+    .border-top-primary { border-top: 4px solid #2271b1; }
+    .border-top-purple { border-top: 4px solid #7e22ce; }
+    .border-top-danger { border-top: 4px solid #d32f2f; }
+    .border-top-success { border-top: 4px solid #10b981; }
+    .border-left-primary { border-left: 4px solid #2271b1; }
+    .border-left-success { border-left: 4px solid #10b981; }
+    .border-left-danger { border-left: 4px solid #ef4444; }
+    .bg-light { background: #f6f7f7; }
+    .bg-dark { background: #1d2327; }
+    .text-white { color: #fff; }
+    .opacity-2 { opacity: 0.2; }
+    .opacity-5 { opacity: 0.5; }
+    .w-100 { width: 100%; }
+    .inline-block { display: inline-block; }
+    .status-bg-success { background: #10b981; }
+    .status-bg-danger { background: #ef4444; }
+    .border-radius-5 { border-radius: 5px; }
+    .v-danger { color: #d32f2f; }
+    .flex-row { display: flex; flex-direction: row; }
+    .flex-between { justify-content: space-between; }
+    .flex-align-center { align-items: center; }
+    .gap-10 { gap: 10px; }
+    .gap-20 { gap: 20px; }
+    .p-0 { padding: 0; }
+    .p-5 { padding: 5px; }
+    .p-10 { padding: 10px; }
+    .p-15 { padding: 15px; }
+    .p-20 { padding: 20px; }
+    .m-0 { margin: 0; }
+    .mb-5 { margin-bottom: 5px; }
+    .mb-15 { margin-bottom: 15px; }
+    .mb-20 { margin-bottom: 20px; }
+    .mt-10 { margin-top: 10px; }
+    .mt-20 { margin-top: 20px; }
+    .border-bottom { border-bottom: 1px solid #c3c4c7; }
+    .border-top { border-top: 1px solid #c3c4c7; }
+    .pointer { cursor: pointer; }
+    .bold { font-weight: bold; }
+    .uppercase { text-transform: uppercase; }
+    .small-text { font-size: 12px; }
+</style>

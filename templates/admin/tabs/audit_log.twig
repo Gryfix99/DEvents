@@ -1,0 +1,158 @@
+{# templates/admin/tabs/audit_log.twig #}
+
+{# --- KONFIGURACJA TŁUMACZEŃ --- #}
+{% set action_map = {
+    'create_event': 'Utworzono wydarzenie',
+    'update_event': 'Zaktualizowano wydarzenie',
+    'delete_event': 'Usunięto wydarzenie',
+    'verify_event': 'Zweryfikowano wydarzenie',
+    'unverify_event': 'Cofnięto weryfikację',
+    'publish_event': 'Opublikowano wydarzenie',
+    'social_published': 'Opublikowano w social media (FB/IG)',
+    'trash_event': 'Przeniesiono do kosza',
+    'create_user': 'Utworzono użytkownika',
+    'update_user': 'Zaktualizowano użytkownika',
+    'delete_user': 'Usunięto użytkownika',
+    'change_role_user': 'Zmieniono rolę użytkownika',
+    'login': 'Zalogowano do panelu',
+    'logout': 'Wylogowano',
+    'import_csv': 'Import danych CSV',
+    'generate_graphic': 'Wygenerowano grafikę',
+    'send_email': 'Wysłano wiadomość e-mail',
+    'settings_update': 'Zaktualizowano ustawienia',
+    'bulk_action': 'Akcja masowa',
+    'event_created': 'Utworzono wydarzenie',
+    'event_updated': 'Zaktualizowano wydarzenie',
+    'event_deleted': 'Usunięto wydarzenie',
+    'event_duplicated': 'Zduplikowano wydarzenie',
+    'event_cancelled': 'Odwołano wydarzenie',
+    'event_restored': 'Przywrócono wydarzenie',
+    'event_featured_paid': 'Opłacono wyróżnienie wydarzenia',
+    'feature_event_custom': 'Zmieniono wyróżnienie wydarzenia',
+    'user_login': 'Zalogowano do panelu',
+    'password_reset_request': 'Prośba o reset hasła',
+    'password_reset_success': 'Zresetowano hasło',
+    'content_reported': 'Zgłoszono treść',
+    'favorite_added': 'Dodano do ulubionych',
+    'favorite_removed': 'Usunięto z ulubionych',
+    'review_deleted': 'Usunięto opinię',
+    'order_updated': 'Zaktualizowano zamówienie',
+    'order_completed': 'Zrealizowano zamówienie',
+    'order_marked_paid': 'Oznaczono zamówienie jako opłacone',
+    'order_auto_completed': 'Auto-realizacja zamówienia',
+    'bulk_email_sent': 'Wysłano newsletter',
+    'email_sent_bulk': 'Wysłano wiadomość masową',
+    'reminder_sent': 'Wysłano przypomnienie',
+    'bulk_users_action': 'Akcja masowa na użytkownikach',
+    'contact_reply': 'Odpowiedź na kontakt',
+    'rewards_assigned': 'Przyznano odznakę',
+    'ajax_error': 'Błąd systemu (AJAX)'
+} %}
+
+{% set object_map = {
+    'event': 'Wydarzenie',
+    'user': 'Użytkownik',
+    'order': 'Zamówienie',
+    'settings': 'Ustawienia',
+    'graphic': 'Grafika'
+} %}
+
+<div class="my-content-list">
+    <div class="list-toolbar">
+        <h3>Dziennik zdarzeń</h3>
+        <div class="filter-pills">
+            <a href="{{ data.panel_url }}&tab=audit_log&log_user_type=all" class="filter-pill {{ data.filters.log_user_type == 'all' ? 'active' : '' }}">Wszyscy Użytkownicy</a>
+            <a href="{{ data.panel_url }}&tab=audit_log&log_user_type=admin" class="filter-pill {{ data.filters.log_user_type == 'admin' ? 'active' : '' }}">Tylko Administratorzy</a>
+        </div>
+    </div>
+
+    <div class="table-responsive-wrapper">
+        <table class="my-content-list__table devents-responsive-table devents-table--cards">
+            <thead>
+                <tr>
+                    <th class="desktop-only" style="width: 140px;">Data</th>
+                    <th class="desktop-only">Użytkownik</th>
+                    <th>Akcja</th>
+                    <th class="desktop-only">Szczegóły</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in data.audit_logs %}
+                    {# Ustalanie nazwy akcji i obiektu #}
+                    {% set action_label = action_map[log.action] ?? log.action|replace({'_': ' '})|title %}
+                    {% set object_label = object_map[log.object_type] ?? log.object_type|title %}
+                    
+                    {# Ustalanie nazwy użytkownika #}
+                    {% if log.user_id == 0 %}
+                        {% set user_display = 'System (Automatycznie)' %}
+                    {% else %}
+                        {% set user_display = log.admin_name ~ ' (ID: ' ~ log.user_id ~ ')' %}
+                    {% endif %}
+
+                    <tr>
+                        {# Kolumna Data - Desktop #}
+                        <td data-label="Data" class="desktop-only">{{ log.log_time|date('d.m.Y H:i') }}</td>
+
+                        {# Kolumna Użytkownik - Desktop #}
+                        <td data-label="Użytkownik" class="desktop-only">
+                            {{ user_display }}
+                        </td>
+
+                        {# GŁÓWNA KOMÓRKA (Akcja) - Responsywna #}
+                        <td class="responsive-main-info" data-label="Akcja">
+                            <strong style="font-size: 1.05em; color: var(--primary);">{{ action_label }}</strong>
+                            
+                            {# Szczegóły widoczne tylko na mobile #}
+                            <div class="mobile-meta">
+                                <div class="mobile-meta-row">
+                                    <span class="mobile-meta-label">Data:</span>
+                                    <span>{{ log.log_time|date('d.m.Y H:i') }}</span>
+                                </div>
+                                <div class="mobile-meta-row">
+                                    <span class="mobile-meta-label">Kto:</span>
+                                    <span>{{ user_display }}</span>
+                                </div>
+                                <div class="mobile-meta-row" style="flex-direction: column; align-items: flex-start; gap: 2px;">
+                                    <span class="mobile-meta-label">Szczegóły:</span>
+                                    <span style="font-size: 0.85em; color: var(--text-primary);">
+                                        {% if log.object_type and log.object_id %}
+                                            {{ object_label }}: #{{ log.object_id }}
+                                        {% elseif log.details %}
+                                            {{ log.details }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+
+                        {# Kolumna Szczegóły - Desktop #}
+                        <td data-label="Szczegóły" class="desktop-only">
+                            {% if log.object_type and log.object_id %}
+                                <span class="status-badge status-badge--neutral">{{ object_label }} #{{ log.object_id }}</span>
+                            {% elseif log.details %}
+                                <small style="color: var(--text-secondary);">{{ log.details }}</small>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding: 2rem; color: var(--text-secondary);">
+                            Brak zdarzeń w dzienniku dla wybranego filtra.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="tablenav bottom">
+        <div class="tablenav-pages">
+            <span class="displaying-num">{{ data.total_items }} wpisów</span>
+            <span class="pagination-links">{{ data.pagination_links|raw }}</span>
+        </div>
+    </div>
+</div>

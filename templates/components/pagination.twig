@@ -1,0 +1,42 @@
+{# templates/components/pagination.twig
+   Nawigacja stronicowania wyników.
+   Kontekst: current_base_url (URL bez query), current_page (int), total_pages (int) #}
+{% if total_pages > 1 %}
+<nav class="devents-pagination" role="navigation" aria-label="{{ __('Stronicowanie wyników', 'devents') }}">
+    <ul class="devents-pagination__list">
+        {% if current_page > 1 %}
+            <li>
+                <a class="devents-pagination__link devents-pagination__prev"
+                   href="{{ current_base_url }}?paged={{ current_page - 1 }}"
+                   rel="prev" aria-label="{{ __('Poprzednia strona', 'devents') }}">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% endif %}
+
+        {% for page in 1..total_pages %}
+            {% if page == current_page %}
+                <li>
+                    <span class="devents-pagination__link is-current" aria-current="page">{{ page }}</span>
+                </li>
+            {% else %}
+                <li>
+                    <a class="devents-pagination__link"
+                       href="{{ current_base_url }}?paged={{ page }}"
+                       aria-label="{{ __('Strona', 'devents') }} {{ page }}">{{ page }}</a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if current_page < total_pages %}
+            <li>
+                <a class="devents-pagination__link devents-pagination__next"
+                   href="{{ current_base_url }}?paged={{ current_page + 1 }}"
+                   rel="next" aria-label="{{ __('Następna strona', 'devents') }}">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}

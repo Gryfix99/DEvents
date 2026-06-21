@@ -1,0 +1,26 @@
+{# templates/user/my-reviews.twig (fragment) — v13.0 (i18n ready) #}
+
+    {# Podsumowanie #}
+    <div class="my-reviews-summary">
+        <div class="summary-card">
+            <div class="summary-card__icon" style="color: var(--primary);">
+                <span class="material-symbols-outlined" aria-hidden="true">help</span>
+            </div>
+            <div class="summary-card__info">
+                <span class="summary-card__value">{{ reviews|default([])|length }}</span>
+                <span class="summary-card__label">{{ __('Łącznie pytań', 'devents') }}</span>
+            </div>
+        </div>
+    </div>
+
+    {# Lista pytań (Komponent) #}
+    <div class="reviews-list-wrapper">
+        {% include 'components/reviews.twig' with {
+            'reviews': reviews,
+            'item': item,
+            'item_type': item_type,
+            'is_user_logged_in': true,
+            'review_nonce': review_nonce,
+            'show_context': true
+        } %}
+    </div>

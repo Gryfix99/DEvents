@@ -1,0 +1,78 @@
+{# templates/components/event-list.twig — v13.0 (i18n ready) #}
+<article class="event-list-item {% if event.is_current %}event-list-item--current{% endif %}">
+    
+    {# 1. ZDJĘCIE (Kwadrat) #}
+    <div class="event-list-item__image-wrapper">
+        <a href="{{ event.permalink }}" class="event-list-item__image-link" tabindex="-1" aria-hidden="true">
+            {% if event.image_url %}
+                <img src="{{ event.image_url|e }}" 
+                     alt="{{ event.image_alt_text|default(event.title)|e }}" 
+                     class="event-list-item__image" 
+                     loading="lazy">
+            {% else %}
+                <div class="event-list-item__placeholder">
+                    <span class="material-symbols-outlined" aria-hidden="true">event</span>
+                </div>
+            {% endif %}
+        </a>
+    </div>
+
+    {# 2. TREŚĆ #}
+    <div class="event-list-item__content">
+        <div class="event-list-item__header">
+            {# Kategoria jest tłumaczona w Helperze PHP przed wysłaniem do Twig #}
+            <span class="card_category event-list-item__category">{{ event.category|e }}</span>
+        </div>
+
+        {# Tytuł #}
+        <h2 class="event-list-item__title">
+            <a href="{{ event.permalink }}" class="event-list-item__title-link">{{ event.title|e }}</a>
+        </h2>
+
+        <div class="event-list-item__meta">
+            <div class="event-list-item__meta-row">
+                <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
+                <span>{{ event.start_datetime|date('d.m.Y, H:i') }}</span>
+            </div>
+            {% if event.location %}
+            <div class="event-list-item__meta-row">
+                <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                <span class="text-truncate">{{ event.location|e }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# 3. CENA I AKCJE #}
+    <div class="event-list-item__actions">
+        
+        <div class="event-list-item__price-box">
+             {% if event.price == 0 %}
+                <span class="badge badge--free">{{ __('Bezpłatne', 'devents') }}</span>
+            {% else %}
+                <span class="event-list-item__price-label">{{ __('Cena biletu', 'devents') }}</span>
+                <span class="event-list-item__price-value">
+                    {{ event.price|number_format(2, ',', ' ') }} {{ __('zł', 'devents') }}
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="event-list-item__buttons-stack">
+            <a href="{{ event.permalink }}" class="btn btn--primary event-list-item__btn-details">
+                {{ __('Szczegóły', 'devents') }}
+            </a>
+            
+            {% if is_user_logged_in %}
+             <button type="button" 
+                     class="btn-favorite {{ event.is_favorite ? 'is-favorite' : '' }}" 
+                     aria-label="{{ event.is_favorite ? __('Usuń z ulubionych', 'devents') : __('Dodaj do ulubionych', 'devents') }}"
+                     data-event-id="{{ event.id }}"
+                     data-nonce="{{ wp_create_nonce('devents_favorites_nonce') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">
+                    {{ event.is_favorite ? 'favorite' : 'heart_plus' }}
+                </span>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</article>

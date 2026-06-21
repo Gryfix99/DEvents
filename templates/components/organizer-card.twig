@@ -1,0 +1,95 @@
+{# templates/components/organizer-card.twig — v13.0 (i18n ready) #}
+<div class="organizer-card {{ organizer.type == 'master' ? 'organizer-card--master' : '' }}" 
+     style="{{ organizer.type == 'master' ? 'border: 2px solid var(--primary);' : '' }}">
+    
+    {# ODZNAKA (Gratyfikacja z bazy) #}
+    {% if organizer.activity_badge.info %}
+    <div class="organizer-card__badge" style="--badge-color: {{ organizer.activity_badge.info.color }};" title="{{ organizer.activity_badge.info.label }}">
+        <span class="material-symbols-outlined" aria-hidden="true">{{ organizer.activity_badge.info.icon }}</span>
+    </div>
+    {% endif %}
+
+    <div class="organizer-card__body">
+        <div class="organizer-card__header-main">
+            
+            {# LOGO #}
+            <div class="organizer-card__logo">
+                {% if organizer.logo_url %}
+                    <img src="{{ organizer.logo_url }}" alt="{{ organizer.name }}">
+                {% else %}
+                    <span class="material-symbols-outlined" aria-hidden="true">domain</span>
+                {% endif %}
+            </div>
+
+            {# PIGUŁKI (Jednostka/Instytucja) #}
+            <div class="card_pills-wrapper" style="margin-bottom: 0.5rem; justify-content: center;">
+                {% if organizer.type == 'master' %}
+                    <span class="card_pill" style="background-color: rgba(59, 130, 246, 0.1); color: var(--primary);">
+                        <span class="material-symbols-outlined icon-small" style="font-size: 14px; vertical-align: middle;" aria-hidden="true">account_balance</span>
+                        {{ __('Instytucja Nadrzędna', 'devents') }}
+                    </span>
+                {% else %}
+                    <span class="card_pill" style="background-color: var(--bg-hover); color: var(--text-secondary);">
+                        <span class="material-symbols-outlined icon-small" style="font-size: 14px; vertical-align: middle;" aria-hidden="true">groups</span>
+                        {{ __('Organizacja', 'devents') }}
+                    </span>
+                {% endif %}
+            </div>
+            
+            {# TYTUŁ #}
+            <h3 class="organizer-card__title">
+                <a href="{{ organizer.profile_url }}">{{ organizer.name }}</a>
+            </h3>
+
+            {# LOKALIZACJA #}
+            {% if organizer.city %}
+            <div style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem;">
+                <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;" aria-hidden="true">location_on</span>
+                {{ organizer.city }}
+            </div>
+            {% endif %}
+        </div>
+
+        {# STATYSTYKI #}
+        <div class="organizer-card__stats-grid">
+            <div class="stat-cell text-primary" title="{{ __('Nadchodzące wydarzenia', 'devents') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">event</span>
+                <span class="stat-value">{{ organizer.upcoming_events_count }}</span>
+            </div>
+            
+            <div class="stat-cell" title="{{ __('Wszystkie wydarzenia', 'devents') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">history</span>
+                <span class="stat-value">{{ organizer.total_events_count }}</span>
+            </div>
+            
+            <div class="stat-cell" title="{{ __('Liczba obserwujących', 'devents') }}">
+                <span class="material-symbols-outlined" style="color: #ec4899;" aria-hidden="true">group</span>
+                <span class="stat-value">{{ organizer.followers_count }}</span>
+            </div>
+            
+            <div class="stat-cell" title="{{ __('Średnia ocen', 'devents') }}">
+                <span class="material-symbols-outlined icon-star" aria-hidden="true">star</span>
+                <span class="stat-value">{{ organizer.average_rating > 0 ? organizer.average_rating : '-' }}</span>
+            </div>
+        </div>
+    </div>
+
+    {# STOPKA I PRZYCISKI #}
+    <div class="organizer-card__footer">
+        <a href="{{ organizer.profile_url }}" class="btn btn--secondary">{{ __('Profil', 'devents') }}</a>
+        
+        {% if is_user_logged_in() and organizer.user_id %}
+            <button 
+                class="btn-follow {{ organizer.is_followed ? 'is-followed' : '' }}" 
+                data-organizer-id="{{ organizer.user_id }}" 
+                data-nonce="{{ wp_create_nonce('devents_subscription_nonce') }}"
+                title="{{ organizer.is_followed ? __('Przestań obserwować', 'devents') : __('Obserwuj', 'devents') }}"
+                aria-label="{{ organizer.is_followed ? __('Przestań obserwować', 'devents') : __('Obserwuj', 'devents') }}"
+            >
+                <span class="state-unfollowed material-symbols-outlined" aria-hidden="true">person_add</span>
+                <span class="state-followed material-symbols-outlined" aria-hidden="true">person_remove</span>
+            </button>
+        {% endif %}
+    </div>
+
+</div>

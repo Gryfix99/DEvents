@@ -1,0 +1,180 @@
+{# Kompletny szablon formularza edycji wydarzenia w panelu admina #}
+<div class="wrap">
+    <div class="admin-edit-container">
+        <h1>Edytuj Wydarzenie: <a href="{{ post_url|default('#') }}" target="_blank">{{ event.title|e }}</a></h1>
+
+        {% if success_message %}
+            <div class="notice notice-success is-dismissible"><p>{{ success_message }}</p></div>
+        {% endif %}
+        {% if error_messages %}
+            <div class="notice notice-error is-dismissible">
+                <p><strong>Wystąpiły błędy:</strong></p>
+                <ul style="margin-left: 20px; list-style: disc;">
+                {% for error in error_messages %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <form method="post" action="" class="form admin-edit-form" enctype="multipart/form-data">
+            {{ nonce_field|raw }}
+            <input type="hidden" name="devents_action" value="edit_event">
+            <input type="hidden" name="event_id" value="{{ event.id }}">
+
+            <div class="form-group">
+                <label for="title" class="form-label">Tytuł <span class="form-required-field">*</span></label>
+                <input class="form-input" type="text" id="title" name="title" value="{{ event.title|e('html_attr') }}" required maxlength="60">
+                <div id="title-count" class="char-count"></div>
+            </div>
+
+            {# POLE DLA INNEGO ORGANIZATORA #}
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-checkbox-group">
+                        <input type="checkbox" id="is_other_organizer" name="is_other_organizer" value="1" {% if is_other_org_checked %}checked{% endif %}>
+                        Inny organizator?
+                    </label>
+                </div>
+                <div class="form-group {% if not is_other_org_checked %}hidden{% endif %}" id="other_organizer_wrapper">
+                    <label class="form-label" for="organizator">Organizator</label>
+                    <input class="form-input" type="text" id="organizator" name="organizator" value="{{ event.organizator|e('html_attr') }}" {% if is_other_org_checked %}required{% endif %}>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category" class="form-label">Kategoria <span class="form-required-field">*</span></label>
+                    <select id="category" name="category" required>
+                        <option value="">Wybierz kategorię</option>
+                        {% for cat in event_categories %}
+                            <option value="{{ cat }}" {{ event.category == cat ? 'selected' : '' }}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="method" class="form-label">Sposób realizacji <span class="form-required-field">*</span></label>
+                    <select id="method" name="method" required>
+                        <option value="">Wybierz sposób</option>
+                        {% for meth in event_methods %}
+                            <option value="{{ meth }}" {{ event.delivery_mode == meth ? 'selected' : '' }}>{{ meth }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="location" class="form-label">Lokalizacja</label>
+                <div class="location-input-container">
+                    <input class="form-input" type="text" id="location" name="location" value="{{ event.location|e('html_attr') }}" placeholder="Wprowadź lokalizację...">
+                    <div id="location-loading-spinner" class="hidden"></div>
+                    <div id="autocomplete-results"></div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <fieldset class="acc-fieldset">
+                    <legend class="form-label">Dostępność <span class="form-required-field">*</span></legend>
+                    <div class="acc-grid acc-grid--admin">
+                        {% for type in accessibility_types %}
+                            <label class="acc-option acc-option--sm {{ type.id in selected_accessibility_ids ? 'acc-option--selected' : '' }}"
+                                   for="adm_acc_{{ type.id }}">
+                                <input type="checkbox"
+                                       id="adm_acc_{{ type.id }}"
+                                       name="accessibility[]"
+                                       value="{{ type.id }}"
+                                       class="acc-checkbox"
+                                       {{ type.id in selected_accessibility_ids ? 'checked' : '' }}>
+                                <span class="material-symbols-outlined acc-option__icon" aria-hidden="true">{{ type.icon }}</span>
+                                <span class="acc-option__label">{{ type.name }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="start_datetime" class="form-label">Data rozpoczęcia <span class="form-required-field">*</span></label>
+                    <input class="form-input flatpickr-datetime" type="text" id="start_datetime" name="start_datetime" value="{{ event.start_datetime ? event.start_datetime|date('Y-m-d H:i') : '' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="end_datetime" class="form-label">Data zakończenia</label>
+                    <input class="form-input flatpickr-datetime" type="text" id="end_datetime" name="end_datetime" value="{{ event.end_datetime and event.end_datetime != '0000-00-00 00:00:00' ? event.end_datetime|date('Y-m-d H:i') : '' }}">
+                </div>
+            </div>
+
+            {# POLA DLA POWTARZANIA WYDARZENIA #}
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="repeat">Powtarzanie</label>
+                    <select class="form-select" id="repeat" name="repeat">
+                        <option value="" {% if not event.repeat %}selected{% endif %}>Brak (jednorazowe)</option>
+                        <option value="daily" {% if event.repeat == 'daily' %}selected{% endif %}>Codziennie</option>
+                        <option value="weekly" {% if event.repeat == 'weekly' %}selected{% endif %}>Cotygodniowo</option>
+                        <option value="monthly" {% if event.repeat == 'monthly' %}selected{% endif %}>Comiesięcznie</option>
+                    </select>
+                </div>
+                <div class="form-group {% if not event.repeat %}hidden{% endif %}" id="repeat_end_wrapper">
+                    <label class="form-label" for="repeat_end_datetime">Zakończenie powtarzania</label>
+                    <input class="form-input flatpickr-datetime" type="text" id="repeat_end_datetime" name="repeat_end_datetime" value="{{ event.repeat_end_datetime and event.repeat_end_datetime != '0000-00-00 00:00:00' ? event.repeat_end_datetime|date('Y-m-d H:i') : '' }}">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="description" class="form-label">Opis <span class="form-required-field">*</span></label>
+                <textarea id="description" name="description" class="form-textarea" rows="10" required>{{ event.description|e('html_attr') }}</textarea>
+                <div id="description-count" class="char-count"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="image">Zmień zdjęcie</label>
+                    <input type="file" id="image" name="image" class="form-input" accept="image/*">
+                    {% if event.image_url %}<p class="add-form-input-info">Aktualne zdjęcie: <a href="{{ event.image_url }}" target="_blank">Zobacz</a></p>{% endif %}
+                </div>
+                 <div class="form-group">
+                    <label for="image_alt_text" class="form-label">Tekst alternatywny</label>
+                    <input type="text" id="image_alt_text" name="image_alt_text" value="{{ event.image_alt_text|e('html_attr') }}" class="form-input" maxlength="100">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="ticket_price" class="form-label">Cena (PLN)</label>
+                <input type="number" id="ticket_price" name="ticket_price" value="{{ event.price|e('html_attr') }}" class="form-input" step="0.01" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="ticket" class="form-label">Link do biletów</label>
+                <input type="url" id="ticket" name="ticket" value="{{ event.ticket|e('html_attr') }}" class="form-input">
+            </div>
+            
+            <div class="form-group form-checkbox-group">
+                <input type="checkbox" id="action_button_enabled" name="action_button_enabled" value="1" {{ event.action_button_enabled ? 'checked' : '' }}>
+                <label for="action_button_enabled" class="form-checkbox-label">Włącz przycisk akcji</label>
+            </div>
+
+            <div id="action_button_fields" class="{% if not event.action_button_enabled %}hidden{% endif %}">
+                <div class="form-group">
+                    <label for="action_button_text" class="form-label">Tekst przycisku akcji</label>
+                    <input type="text" id="action_button_text" name="action_button_text" class="form-input" value="{{ event.action_button_text|e('html_attr') }}" maxlength="255">
+                </div>
+                <div class="form-group">
+                    <label for="action_button_link" class="form-label">Link przycisku akcji</label>
+                    <input type="url" id="action_button_link" name="action_button_link" class="form-input" value="{{ event.action_button_link|e('html_attr') }}" placeholder="https://twoja-strona.com/akcja">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-checkbox-group">
+                    <input type="checkbox" name="verified" value="1" {{ event.verified ? 'checked' : '' }}>
+                    Wydarzenie zweryfikowane
+                </label>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="button button-primary button-large">Zaktualizuj wydarzenie</button>
+            </div>
+        </form>
+    </div>
+</div>

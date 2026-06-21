@@ -1,0 +1,193 @@
+{# templates/components/event-card.twig — v14.2 (A11Y - czysty HTML) #}
+
+{% from 'macros/address.twig' import format_address %}
+
+{% set days_map = {
+    'Mon': __('poniedziałek', 'devents'),
+    'Tue': __('wtorek', 'devents'),
+    'Wed': __('środa', 'devents'),
+    'Thu': __('czwartek', 'devents'),
+    'Fri': __('piątek', 'devents'),
+    'Sat': __('sobota', 'devents'),
+    'Sun': __('niedziela', 'devents')
+} %}
+
+{% set address = format_address(event) %}
+
+<article class="card_event {% if event.special_occasion_id %}card_event--special-occasion{% endif %}"
+         style="--special-occasion-color: {{ event.special_occasion_color|default('transparent') }};"
+         aria-labelledby="card-title-{{ event.id }}">
+
+    {# ============================================================
+        STREFA 1 — OBRAZEK + OVERLAY
+       ============================================================ #}
+    <div class="card_zone-image">
+        <a href="{{ event.permalink }}" class="card_image-link" tabindex="-1" aria-hidden="true">
+            {% if event.image_url %}
+                <img src="{{ event.image_url|e }}"
+                     alt=""
+                     loading="lazy">
+            {% else %}
+                <div class="card_image-placeholder">
+                    <span class="material-symbols-outlined" aria-hidden="true">event</span>
+                </div>
+            {% endif %}
+        </a>
+
+        <div class="card_top-bar">
+            <span class="card_chip card_chip--category">
+                {{ event.category_label|default(event.category)|e }}
+            </span>
+
+            {% if event.price == 0 %}
+                <span class="card_chip card_chip--free">{{ __('Bezpłatne', 'devents') }}</span>
+            {% else %}
+                <span class="card_chip card_chip--price">
+                    <span class="card_chip-from">{{ __('Od', 'devents') }}</span>
+                    {{ event.price|number_format(2, ',', ' ') }} {{ __('zł', 'devents') }}
+                </span>
+            {% endif %}
+        </div>
+
+        {% if event.is_current or event.special_occasion_slug %}
+            <div class="card_status-strip">
+                {% if event.is_current %}
+                    <span class="card_strip card_strip--now">{{ __('Trwa teraz', 'devents') }}</span>
+                {% endif %}
+                {% if event.special_occasion_slug %}
+                    <span class="card_strip card_strip--occasion" style="background-color: {{ event.special_occasion_color }};">
+                        {{ event.special_occasion_name|default(event.special_occasion_slug) }}
+                    </span>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    {# ============================================================
+        STREFA 2 — TREŚĆ
+       ============================================================ #}
+    <div class="card_zone-content">
+
+        <h3 class="card_title">
+            <a href="{{ event.permalink }}" class="card_title-link" id="card-title-{{ event.id }}">{{ event.title|e }}</a>
+        </h3>
+
+        <div class="card_meta">
+            <div class="card_meta-item">
+                <span class="material-symbols-outlined card_meta-icon" aria-hidden="true">calendar_today</span>
+                <span class="sr-only">{{ __('Data:', 'devents') }}</span>
+                <span>
+                    {{ event.start_datetime|date('d.m.Y') }} ({{ days_map[event.start_datetime|date('D')] }}),
+                    {{ event.start_datetime|date('H:i') }}
+                </span>
+            </div>
+
+            {% if address %}
+                <div class="card_meta-item">
+                    <span class="material-symbols-outlined card_meta-icon" aria-hidden="true">location_on</span>
+                    <span class="sr-only">{{ __('Lokalizacja:', 'devents') }}</span>
+                    <a class="text-truncate card_meta-link"
+                       href="https://www.google.com/maps/search/?api=1&query={{ address|url_encode }}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       title="{{ address|e }}"
+                       aria-label="{{ __('Pokaż na mapie:', 'devents') }} {{ address|e }}">{{ address|e }}</a>
+                </div>
+            {% endif %}
+
+            <div class="card_meta-item">
+                <span class="material-symbols-outlined card_meta-icon" aria-hidden="true">
+                    {% if event.delivery_mode == 'online' %}language{% elseif event.delivery_mode == 'hybrid' %}devices_other{% else %}person_pin_circle{% endif %}
+                </span>
+                <span class="sr-only">{{ __('Sposób realizacji:', 'devents') }}</span>
+                <span>{{ event.delivery_mode_label|default(event.delivery_mode)|e }}</span>
+            </div>
+        </div>
+
+        {% if event.age_rating or (event.accessibility_items is not empty) %}
+            <div class="card_tags-row" role="list" aria-label="{{ __('Tagi i dostępność', 'devents') }}">
+
+                {% if event.age_rating is not empty or event.age_rating == '0' %}
+                    {% set age_num = event.age_rating|replace({'+': ''})|trim + 0 %}
+
+                    {% if age_num >= 18 %}{% set age_class = 'age-dark' %}
+                    {% elseif age_num >= 16 %}{% set age_class = 'age-red' %}
+                    {% elseif age_num >= 12 %}{% set age_class = 'age-orange' %}
+                    {% elseif age_num >= 7 %}{% set age_class = 'age-yellow' %}
+                    {% elseif age_num >= 3 %}{% set age_class = 'age-teal' %}
+                    {% else %}{% set age_class = 'age-green' %}{% endif %}
+
+                    <span class="card_tag card_tag--age {{ age_class }}"
+                          role="listitem"
+                          aria-label="{{ __('Od lat:', 'devents') }} {{ age_num }}">
+                        <span aria-hidden="true">{{ age_num }}{{ age_num > 0 ? '+' : '' }}</span>
+                    </span>
+                {% endif %}
+
+                {% if event.age_rating and (event.accessibility_items is not empty) %}
+                    <span class="card_tags-separator" aria-hidden="true"></span>
+                {% endif %}
+
+                {% if event.accessibility_items is not empty %}
+                    {% for item in event.accessibility_items %}
+                        {% set event_langs = (selected_acc_languages[event.id][item.id] ?? []) %}
+
+                        {% set acc_label = item.name %}
+                        {% if event_langs is not empty %}
+                            {% set lang_codes = [] %}
+                            {% for l in event_langs %}
+                                {% set lang_codes = lang_codes|merge([l.abbr]) %}
+                            {% endfor %}
+                            {% set acc_label = acc_label ~ ': ' ~ lang_codes|join(', ') %}
+                        {% endif %}
+
+                        <span class="card_acc-chip {% if event_langs is not empty %}card_acc-chip--has-langs{% endif %}"
+                              role="listitem"
+                              aria-label="{{ acc_label }}"
+                              data-tooltip="{{ acc_label }}">
+
+                            <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+
+                            {% if event_langs is not empty %}
+                                <span class="card_acc-iso-box" aria-hidden="true">
+                                    {% for l in event_langs|slice(0, 2) %}
+                                        <span class="card_acc-iso">{{ l.abbr }}</span>
+                                    {% endfor %}
+                                    {% if event_langs|length > 2 %}
+                                        <span class="card_acc-iso">+</span>
+                                    {% endif %}
+                                </span>
+                            {% endif %}
+                        </span>
+                    {% endfor %}
+                {% endif %}
+
+            </div>
+        {% endif %}
+
+    </div>
+
+    {# ============================================================
+        STREFA 3 — AKCJA
+       ============================================================ #}
+    <div class="card_zone-action">
+        <a href="{{ event.permalink }}"
+           class="btn btn--primary btn-grow"
+           aria-describedby="card-title-{{ event.id }}">
+            {{ __('Szczegóły', 'devents') }}
+        </a>
+
+        {% if is_user_logged_in %}
+            <button type="button"
+                    class="btn-favorite {{ event.is_favorite ? 'is-favorite' : '' }}"
+                    data-event-id="{{ event.id }}"
+                    data-nonce="{{ wp_create_nonce('devents_favorites_nonce') }}"
+                    aria-pressed="{{ event.is_favorite ? 'true' : 'false' }}"
+                    aria-label="{{ __('Ulubione:', 'devents') }} {{ event.title|e }}">
+                <span class="state-off" aria-hidden="true"><span class="material-symbols-outlined">heart_plus</span></span>
+                <span class="state-on" aria-hidden="true"><span class="material-symbols-outlined">favorite</span></span>
+            </button>
+        {% endif %}
+    </div>
+
+</article>

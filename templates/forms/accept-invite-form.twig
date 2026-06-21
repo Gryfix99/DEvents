@@ -1,0 +1,182 @@
+{# templates/pages/accept-invite.twig — v13.0 (i18n ready) #}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>{{ __('Witaj w zespole!', 'devents') }}</h1>
+            <p>{{ __('Ustaw hasło, aby aktywować swoje konto i rozpocząć pracę.', 'devents') }}</p>
+        </div>
+        
+        <form id="accept-invite-form" class="devents-form" method="post">
+            {{ wp_nonce_field('devents_reg_nonce')|raw }}
+            
+            <input type="hidden" name="token" value="{{ token|e('html_attr') }}">
+            <input type="hidden" name="action" value="devents_complete_registration">
+            
+            {# --- HASŁA --- #}
+            <div class="form-row two-cols">
+                <div class="form-group">
+                    <label for="pass1" class="form-label">{{ __('Hasło', 'devents') }} <span class="form-required-field">*</span></label>
+                    <div class="input-with-icon">
+                        <span class="material-symbols-outlined input-icon">lock</span>
+                        <input type="password" id="pass1" name="pass1" class="form-control" required placeholder="••••••••" minlength="8" autocomplete="new-password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="pass2" class="form-label">{{ __('Powtórz hasło', 'devents') }} <span class="form-required-field">*</span></label>
+                    <div class="input-with-icon">
+                        <span class="material-symbols-outlined input-icon">lock_reset</span>
+                        <input type="password" id="pass2" name="pass2" class="form-control" required placeholder="••••••••" minlength="8" autocomplete="new-password">
+                    </div>
+                </div>
+            </div>
+
+            {# --- SIŁA HASŁA --- #}
+            <div class="password-strength-wrapper form-group">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="font-size: 12px; color: #666;">{{ __('Siła hasła:', 'devents') }}</span>
+                    <span id="password-strength-text" style="font-size: 12px; font-weight: bold;">---</span>
+                </div>
+                <meter id="password-strength-meter" min="0" max="4" value="0" style="width: 100%; height: 8px;"></meter>
+                
+                <ul id="password-requirements" class="password-requirements-list" style="margin-top: 10px; padding-left: 0; list-style: none; display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px;">
+                    <li id="req-length" class="req-item"><span class="icon">○</span> {{ __('Min. 8 znaków', 'devents') }}</li>
+                    <li id="req-uppercase" class="req-item"><span class="icon">○</span> {{ __('Wielka litera', 'devents') }}</li>
+                    <li id="req-lowercase" class="req-item"><span class="icon">○</span> {{ __('Mała litera', 'devents') }}</li>
+                    <li id="req-digit" class="req-item"><span class="icon">○</span> {{ __('Cyfra', 'devents') }}</li>
+                </ul>
+            </div>
+
+            {# --- ZGODY --- #}
+            <div class="auth-consents" style="margin-bottom: 20px;">
+                <div class="form-group">
+                    <label class="form-checkbox-group" style="display: flex; align-items: flex-start; gap: 10px; font-size: 13px;">
+                        <input type="checkbox" id="accept_policy" name="accept_policy" required style="margin-top: 3px;">
+                        <span>
+                            {{ __('Akceptuję %sRegulamin%s, %sPolitykę Prywatności%s oraz zasady RODO', 'devents')|replace({
+                                '%sRegulamin%s': '<a href="/regulamin" target="_blank">' ~ __('Regulamin', 'devents') ~ '</a>',
+                                '%sPolitykę Prywatności%s': '<a href="/polityka-prywatnosci" target="_blank">' ~ __('Politykę Prywatności', 'devents') ~ '</a>'
+                            })|raw }}
+                        </span>
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" id="submit-btn" class="btn btn--primary btn--full-width">{{ __('Aktywuj konto', 'devents') }}</button>
+        </form>
+        
+        <div id="invite-messages" style="margin-top:15px;"></div>
+    </div>
+</div>
+
+<script>
+jQuery(document).ready(function($) {
+    const passInput = $('#pass1');
+    const meter = $('#password-strength-meter');
+    const text = $('#password-strength-text');
+    const submitBtn = $('#submit-btn');
+    const msgContainer = $('#invite-messages');
+
+    // Słownik tłumaczeń dla JS
+    const i18n = {
+        strengthLabels: [
+            "{{ __('Bardzo słabe', 'devents') }}",
+            "{{ __('Słabe', 'devents') }}",
+            "{{ __('Średnie', 'devents') }}",
+            "{{ __('Dobre', 'devents') }}",
+            "{{ __('Silne', 'devents') }}"
+        ],
+        passMismatch: "{{ __('Podane hasła nie są identyczne.', 'devents') }}",
+        policyReq: "{{ __('Musisz zaakceptować regulamin.', 'devents') }}",
+        processing: "{{ __('Tworzenie konta...', 'devents') }}",
+        successMsg: "{{ __('Konto utworzone! Przekierowywanie...', 'devents') }}",
+        errorDefault: "{{ __('Wystąpił nieoczekiwany błąd.', 'devents') }}",
+        connError: "{{ __('Błąd połączenia z serwerem. Spróbuj ponownie.', 'devents') }}"
+    };
+
+    const reqs = {
+        length: $('#req-length'),
+        uppercase: $('#req-uppercase'),
+        lowercase: $('#req-lowercase'),
+        digit: $('#req-digit')
+    };
+
+    function updateReq(el, isValid) {
+        const icon = el.find('.icon');
+        if (isValid) {
+            el.css('color', '#339900');
+            icon.text('✓');
+        } else {
+            el.css('color', '#999');
+            icon.text('○');
+        }
+    }
+
+    passInput.on('input', function() {
+        const val = $(this).val();
+        const hasLength = val.length >= 8;
+        const hasUpper = /[A-Z]/.test(val);
+        const hasLower = /[a-z]/.test(val);
+        const hasDigit = /[0-9]/.test(val);
+
+        updateReq(reqs.length, hasLength);
+        updateReq(reqs.uppercase, hasUpper);
+        updateReq(reqs.lowercase, hasLower);
+        updateReq(reqs.digit, hasDigit);
+
+        let score = 0;
+        if (hasLength) score++;
+        if (hasUpper) score++;
+        if (hasLower) score++;
+        if (hasDigit) score++;
+
+        meter.val(score);
+        const colors = ['#ff4d4d', '#ff944d', '#ffdb4d', '#99cc00', '#339900'];
+        
+        text.text(i18n.strengthLabels[score]);
+        text.css('color', colors[score]);
+    });
+
+    $('#accept-invite-form').on('submit', function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const p1 = $('#pass1').val();
+        const p2 = $('#pass2').val();
+        
+        msgContainer.empty();
+
+        if (p1 !== p2) {
+            msgContainer.html('<div class="message-box message-box--error">'+i18n.passMismatch+'</div>');
+            return;
+        }
+
+        if (!$('#accept_policy').is(':checked')) {
+            msgContainer.html('<div class="message-box message-box--error">'+i18n.policyReq+'</div>');
+            return;
+        }
+
+        const originalBtnText = submitBtn.text();
+        submitBtn.prop('disabled', true).text(i18n.processing);
+        
+        const formData = form.serialize();
+
+        $.post(devents_config.ajax_url, formData)
+            .done(function(res) {
+                if (res.success) {
+                    msgContainer.html('<div class="message-box message-box--success">' + (res.data.message || i18n.successMsg) + '</div>');
+                    form.slideUp();
+                    if (res.data.redirect) {
+                        setTimeout(() => { window.location.href = res.data.redirect; }, 1500);
+                    }
+                } else {
+                    let errorMsg = res.data && res.data.message ? res.data.message : i18n.errorDefault;
+                    msgContainer.html('<div class="message-box message-box--error">' + errorMsg + '</div>');
+                    submitBtn.prop('disabled', false).text(originalBtnText);
+                }
+            })
+            .fail(function() {
+                msgContainer.html('<div class="message-box message-box--error">'+i18n.connError+'</div>');
+                submitBtn.prop('disabled', false).text(originalBtnText);
+            });
+    });
+});
+</script>

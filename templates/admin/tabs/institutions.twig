@@ -1,0 +1,464 @@
+{# templates/admin/tabs/institutions.twig - Wersja 9.0 (Ostateczna spójność i optymalizacja PDF) #}
+
+<div class="my-content-list">
+    <div class="admin-tab-head">
+        <span class="admin-widget__chip"><span class="material-symbols-outlined" aria-hidden="true">domain</span></span>
+        <h2 class="admin-widget__title">Instytucje</h2>
+        {% if data.total_items %}<span class="admin-tab-count">{{ data.total_items }}</span>{% endif %}
+    </div>
+
+    {# --- GŁÓWNY FORMULARZ DLA WYSZUKIWARKI, FILTRÓW I PAGINACJI --- #}
+    <form id="institutions-list-form" method="GET">
+        <input type="hidden" name="view" value="panel-admina">
+        <input type="hidden" name="tab" value="institutions">
+        
+        {# Zachowanie filtru nagród w ukrytym polu #}
+        <input type="hidden" name="reward_status" value="{{ data.filters.reward_status|default('') }}">
+
+        {# --- PASEK NARZĘDZI (Filtry + Szukaj) --- #}
+        <div class="list-toolbar" style="display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+            
+            <div class="filters-group" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                {# Filtr: Typ instytucji #}
+                <select name="type" class="form-control devents-select" style="width: auto; min-width: 180px;" onchange="this.form.submit()" aria-label="Filtruj po typie">
+                    <option value="">Wszystkie typy</option>
+                    <option value="master" {{ data.filters.type == 'master' ? 'selected' : '' }}>Instytucja nadrzędna</option>
+                    <option value="unit" {{ data.filters.type == 'unit' ? 'selected' : '' }}>Organizator (Jednostka)</option>
+                </select>
+
+                {# Filtr/Sortowanie: Ilość wydarzeń #}
+                <select name="orderby" class="form-control devents-select" style="width: auto; min-width: 180px;" onchange="this.form.submit()" aria-label="Sortowanie">
+                    <option value="created_at_desc" {{ data.filters.orderby == 'created_at_desc' ? 'selected' : '' }}>Najnowsze</option>
+                    <option value="name_asc" {{ data.filters.orderby == 'name_asc' ? 'selected' : '' }}>Nazwa (A-Z)</option>
+                    <option value="events_desc" {{ data.filters.orderby == 'events_desc' ? 'selected' : '' }}>Najwięcej wydarzeń</option>
+                    <option value="events_asc" {{ data.filters.orderby == 'events_asc' ? 'selected' : '' }}>Najmniej wydarzeń</option>
+                </select>
+            </div>
+
+            <div class="search-form" style="display: flex; gap: 10px;">
+                <input type="text" name="search" value="{{ data.search_query }}" placeholder="Szukaj po nazwie, NIP, email..." class="form-control" aria-label="Szukaj">
+                <button type="submit" class="btn btn--primary">Szukaj</button>
+                {% if data.search_query or data.filters.type or data.filters.orderby %}
+                    <a href="{{ data.panel_url }}&tab=institutions" class="btn btn--outline" title="Wyczyść filtry" aria-label="Wyczyść filtry">
+                        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {# --- ZAKŁADKI (Pills) --- #}
+        <div class="filter-pills" style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="{{ data.panel_url }}&tab=institutions" class="filter-pill {{ not data.filters.reward_status ? 'active' : '' }}">Wszystkie Instytucje</a>
+            
+            {# FILTR: NAGRODY DO WYDANIA #}
+            <a href="{{ data.panel_url }}&tab=institutions&reward_status=pending" class="filter-pill {{ data.filters.reward_status == 'pending' ? 'active' : '' }}" style="border-color: #f59e0b; color: #b45309; background: #fffbeb;">
+                <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; margin-right: 4px;" aria-hidden="true">military_tech</span>
+                Nagrody do wydania
+            </a>
+        </div>
+
+        {# --- TABELA --- #}
+        <div class="table-responsive-wrapper">
+            <table class="my-content-list__table sortable devents-responsive-table devents-table--cards admin-table">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width: 60px;">Logo</th>
+                        <th scope="col">Nazwa Instytucji</th>
+                        <th scope="col">Typ</th>
+                        <th scope="col">Dane kontaktowe</th>
+                        <th scope="col">Administrator instytucji</th>
+                        <th scope="col" style="text-align: center;">Wydarzenia</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" style="text-align: right;">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inst in data.institutions %}
+                        {% set meta = inst.metadata|json_decode %}
+                        <tr>
+                            <td>
+                                <div class="admin-avatar">
+                                    {% if inst.logo_url %}
+                                        <img src="{{ inst.logo_url }}" alt="Logo" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                    {% else %}
+                                        <div style="width: 40px; height: 40px; background: var(--bg-hover); display: flex; align-items: center; justify-content: center; border-radius: 4px;">
+                                            <span class="material-symbols-outlined" style="color: var(--text-light);" aria-hidden="true">image</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            <td class="responsive-main-info" data-label="Instytucja">
+                                <strong>{{ inst.name }}</strong>
+                                <div class="mobile-meta">
+                                    <small>Kod: <code>{{ meta.org_code }}</code></small>
+                                </div>
+                            </td>
+
+                            <td data-label="Typ">
+                                {% if inst.type == 'master' %}
+                                    <span class="badge badge--purple">Instytucja nadrzędna</span>
+                                {% else %}
+                                    <span class="badge badge--secondary">Organizator</span>
+                                {% endif %}
+                            </td>
+
+                            <td data-label="Kontakt">
+                                <small>
+                                    {% if meta.address %}{{ meta.address }}<br>{% endif %}
+                                    {% if meta.email %}<a href="mailto:{{ meta.email }}">{{ meta.email }}</a><br>{% endif %}
+                                    {% if meta.nip %}NIP: {{ meta.nip }}{% endif %}
+                                </small>
+                            </td>
+
+                            <td data-label="Administrator instytucji">
+                                {% if meta.coordinator.first_name or meta.coordinator.last_name %}
+                                    {{ meta.coordinator.first_name }} {{ meta.coordinator.last_name }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+
+                            <td data-label="Wydarzenia" style="text-align: center;">
+                                <span class="badge badge--primary" style="font-size: 14px; min-width: 30px; text-align: center; display: inline-block;">
+                                    {{ inst.events_count|default(0) }}
+                                </span>
+                            </td>
+
+                            <td data-label="Status">
+                                {% if inst.verification_status == 1 %}
+                                    <span class="status-badge status-badge--published">Zweryfikowana</span>
+                                {% else %}
+                                    <span class="status-badge status-badge--pending">Oczekuje</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="actions-cell" data-label="Akcje" style="text-align: right;">
+                                <div class="actions-group">
+                                    <button type="button" class="btn btn--small btn--icon btn--secondary action-edit-institution"
+                                            data-id="{{ inst.id }}"
+                                            data-name="{{ inst.name }}"
+                                            data-logo="{{ inst.logo_url|default('') }}"
+                                            title="Edytuj nazwę i logo (WebP)" aria-label="Edytuj instytucję — nazwa i logo">
+                                        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                                    </button>
+
+                                    <button type="button" class="btn btn--small btn--icon btn--secondary action-manage-staff"
+                                            data-unit-id="{{ inst.id }}"
+                                            data-unit-name="{{ inst.name }}"
+                                            data-nonce="{{ data.nonce_team }}"
+                                            title="Zobacz kadrę" aria-label="Zobacz kadrę instytucji">
+                                        <span class="material-symbols-outlined" aria-hidden="true">group</span>
+                                    </button>
+                                    
+                                    {# PRZYCISK NAGRÓD - Używa inst.id #}
+                                    <button type="button" class="btn btn--small btn--secondary btn--icon btn-action js-manage-rewards {{ inst.has_pending_reward ? 'btn--pulse-alert' : '' }}" 
+                                            data-id="{{ inst.id }}" 
+                                            data-name="{{ inst.name }}"
+                                            data-type="institution"
+                                            title="{{ inst.has_pending_reward ? 'Nagroda do przyznania!' : 'Zarządzaj Nagrodami' }}" aria-label="Zarządzaj Nagrodami">
+                                        <span class="material-symbols-outlined" aria-hidden="true">military_tech</span>
+                                        {% if inst.has_pending_reward %}
+                                            <span class="alert-dot"></span>
+                                        {% endif %}
+                                    </button>
+
+                                    <button type="button" class="btn btn--small btn--icon btn--secondary action-toggle-inst-status"
+                                            data-id="{{ inst.id }}"
+                                            data-status="{{ inst.verification_status == 1 ? 0 : 1 }}"
+                                            title="{{ inst.verification_status == 1 ? 'Cofnij weryfikację (oczekująca)' : 'Zatwierdź instytucję (aktywna)' }}"
+                                            aria-label="Zmień status instytucji">
+                                        <span class="material-symbols-outlined" aria-hidden="true">{{ inst.verification_status == 1 ? 'toggle_on' : 'toggle_off' }}</span>
+                                    </button>
+
+                                    <button type="button" class="btn btn--small btn--icon btn--outline action-delete-institution"
+                                            data-id="{{ inst.id }}"
+                                            data-nonce="{{ data.nonce_org }}"
+                                            title="Usuń trwale instytucję i kadrę" aria-label="Usuń instytucję">
+                                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 40px;">
+                                <span class="material-symbols-outlined" style="font-size: 48px; color: var(--text-light);" aria-hidden="true">domain_disabled</span>
+                                <p>Brak instytucji spełniających kryteria.</p>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {# PAGINACJA #}
+        <div class="tablenav bottom" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 15px;">
+            <div class="pagination-per-page-selector" style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 0.85rem; color: var(--text-secondary);">Pokaż:</span>
+                <select name="per_page" class="form-control devents-select" style="width: auto; padding: 2px 5px;" onchange="this.form.submit()" aria-label="Wybierz liczbę elementów na stronę">
+                    <option value="20" {{ data.filters.per_page == 20 ? 'selected' : '' }}>20</option>
+                    <option value="50" {{ data.filters.per_page == 50 ? 'selected' : '' }}>50</option>
+                    <option value="100" {{ data.filters.per_page == 100 ? 'selected' : '' }}>100</option>
+                    <option value="-1" {{ data.filters.per_page == -1 ? 'selected' : '' }}>Wszystkie</option>
+                </select>
+            </div>
+
+            {% if data.pagination_links %}
+            <div class="tablenav-pages" style="display: flex; align-items: center;">
+                <span class="displaying-num" style="margin-right: 15px; color: var(--text-secondary);">{{ data.total_items }} elementów</span>
+                {{ data.pagination_links|raw }}
+            </div>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+{# --- MODAL KADRY --- #}
+<div id="unit-staff-modal" class="modal devents-modal" style="display: none;">
+    <div class="modal-overlay"></div>
+    <div class="modal-content" style="max-width: 600px;">
+        <span class="modal-close material-symbols-outlined close-modal" aria-hidden="true">close</span>
+        <div class="modal-header-wrapper" style="border-bottom: 1px solid var(--border-primary); padding-bottom: 15px; margin-bottom: 20px;">
+            <h3 style="margin: 0; color: var(--text-primary);">Kadra Instytucji</h3>
+        </div>
+        <div class="modal-body-scrollable" id="unit-staff-list-container" style="min-height: 100px;"></div>
+    </div>
+</div>
+
+{# --- MODAL ZARZĄDZANIA NAGRODAMI --- #}
+<div id="rewards-modal" class="modal devents-modal" style="display: none;">
+    <div class="devents-modal-content" style="max-width: 600px;">
+        <div class="devents-modal-header">
+            <h3>Nagrody: <span id="rewards-user-name"></span></h3>
+            <button type="button" class="close-modal btn btn--icon" aria-label="Zamknij"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+        </div>
+        <div class="devents-modal-body">
+            <div id="rewards-loader" style="text-align: center; padding: 20px;">
+                <span class="material-symbols-outlined spin" aria-hidden="true">sync</span> Pobieranie danych...
+            </div>
+
+            <div id="rewards-content" class="hidden">
+                <div id="rewards-badges-list" style="display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; border-bottom: 1px solid #eee;"></div>
+
+                <div class="rewards-status-box" style="background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;">
+                    <div id="rewards-badge-icon" style="font-size: 40px;"></div>
+                    <div>
+                        <h4 id="rewards-badge-label" style="margin: 0; font-size: 18px;"></h4>
+                        <p style="margin: 5px 0 0; color: var(--text-secondary); font-size: 14px;">
+                            Wymagane: <strong id="rewards-badge-min"></strong> wydarzeń 
+                            (Ma: <strong id="rewards-event-count"></strong>)
+                        </p>
+                    </div>
+                </div>
+
+                <form id="rewards-form">
+                    <input type="hidden" name="user_id" id="rewards_user_id">
+                    <input type="hidden" name="badge_key" id="rewards_badge_key">
+                    <h4 style="border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">Kody Nagród</h4>
+                    <div id="rewards-inputs-container"></div>
+
+                    <div class="devents-modal-footer" style="padding-top: 20px; margin-top: 20px; border-top: 1px solid #eee; display:flex; flex-wrap: wrap; gap: 10px; justify-content:space-between; align-items:center;">
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="btn btn--outline js-generate-diploma" style="display:none;" id="btn-pdf-diploma"><span class="material-symbols-outlined" aria-hidden="true">school</span> Dyplom</button>
+                            <button type="button" class="btn btn--outline js-generate-letter" style="display:none;" id="btn-pdf-letter"><span class="material-symbols-outlined" aria-hidden="true">description</span> List</button>
+                        </div>
+                        <div style="text-align: right;">
+                            <button type="button" class="btn btn--secondary close-modal">Zamknij</button>
+                            <button type="submit" class="btn btn--primary">Zapisz</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div id="rewards-empty" class="hidden" style="text-align: center; padding: 30px;">
+                <span class="material-symbols-outlined" style="font-size: 48px; color: #ccc;" aria-hidden="true">lock</span>
+                <p>Instytucja nie osiągnęła jeszcze progu pierwszej odznaki.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# --- SZABLONY DOKUMENTÓW (PDF) Z WCAG --- #}
+<div id="admin-diploma-template" style="position:fixed; top:-9999px; left:-9999px; width: 794px; height: 1123px; background: #fff; box-sizing: border-box; font-family: 'Dosis', sans-serif; color:#000000; overflow:hidden;">
+    <div style="width: 100%; height: 100%; padding: 60px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+        <div style="position: absolute; top: 0; left: 0; width: 150px; height: 150px; background: linear-gradient(135deg, #005A54 0%, transparent 50%); z-index: 1;"></div>
+        <div style="position: absolute; bottom: 0; right: 0; width: 150px; height: 150px; background: linear-gradient(315deg, #73531A 0%, transparent 50%); z-index: 1;"></div>
+
+        <div style="text-align: center; position: relative; z-index: 10; margin-top: 20px;">
+            <img src="/wp-content/plugins/wydarzenia/assets/images/logo-DEvents_light-mode.png" alt="DEvents" style="height: 80px; margin-bottom: 20px; display: inline-block;">
+            <h1 style="font-size: 64px; font-weight: 700; letter-spacing: 4px; color: #005A54; margin: 0; line-height: 1.1; text-transform: uppercase;">Dyplom</h1>
+            <h2 style="font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #73531A; margin: 5px 0 0 0; text-transform: uppercase;">Uznania</h2>
+            <div style="width: 100px; height: 4px; background: #73531A; margin: 30px auto;"></div>
+            <p style="font-size: 18px; color: #000000; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px;">za tworzenie wydarzeń włączających<br>i budowanie przestrzeni wolnej od barier</p>
+        </div>
+
+        <div style="text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 10;">
+            <p style="font-size: 20px; color: #000000; font-weight: 600; margin-bottom: 30px;">Zespół DEvents z dumą przyznaje odznakę</p>
+            <div id="pdf-badge-container" style="margin-bottom: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <span id="pdf-badge-icon" class="material-symbols-outlined" style="font-size: 60px; margin-bottom: 15px; color: #000000;" aria-hidden="true"></span>
+                <span id="pdf-badge-name" style="font-size: 40px; font-weight: 800; text-transform: uppercase; color: #000000;"></span>
+            </div>
+            <p style="font-size: 20px; color: #000000; font-weight: 600; margin-bottom: 10px;">dla</p>
+            <h3 id="pdf-user-name" style="font-size: 42px; font-weight: 700; color: #000000; border-bottom: 2px solid #000000; padding-bottom: 10px; display: inline-block; min-width: 400px; max-width: 100%; white-space: pre-wrap; word-wrap: break-word;"></h3>
+            
+            <p style="font-size: 18px; color: #000000; font-weight: 500; margin-top: 20px; max-width: 650px; margin-left: auto; margin-right: auto; line-height: 1.6;">w podziękowaniu za zaangażowanie w projektowanie uniwersalne, dzięki któremu<br/>kultura, edukacja i życie społeczne stają się w pełni dostępne dla każdego.<br/>Niezależnie od indywidualnych potrzeb.</p>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; padding: 20px 0; position: relative; z-index: 10;">
+            <div style="text-align: left;">
+                <p style="font-size: 16px; color: #000000; font-weight: 600; margin: 0;">Data wystawienia:</p>
+                <p style="font-size: 20px; font-weight: 700; margin: 5px 0 0 0; color: #000000;">{{ "now"|date("d.m.Y") }}</p>
+            </div>
+            <div style="text-align: center;">
+                <div style="width: 200px; border-top: 2px solid #000000;"></div>
+                <p style="font-size: 14px; color: #000000; font-weight: 600; margin: 5px 0 0 0; text-transform: uppercase;">Podpis</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="admin-letter-template" style="position:fixed; top:-9999px; left:-9999px; width: 794px; height: 1123px; background: #fff; box-sizing: border-box; font-family: 'Dosis', sans-serif; color:#000000; overflow:hidden;">
+    <div style="padding: 60px 80px; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <img src="/wp-content/plugins/wydarzenia/assets/images/logo-DEvents_light-mode.png" alt="DEvents" style="height: 50px;">
+            <div style="text-align: right; color: #000000; font-weight: 600; font-size: 16px;">Warszawa, {{ "now"|date("d.m.Y") }}</div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 40px;">
+            <div style="text-align: right; font-size: 18px; line-height: 1.5; min-width: 250px; max-width: 400px; word-wrap: break-word; color: #000000;">
+                <strong><span id="letter-user-name-address"></span></strong><br>Twórcy Przestrzeni Dostępnej
+            </div>
+        </div>
+        <div style="margin-top: 40px;">
+            <h1 style="font-size: 32px; color: #005A54; margin-bottom: 20px; font-weight: 800;">Szanowny Zespole,</h1>
+            <div style="font-size: 18px; line-height: 1.6; color: #000000; text-align: justify; font-weight: 500;">
+                <p style="margin-bottom: 15px;">Z ogromną radością i uznaniem obserwujemy Państwa zaangażowanie w tworzenie wydarzeń prawdziwie otwartych dla każdego. Każda inicjatywa, którą projektują Państwo z uwzględnieniem różnorodnych potrzeb uczestników, to kolejny, niezwykle ważny krok w stronę społeczeństwa włączającego.</p>
+                <p style="margin-bottom: 15px;">Dzięki Państwa pracy osoby z niepełnosprawnościami oraz wszyscy ci, którzy wymagają szczególnego wsparcia, zyskują pewność, że są mile widziani, a oferowane przez Państwa wydarzenia są dla nich w pełni widoczne, bezpieczne i osiągalne. Otwartość i dostępność to nie tylko spełnianie standardów, ale przede wszystkim wyraz najwyższego szacunku do drugiego człowieka.</p>
+                <p style="margin-bottom: 15px;">Dziękujemy, że znoszą Państwo bariery. Państwa postawa jest inspiracją dla innych organizatorów i dowodem na to, że świat dostępny dla wszystkich jest na wyciągnięcie ręki.</p>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 40px;">
+            <div style="text-align: center; width: 220px;">
+                <p style="font-size: 16px; font-weight: 700; color: #000000; margin-bottom: 15px;">Z wyrazami szacunku,</p>
+                <div style="width: 100%; border-top: 2px solid #000000; margin-bottom: 8px;"></div>
+                <p style="font-size: 16px; color: #005A54; font-weight: 800;">Zespół DEvents.pl</p>
+            </div>
+        </div>
+        <div style="border-top: 2px solid #000000; padding-top: 20px; margin-top: auto;">
+            <div style="background: #ffffff; border: 2px solid #005A54; padding: 20px; border-radius: 8px;">
+                <h4 style="margin: 0 0 10px 0; color: #005A54; font-size: 18px; font-weight: 800;">Odbierz swoją nagrodę (<span id="letter-badge-name"></span>):</h4>
+                <ul id="letter-codes-list" style="margin: 0; padding-left: 20px; font-size: 16px; font-weight: 600; color: #000000; list-style: circle;"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# --- MODAL: edycja instytucji (admin) — nazwa + logo (konwersja do WebP) --- #}
+<div id="admin-edit-inst-modal" class="devents-modal hidden" role="dialog" aria-modal="true" aria-labelledby="admin-edit-inst-title">
+    <div class="devents-modal-content" style="max-width:680px;max-height:90vh;display:flex;flex-direction:column;">
+        <button type="button" class="modal-close close-modal" aria-label="Zamknij"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+        <div style="padding:18px 22px;border-bottom:1px solid var(--border-primary);flex:0 0 auto;">
+            <h3 id="admin-edit-inst-title" style="margin:0;">Edytuj instytucję</h3>
+            <p style="margin:4px 0 0;font-size:.85rem;color:var(--text-secondary);">Pełna edycja danych instytucji (tak jak przy dodawaniu).</p>
+        </div>
+        <form id="admin-edit-inst-form" enctype="multipart/form-data" style="display:flex;flex-direction:column;min-height:0;flex:1 1 auto;">
+            <input type="hidden" name="institution_id" id="admin-edit-inst-id">
+
+            <div style="padding:22px;overflow-y:auto;min-height:0;">
+                {# Logo (WebP) #}
+                <div class="form-group" style="display:flex;align-items:center;gap:16px;margin-bottom:18px;">
+                    <img id="admin-edit-inst-logo-preview" src="" alt="Podgląd logo instytucji" style="width:64px;height:64px;object-fit:cover;border-radius:8px;border:1px solid var(--border-primary);background:var(--bg-hover);">
+                    <div>
+                        <label for="admin-edit-inst-logo" class="btn btn--small btn--secondary" style="cursor:pointer;">Zmień logo (→ WebP)</label>
+                        <input type="file" id="admin-edit-inst-logo" name="logo_upload" accept="image/*" style="display:none;">
+                        <label style="display:block;margin-top:8px;font-size:.85rem;color:var(--text-secondary);"><input type="checkbox" name="delete_logo" value="true"> Usuń logo</label>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <div class="form-group" style="grid-column:1 / -1;">
+                        <label class="form-label" for="admin-edit-inst-name">Nazwa instytucji</label>
+                        <input type="text" id="admin-edit-inst-name" name="org_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="admin-edit-inst-type">Typ</label>
+                        <select id="admin-edit-inst-type" name="org_type" class="form-control">
+                            <option value="unit">Jednostka (niezależny organizator)</option>
+                            <option value="master">Instytucja kierująca (master)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="admin-edit-inst-nip">NIP</label>
+                        <input type="text" id="admin-edit-inst-nip" name="org_nip" class="form-control">
+                    </div>
+                    <div class="form-group" style="grid-column:1 / -1;">
+                        <label class="form-label" for="admin-edit-inst-desc">Opis działalności</label>
+                        <textarea id="admin-edit-inst-desc" name="org_description" rows="3" class="form-control"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="admin-edit-inst-email">E-mail</label>
+                        <input type="email" id="admin-edit-inst-email" name="org_email" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="admin-edit-inst-phone">Telefon</label>
+                        <input type="text" id="admin-edit-inst-phone" name="org_phone" class="form-control">
+                    </div>
+                    <div class="form-group" style="grid-column:1 / -1;">
+                        <label class="form-label" for="admin-edit-inst-website">Strona WWW</label>
+                        <input type="text" id="admin-edit-inst-website" name="org_website" class="form-control">
+                    </div>
+                    <div class="form-group" style="grid-column:1 / -1;">
+                        <label class="form-label" for="admin-edit-inst-pjm">Wizytówka PJM (link YouTube/Vimeo)</label>
+                        <input type="text" id="admin-edit-inst-pjm" name="pjm_video_link" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+                    </div>
+                </div>
+
+                <h4 class="form-section-title" style="margin:18px 0 10px;">Adres</h4>
+                <div class="form-grid" style="display:grid;grid-template-columns:2fr 1fr;gap:14px;">
+                    <div class="form-group">
+                        <label class="form-label" for="admin-edit-inst-street">Ulica</label>
+                        <input type="text" id="admin-edit-inst-street" name="street" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="admin-edit-inst-house">Nr</label>
+                        <input type="text" id="admin-edit-inst-house" name="house_number" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="admin-edit-inst-zip">Kod pocztowy</label>
+                        <input type="text" id="admin-edit-inst-zip" name="zip_code" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="admin-edit-inst-city">Miasto</label>
+                        <input type="text" id="admin-edit-inst-city" name="city" class="form-control">
+                    </div>
+                </div>
+
+                <h4 class="form-section-title" style="margin:18px 0 10px;">Administrator instytucji</h4>
+                <div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+                    <div class="form-group">
+                        <label class="form-label" for="admin-edit-inst-coord-first">Imię</label>
+                        <input type="text" id="admin-edit-inst-coord-first" name="coordinator_first_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="admin-edit-inst-coord-last">Nazwisko</label>
+                        <input type="text" id="admin-edit-inst-coord-last" name="coordinator_last_name" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="admin-edit-inst-coord-email">E-mail</label>
+                        <input type="email" id="admin-edit-inst-coord-email" name="coordinator_email" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="admin-edit-inst-coord-phone">Telefon</label>
+                        <input type="text" id="admin-edit-inst-coord-phone" name="coordinator_phone" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:10px;align-items:center;padding:16px 22px;border-top:1px solid var(--border-primary);flex:0 0 auto;">
+                <p id="admin-edit-inst-msg" role="status" aria-live="polite" style="margin:0;margin-right:auto;font-size:.85rem;"></p>
+                <button type="button" class="btn btn--secondary close-modal">Anuluj</button>
+                <button type="submit" class="btn btn--primary">Zapisz zmiany</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,52 @@
+{# templates/admin/import-csv-modal.twig #}
+<div id="csv-import-modal" class="graphic-modal-overlay hidden">
+    <div class="graphic-modal-content" style="max-width: 90vw; width: 1200px;">
+        <button class="graphic-modal-close">&times;</button>
+        <h3>Import wydarzeń z pliku CSV</h3>
+
+        <div id="csv-import-step-1" class="csv-import-step">
+            <p>
+                Wybierz plik CSV do importu. Pamiętaj, aby plik był zakodowany w formacie UTF-8.
+                <br>
+                <strong>Wymagane nagłówki:</strong> <code>title</code>, <code>category</code>, <code>delivery_mode</code>, <code>start_datetime</code>, <code>description</code>. <br>
+                <strong>Opcjonalne nagłówki:</strong> <code>end_datetime</code>, <code>price</code>, <code>ticket</code>, <code>image_url</code>, <code>image_alt_text</code>, <code>location</code>, <code>other_organizer</code>, <code>accessibility</code>, <code>action_button_enabled</code>, <code>action_button_text</code>, <code>action_button_link</code>.
+            </p>
+            {# NOWY LINK DO POBRANIA PRZYKŁADU #}
+            <p><a href="{{ admin_url('admin-ajax.php?action=devents_download_sample_csv') }}" class="button">Pobierz przykładowy plik CSV</a></p>
+            
+            <div class="form-group">
+                <label for="csv_file_input" class="form-label">Plik CSV</label>
+                <input type="file" id="csv_file_input" class="form-control" accept=".csv">
+            </div>
+             <div id="csv-parse-error" class="message-box message-box--error" style="display: none;"></div>
+        </div>
+
+        <div id="csv-import-step-2" class="csv-import-step" style="display: none;">
+            <h4>Podgląd danych. Możesz edytować komórki przed importem.</h4>
+            
+            <div class="form-group" style="max-width: 400px; margin-bottom: 1rem;">
+                <label for="special-occasion-selector" class="form-label">Przypisz do specjalnej okazji (opcjonalnie):</label>
+                <select id="special-occasion-selector" class="form-control">
+                    <option value="">-- Brak --</option>
+                    {% for occasion in data.special_occasions %}
+                        <option value="{{ occasion.id }}">{{ occasion.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="table-responsive-wrapper" style="max-height: 50vh; overflow-y: auto;">
+                <table id="csv-preview-table" class="my-content-list__table">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="form-actions" style="margin-top: 1.5rem; display: flex; justify-content: space-between;">
+                <button type="button" id="cancel-csv-import-btn" class="btn btn--secondary">Anuluj</button>
+                <button type="button" id="import-csv-data-btn" class="btn btn--primary">Zatwierdź i importuj</button>
+            </div>
+        </div>
+         <div id="csv-import-spinner" style="display: none; text-align: center; padding: 2rem;">
+            <p>Przetwarzanie pliku...</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,145 @@
+{# ========================================================================
+   GŁÓWNY NAGŁÓWEK WITRYNY (samodzielny, niezależny od motywu)
+   Renderowany przez [devents_header] i/lub auto-wstrzykiwany w wp_body_open.
+   Zmienne (z site-header-handler.php): logo_light, logo_dark, home_url, nav,
+   is_logged_in, user{display_name,avatar_url,is_admin}, urls{...},
+   unread_notifications, show_bell, active_ui_lang, ui_languages, switch_url.
+   ======================================================================== #}
+<header class="devents-header" id="devents-site-header">
+    <a href="#devents-header-main" class="devents-skip-link">{{ __('Przejdź do treści', 'devents') }}</a>
+
+    <div class="devents-header__inner">
+
+        {# --- Logo (zmiana wg trybu jasny/ciemny, czysto CSS) --- #}
+        <a class="devents-header__brand" href="{{ home_url }}" aria-label="DEvents — {{ __('Strona główna', 'devents') }}">
+            <img class="devents-header__logo devents-header__logo--light" src="{{ logo_light }}" alt="DEvents" width="150" height="96">
+            <img class="devents-header__logo devents-header__logo--dark" src="{{ logo_dark }}" alt="DEvents" width="150" height="96">
+        </a>
+
+        {# --- Przycisk menu mobilnego --- #}
+        <button type="button" class="devents-header__burger js-devents-burger"
+                aria-expanded="false" aria-controls="devents-header-nav"
+                aria-label="{{ __('Otwórz menu', 'devents') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+        </button>
+
+        {# --- Nawigacja + akcje (zwijane na mobile) --- #}
+        <nav class="devents-header__nav" id="devents-header-nav" aria-label="{{ __('Menu główne', 'devents') }}">
+            <ul class="devents-header__menu">
+                {% for item in nav %}
+                    <li>
+                        <a href="{{ item.url }}" class="devents-header__link {{ item.active ? 'is-active' : '' }}"{{ item.active ? ' aria-current="page"' : '' }}>
+                            {{ item.label }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <div class="devents-header__actions">
+
+                {# Język #}
+                {% include 'components/lang-switcher.twig' %}
+
+                {# Tryb ciemny (obsługa: dark-mode.js -> .js-dark-mode-toggle) #}
+                <button type="button" class="devents-header__icon-btn js-dark-mode-toggle"
+                        aria-label="{{ __('Przełącz tryb ciemny', 'devents') }}" aria-pressed="false">
+                    <span class="material-symbols-outlined" aria-hidden="true">dark_mode</span>
+                </button>
+
+                {% if is_logged_in %}
+                    {% if show_bell %}
+                        {# Dzwonek (obsługa: my-notifications.js) #}
+                        <button type="button"
+                                class="devents-header__icon-btn notification-bell js-open-notifications {{ unread_notifications > 0 ? 'has-unread' : '' }}"
+                                aria-label="{{ __('Powiadomienia', 'devents') }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">notifications</span>
+                            <span class="bell-badge js-bell-badge"{{ unread_notifications > 0 ? '' : ' style="display:none;"' }}>{{ unread_notifications }}</span>
+                        </button>
+                    {% endif %}
+
+                    {# Menu użytkownika #}
+                    <details class="devents-header__user js-devents-dropdown">
+                        <summary class="devents-header__user-toggle">
+                            <span class="devents-header__avatar">
+                                {% if user.avatar_url %}
+                                    <img src="{{ user.avatar_url|e }}" alt="" width="32" height="32">
+                                {% else %}
+                                    <span class="material-symbols-outlined" aria-hidden="true">account_circle</span>
+                                {% endif %}
+                            </span>
+                            <span class="devents-header__username">{{ user.display_name|e }}</span>
+                            <span class="material-symbols-outlined devents-header__caret" aria-hidden="true">expand_more</span>
+                        </summary>
+                        <ul class="devents-header__user-menu" role="list">
+                            {% if user.is_admin %}
+                                <li>
+                                    <a href="{{ urls.admin }}">
+                                        <span class="material-symbols-outlined" aria-hidden="true">shield_person</span>
+                                        {{ __('Panel administratora', 'devents') }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                            <li>
+                                <a href="{{ urls.pulpit }}">
+                                    <span class="material-symbols-outlined" aria-hidden="true">space_dashboard</span>
+                                    {{ __('Pulpit', 'devents') }}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ urls.moje_wydarzenia }}">
+                                    <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+                                    {{ __('Moje wydarzenia', 'devents') }}
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ urls.ustawienia }}">
+                                    <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+                                    {{ __('Ustawienia', 'devents') }}
+                                </a>
+                            </li>
+                            <li class="devents-header__user-sep">
+                                <a href="{{ urls.logout }}">
+                                    <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+                                    {{ __('Wyloguj', 'devents') }}
+                                </a>
+                            </li>
+                        </ul>
+                    </details>
+                {% else %}
+                    <a href="{{ urls.login }}" class="devents-header__login">{{ __('Zaloguj się', 'devents') }}</a>
+                    <a href="{{ urls.register }}" class="devents-header__cta">{{ __('Zarejestruj się', 'devents') }}</a>
+                {% endif %}
+
+            </div>
+        </nav>
+    </div>
+
+    {# Kotwica „przejdź do treści" #}
+    <span id="devents-header-main" tabindex="-1"></span>
+
+    {% if is_logged_in and show_bell %}
+        {# --- MODAL POWIADOMIEŃ (działa na całej witrynie; obsługa: my-notifications.js) --- #}
+        <div id="notifications-modal" class="devents-modal-overlay hidden" role="dialog" aria-labelledby="devents-notif-title" aria-modal="true">
+            <div class="devents-modal-content notifications-modal-box">
+                <div class="notifications-header">
+                    <div class="notifications-title">
+                        <span class="material-symbols-outlined icon-bell" aria-hidden="true">notifications_active</span>
+                        <h3 id="devents-notif-title">{{ __('Powiadomienia', 'devents') }}</h3>
+                    </div>
+                    <div class="notifications-actions">
+                        <button type="button" class="btn-mark-all-read" id="js-mark-all-read"
+                                title="{{ __('Oznacz wszystkie jako przeczytane', 'devents') }}"
+                                aria-label="{{ __('Oznacz wszystkie jako przeczytane', 'devents') }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">done_all</span>
+                        </button>
+                        <button type="button" class="btn-close-modal js-close-notifications-modal"
+                                title="{{ __('Zamknij', 'devents') }}" aria-label="{{ __('Zamknij', 'devents') }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                        </button>
+                    </div>
+                </div>
+                <div id="notifications-list-container" class="notifications-scroll-area"></div>
+            </div>
+        </div>
+    {% endif %}
+</header>

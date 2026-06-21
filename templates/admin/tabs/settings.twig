@@ -1,0 +1,218 @@
+{# templates/admin/tabs/settings.twig — Ustawienia + Klucze API (scalone w jedną zakładkę).
+   Formularz korzysta z obsługi sub_action=save_settings i skryptu admin-settings.js. #}
+
+<div class="devents-settings-dashboard">
+
+    {# ===================== KLUCZE API ===================== #}
+    <form id="devents-settings-form" class="devents-form">
+        <input type="hidden" name="action" value="devents_admin_general_action">
+        <input type="hidden" name="sub_action" value="save_settings">
+
+        <div class="admin-dashboard-grid" style="gap: 20px; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));">
+
+            {# --- Stripe --- #}
+            <div class="admin-widget">
+                <h3>Płatności (Stripe)</h3>
+                <div style="padding:1.25rem;">
+                    <div class="form-group">
+                        <label for="stripe_secret_key" style="font-weight:600; display:block; margin-bottom:5px;">Stripe Secret Key (sk_...)</label>
+                        <input type="password" id="stripe_secret_key" name="payload[stripe_secret_key]" value="{{ data.stripe.secret_key }}" class="form-control" style="width:100%;" autocomplete="off">
+                    </div>
+                    <div class="form-group" style="margin-top:15px;">
+                        <label for="stripe_webhook_secret" style="font-weight:600; display:block; margin-bottom:5px;">Stripe Webhook Secret (whsec_...)</label>
+                        <input type="password" id="stripe_webhook_secret" name="payload[stripe_webhook_secret]" value="{{ data.stripe.webhook_secret }}" class="form-control" style="width:100%;" autocomplete="off">
+                    </div>
+                    <div style="margin-top:18px; background:#f0f9ff; border:1px solid #bae6fd; padding:13px; border-radius:6px; font-size:0.88em;">
+                        <p style="margin:0 0 5px 0;"><strong>Endpoint URL (do wklejenia w Stripe):</strong></p>
+                        <code style="background:#e0f2fe; padding:2px 5px; border-radius:3px; display:block; word-break:break-all;">{{ data.stripe.webhook_url }}</code>
+                        <p style="margin:5px 0 0 0; color:#0369a1;"><small>Zdarzenie: <code>checkout.session.completed</code></small></p>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Social Media --- #}
+            <div class="admin-widget">
+                <h3>Social Media (Facebook / Instagram)</h3>
+                <div style="padding:1.25rem;">
+                    <div class="form-group">
+                        <label for="fb_page_id">Facebook Page ID</label>
+                        <input type="text" id="fb_page_id" name="payload[fb_page_id]" value="{{ data.social.fb_page_id }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="ig_account_id">Instagram Account ID</label>
+                        <input type="text" id="ig_account_id" name="payload[ig_account_id]" value="{{ data.social.ig_account_id }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="fb_access_token">Access Token</label>
+                        <input type="password" id="fb_access_token" name="payload[fb_access_token]" value="{{ data.social.fb_access_token }}" class="form-control" autocomplete="off">
+                    </div>
+                    <div class="form-group" style="margin-top:12px;">
+                        <label for="post_to_story" style="display:flex; align-items:flex-start; gap:8px; cursor:pointer; font-weight:500;">
+                            <input type="checkbox" id="post_to_story" name="payload[post_to_story]" value="1" {{ data.social.post_to_story ? 'checked' : '' }} style="margin-top:3px;">
+                            <span>
+                                Publikuj też <strong>relację</strong> (Story na FB i IG)
+                                <small style="display:block; color:var(--text-secondary); font-weight:400;">
+                                    Przy każdej publikacji posta ta sama grafika 9:16 trafia również na relację.
+                                </small>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="form-group" style="margin-top:15px;">
+                        <button type="button" class="btn btn--secondary" id="btn-validate-social">
+                            <span class="material-symbols-outlined" aria-hidden="true">fact_check</span>
+                            Sprawdź połączenie FB/IG
+                        </button>
+                        <p style="margin:6px 0 0; font-size:0.82rem; color:var(--text-secondary);">
+                            Zapisz najpierw klucze, potem sprawdź — test odpytuje API Meta i pokaże, czego brakuje.
+                        </p>
+                        <div id="social-validation-result" class="social-validation" style="margin-top:12px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Integracja PJM --- #}
+            <div class="admin-widget">
+                <h3>Integracja PJM (januszmigowego.pl)</h3>
+                <div style="padding:1.25rem;">
+                    <div class="form-group">
+                        <label for="remote_api_key" style="font-weight:600; display:block; margin-bottom:5px;">Klucz API (strona-matka)</label>
+                        <input type="password" id="remote_api_key" name="payload[remote_api_key]" value="{{ data.remote.api_key }}" class="form-control" style="width:100%;" autocomplete="off" {{ data.remote.constant_active ? 'disabled' : '' }}>
+                    </div>
+                    {% if data.remote.constant_active %}
+                        <div style="margin-top:12px; display:flex; align-items:flex-start; gap:8px; padding:10px 13px; background:rgba(16,185,129,.10); border:1px solid rgba(16,185,129,.35); border-radius:8px; font-size:.86rem; color:var(--text-secondary);">
+                            <span class="material-symbols-outlined" style="font-size:18px;color:#10b981;" aria-hidden="true">verified_user</span>
+                            <span>Klucz jest ustawiony stałą <code>DEVENTS_REMOTE_API_KEY</code> w <code>wp-config.php</code> — pole jest nieaktywne (stała ma pierwszeństwo).</span>
+                        </div>
+                    {% elseif data.remote.no_key %}
+                        <div style="margin-top:12px; display:flex; align-items:flex-start; gap:8px; padding:10px 13px; background:rgba(245,166,35,.12); border:1px solid rgba(245,166,35,.40); border-radius:8px; font-size:.86rem; color:var(--text-secondary);">
+                            <span class="material-symbols-outlined" style="font-size:18px;color:#d99a29;" aria-hidden="true">warning</span>
+                            <span><strong>Brak klucza.</strong> Integracja PJM nie zadziała, dopóki nie wpiszesz tu klucza.</span>
+                        </div>
+                    {% endif %}
+                    <div style="margin-top:16px; background:#f8fafc; border:1px solid #e5e7eb; padding:13px; border-radius:6px; font-size:0.86em;">
+                        <p style="margin:0 0 5px 0;"><strong>Endpoint strony-matki:</strong></p>
+                        <code style="background:#eef2f4; padding:2px 5px; border-radius:3px; display:block; word-break:break-all;">{{ data.remote.url }}</code>
+                    </div>
+                </div>
+            </div>
+
+            {# --- Fakturownia (proformy/faktury — krok 1 scalonego systemu płatności #3) --- #}
+            <div class="admin-widget">
+                <h3>Fakturownia (faktury / proformy)</h3>
+                <div style="padding:1.25rem;">
+                    <div class="form-group">
+                        <label for="fakturownia_token" style="font-weight:600; display:block; margin-bottom:5px;">Token API</label>
+                        <input type="password" id="fakturownia_token" name="payload[fakturownia_token]" value="{{ data.fakturownia.token }}" class="form-control" style="width:100%;" autocomplete="off">
+                    </div>
+                    <div class="form-group" style="margin-top:15px;">
+                        <label for="fakturownia_domain" style="font-weight:600; display:block; margin-bottom:5px;">Subdomena (np. <code>firma</code> z firma.fakturownia.pl)</label>
+                        <input type="text" id="fakturownia_domain" name="payload[fakturownia_domain]" value="{{ data.fakturownia.domain }}" class="form-control" style="width:100%;" placeholder="firma">
+                    </div>
+                    <p style="margin:12px 0 0; font-size:0.84rem; color:var(--text-secondary);">
+                        Po podaniu danych proformy/faktury dla zamówień (wyróżnienie, raport, PJM) będą wystawiane przez Fakturownię. Bez tych danych używana jest wbudowana proforma HTML.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="margin-top:22px; text-align:right;">
+            <div id="settings-message" class="hidden" style="margin-bottom:10px; text-align:center;"></div>
+            <button type="submit" class="btn btn--primary">
+                <span class="material-symbols-outlined" style="font-size:18px;vertical-align:-4px;" aria-hidden="true">save</span>
+                Zapisz klucze API
+            </button>
+        </div>
+    </form>
+
+    {# ===================== POZOSTAŁE USTAWIENIA ===================== #}
+    <div class="admin-dashboard-grid" style="gap: 20px; margin-top: 24px; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));">
+
+        {# --- Powiadomienia push (VAPID) --- #}
+        <div class="admin-widget">
+            <h3>Powiadomienia push (VAPID)</h3>
+            <div style="padding: 1.25rem;">
+                <p style="margin: 0 0 1rem; color: var(--text-secondary);">
+                    Wygeneruj parę kluczy VAPID, aby uruchomić powiadomienia web push. Potem użytkownicy włączają je u siebie.
+                </p>
+                {% if data.vapid_public %}
+                    <p style="margin: 0 0 0.85rem; font-size: 0.85rem; color: #10b981;">
+                        <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;" aria-hidden="true">check_circle</span>
+                        Klucze są skonfigurowane — push działa.
+                    </p>
+                {% endif %}
+                <button type="button" class="btn btn--secondary" id="btn-generate-vapid" data-has-keys="{{ data.vapid_public ? '1' : '0' }}">
+                    <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;" aria-hidden="true">key</span>
+                    {{ data.vapid_public ? 'Wygeneruj nowe klucze' : 'Wygeneruj klucze push' }}
+                </button>
+                <button type="button" class="btn btn--secondary" id="btn-test-push" {{ data.vapid_public ? '' : 'disabled' }}>
+                    <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;" aria-hidden="true">notifications_active</span>
+                    Wyślij test do siebie
+                </button>
+                <p id="vapid-result" role="status" aria-live="polite" style="margin: 0.85rem 0 0; font-weight: 600; color: var(--primary); min-height: 1.2em;"></p>
+            </div>
+        </div>
+
+        {# --- Tryb konserwacji --- #}
+        <div class="admin-widget">
+            <h3>Tryb konserwacji</h3>
+            <div style="padding: 1.25rem; display:flex; flex-direction:column; align-items:center; text-align:center;">
+                <span class="material-symbols-outlined" style="font-size: 48px; color: {{ data.maintenance_mode ? '#ef4444' : '#10b981' }}; margin-bottom: 10px;">
+                    {{ data.maintenance_mode ? 'engineering' : 'check_circle' }}
+                </span>
+                <p style="margin-bottom: 20px;">
+                    Obecny status:
+                    <strong style="color: {{ data.maintenance_mode ? '#ef4444' : '#10b981' }};">
+                        {{ data.maintenance_mode ? 'WŁĄCZONY' : 'WYŁĄCZONY' }}
+                    </strong>
+                </p>
+                <button type="button" class="btn {{ data.maintenance_mode ? 'btn--success' : 'btn--danger' }} js-toggle-maintenance" data-id="1">
+                    {{ data.maintenance_mode ? 'Wyłącz tryb konserwacji' : 'Włącz tryb konserwacji' }}
+                </button>
+                <p style="font-size:0.85em; color:var(--text-secondary); margin-top:15px;">
+                    Gdy włączony, tylko administratorzy widzą stronę. Inni zobaczą komunikat o pracach technicznych.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    {# ===================== OPTYMALIZACJA LOGOTYPÓW (globalnie, WebP) ===================== #}
+    <div class="admin-widget" style="margin-top: 24px;">
+        <h3>Optymalizacja logotypów instytucji</h3>
+        <div style="padding: 18px 22px;">
+            <p style="margin:0 0 12px;color:var(--text-secondary);font-size:.9rem;">
+                Konwertuje logotypy <strong>wszystkich</strong> instytucji do formatu WebP (mniejszy rozmiar, szybsze ładowanie). Pliki już w WebP są pomijane. Operacja działa na wszystkich istniejących instytucjach naraz.
+            </p>
+            <button type="button" id="dv-convert-logos-webp" class="btn btn--primary">
+                <span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;" aria-hidden="true">image</span>
+                Konwertuj wszystkie loga na WebP
+            </button>
+            <p id="dv-convert-logos-result" role="status" aria-live="polite" style="margin:12px 0 0;font-size:.9rem;"></p>
+        </div>
+    </div>
+
+    {# ===================== GRAFIKI MARKETINGOWE — generowanie zbiorcze (przyszłe wydarzenia) ===================== #}
+    <div class="admin-widget" style="margin-top: 24px;">
+        <h3>Grafiki marketingowe — przyszłe wydarzenia</h3>
+        <div class="dev-mkt-tools" style="padding: 18px 22px;">
+            <p style="margin:0 0 12px;color:var(--text-secondary);font-size:.9rem;">
+                Generuje brakujące grafiki marketingowe (2 posty 4:5 + 1 story 9:16) dla <strong>wszystkich nadchodzących</strong> wydarzeń. Grafiki zapisują się przy wydarzeniach — można je pobrać z generatora i są używane przy automatycznej publikacji na FB/IG. Wydarzenia z kompletem grafik są pomijane. <strong>Nie zamykaj tej karty</strong> do zakończenia procesu (grafiki renderują się w przeglądarce, kolejno).
+            </p>
+            <button type="button" class="dev-mkt-backfill btn btn--primary">
+                <span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;" aria-hidden="true">auto_awesome</span>
+                Wygeneruj grafiki dla przyszłych wydarzeń
+            </button>
+            <p class="dev-mkt-backfill-status" role="status" aria-live="polite" style="margin:12px 0 0;font-size:.9rem;"></p>
+        </div>
+    </div>
+
+    {# ===================== LOGI SYSTEMOWE ===================== #}
+    <div class="admin-widget" style="margin-top: 24px;">
+        <h3>Logi systemowe (debug.log)</h3>
+        <div style="background: #1e293b; color: #cbd5e1; padding: 15px; border-radius: 0 0 8px 8px; font-family: monospace; font-size: 12px; height: 300px; overflow-y: auto;">
+            <pre style="white-space: pre-wrap; margin: 0;">{{ data.error_log_content|raw }}</pre>
+        </div>
+    </div>
+
+</div>

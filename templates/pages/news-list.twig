@@ -1,0 +1,66 @@
+{# ========================================================================
+   AKTUALNOŚCI — lista wpisów ([lista_aktualnosci]).
+   Zmienne: news_items (każdy: id, title, content, publish_date, news_type,
+   media_items (JSON), is_pinned, permalink).
+   ======================================================================== #}
+{% set news_meta = {
+    'ogloszenie':   { 'icon': 'campaign',      'color': '#1A6EF4', 'label': __('Ogłoszenie', 'devents') },
+    'nowa_funkcja': { 'icon': 'build',         'color': '#178740', 'label': __('Nowa funkcja', 'devents') },
+    'poradnik':     { 'icon': 'school',        'color': '#C45303', 'label': __('Poradnik', 'devents') },
+    'wyroznienie':  { 'icon': 'military_tech', 'color': '#A26907', 'label': __('Wyróżnienie', 'devents') }
+} %}
+
+<section class="devents-news" id="devents-main-content" aria-labelledby="devents-news-title">
+    <header class="devents-news__head">
+        <h1 class="devents-news__title" id="devents-news-title">
+            <span class="material-symbols-outlined" aria-hidden="true">newspaper</span>
+            {{ __('Aktualności', 'devents') }}
+        </h1>
+        <p class="devents-news__lead">{{ __('Ogłoszenia, nowości i poradniki z platformy DEvents.', 'devents') }}</p>
+    </header>
+
+    {% if news_items is empty %}
+        <div class="devents-news__empty">
+            <span class="material-symbols-outlined" aria-hidden="true">notifications_paused</span>
+            <p>{{ __('Brak aktualności do wyświetlenia.', 'devents') }}</p>
+        </div>
+    {% else %}
+        <div class="devents-news__grid">
+            {% for item in news_items %}
+                {% set media = item.media_items ? item.media_items|json_decode : [] %}
+                {% set thumb = media[0].url|default('') %}
+                {% set meta  = news_meta[item.news_type]|default(news_meta['ogloszenie']) %}
+                <article class="devents-news-card {{ item.is_pinned ? 'is-pinned' : '' }}">
+                    <a href="{{ item.permalink }}" class="devents-news-card__media" tabindex="-1" aria-hidden="true">
+                        {% if thumb %}
+                            <img src="{{ thumb|e }}" alt="" loading="lazy">
+                        {% else %}
+                            <span class="material-symbols-outlined devents-news-card__placeholder">{{ meta.icon }}</span>
+                        {% endif %}
+                        {% if item.is_pinned %}
+                            <span class="devents-news-card__pin" title="{{ __('Przypięte', 'devents') }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">push_pin</span>
+                            </span>
+                        {% endif %}
+                    </a>
+                    <div class="devents-news-card__body">
+                        <span class="devents-news-card__badge" style="color: {{ meta.color }}; border-color: {{ meta.color }};">
+                            <span class="material-symbols-outlined" aria-hidden="true">{{ meta.icon }}</span>
+                            {{ meta.label }}
+                        </span>
+                        <h2 class="devents-news-card__title">
+                            <a href="{{ item.permalink }}">{{ item.title|e }}</a>
+                        </h2>
+                        {% if item.content %}
+                            <p class="devents-news-card__excerpt">{{ item.content|striptags|slice(0, 140) }}{{ item.content|striptags|length > 140 ? '…' : '' }}</p>
+                        {% endif %}
+                        <div class="devents-news-card__meta">
+                            <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+                            {{ item.publish_date|date('d.m.Y') }}
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    {% endif %}
+</section>

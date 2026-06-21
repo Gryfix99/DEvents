@@ -1,0 +1,17 @@
+{# templates/components/permission-gate.twig
+   Komunikat blokady dostępu (np. sekcja tylko dla organizatorów).
+   Kontekst: icon, title, message, action_url, action_text #}
+<div class="permission-gate" role="region" aria-label="{{ title|default('Brak dostępu') }}">
+    <div class="permission-gate__inner">
+        {% if icon %}
+            <span class="material-symbols-outlined permission-gate__icon" aria-hidden="true">{{ icon }}</span>
+        {% endif %}
+        <h2 class="permission-gate__title">{{ title|default('Brak dostępu') }}</h2>
+        {% if message %}
+            <p class="permission-gate__message">{{ message }}</p>
+        {% endif %}
+        {% if action_url and action_text %}
+            <a href="{{ action_url }}" class="btn btn--primary permission-gate__action">{{ action_text }}</a>
+        {% endif %}
+    </div>
+</div>

@@ -1,0 +1,138 @@
+{# ========================================================================
+   ANKIETA SATYSFAKCJI ([devents_ankieta])
+   Style + skrypt inline (shortcode renderuje się w trakcie the_content).
+   Oceny gwiazdkowe realizowane na radiach (dostępne, działają bez JS).
+   ======================================================================== #}
+<style>
+.dv-survey{max-width:620px;margin:0 auto;padding:8px 0 40px}
+.dv-survey__card{background:var(--bg-secondary,#fff);border:1px solid var(--border-primary,#e5e7eb);border-radius:16px;padding:28px;box-shadow:0 6px 24px rgba(0,0,0,.05)}
+.dv-survey__title{font-size:1.6rem;font-weight:800;margin:0 0 6px;color:var(--text-primary,#0f172a)}
+.dv-survey__lead{margin:0 0 22px;color:var(--text-secondary,#475569);line-height:1.55}
+.dv-survey__q{margin:0 0 22px;border:0;padding:0}
+.dv-survey__q legend,.dv-survey__label{font-weight:700;font-size:1rem;color:var(--text-primary,#0f172a);margin:0 0 10px;padding:0;display:block}
+.dv-survey__req{color:#dc2626}
+/* Oceny gwiazdkowe — kolejność DOM 5..1 + row-reverse = wizualnie 1..5 */
+.dv-rate{display:inline-flex;flex-direction:row-reverse;justify-content:flex-end;gap:2px}
+.dv-rate input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.dv-rate label{cursor:pointer;color:#d1d5db;line-height:1;transition:color .12s ease}
+.dv-rate label .material-symbols-outlined{font-size:38px}
+.dv-rate input:checked ~ label,
+.dv-rate label:hover,
+.dv-rate label:hover ~ label{color:#f5a623}
+.dv-rate input:focus-visible + label{outline:2px solid var(--primary,#00857c);outline-offset:2px;border-radius:4px}
+.dv-choice{display:flex;flex-wrap:wrap;gap:10px}
+.dv-choice label{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border-primary,#e5e7eb);border-radius:999px;padding:8px 16px;cursor:pointer;font-size:.94rem;transition:all .12s ease}
+.dv-choice input{accent-color:var(--primary,#00857c)}
+.dv-choice label:has(input:checked){border-color:var(--primary,#00857c);background:color-mix(in srgb,var(--primary,#00857c) 8%,transparent);font-weight:600}
+.dv-survey textarea{width:100%;box-sizing:border-box;min-height:110px;padding:12px 14px;border:1px solid var(--border-primary,#e5e7eb);border-radius:10px;font:inherit;resize:vertical}
+.dv-survey textarea:focus{outline:2px solid var(--primary,#00857c);border-color:transparent}
+.dv-survey__msg{margin:0 0 14px;padding:10px 14px;border-radius:8px;font-size:.92rem;display:none}
+.dv-survey__msg--err{display:block;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+.dv-survey__submit{width:100%;font-size:1.02rem}
+.dv-survey__done{text-align:center;padding:30px 10px}
+.dv-survey__done .material-symbols-outlined{font-size:56px;color:var(--primary,#00857c)}
+.dv-survey__done h2{margin:12px 0 6px;font-size:1.4rem}
+.dv-survey__done p{color:var(--text-secondary,#475569);margin:0}
+</style>
+
+<section class="dv-survey" id="devents-main-content">
+    <div class="dv-survey__card">
+        <h1 class="dv-survey__title">{{ __('Ankieta satysfakcji', 'devents') }}</h1>
+        <p class="dv-survey__lead">{{ __('Twoja opinia pomaga nam tworzyć serwis bardziej dostępny dla każdego. Wypełnienie zajmie mniej niż minutę.', 'devents') }}</p>
+
+        <p class="dv-survey__msg" id="dv-survey-msg" role="alert"></p>
+
+        <form id="dv-survey-form" data-ajax="{{ ajax_url }}">
+            <input type="hidden" name="nonce" value="{{ nonce }}">
+            <input type="hidden" name="page_url" value="">
+
+            <fieldset class="dv-survey__q">
+                <legend>{{ __('Jak ogólnie oceniasz DEvents?', 'devents') }} <span class="dv-survey__req" aria-hidden="true">*</span></legend>
+                <div class="dv-rate" role="radiogroup" aria-label="{{ __('Ogólna ocena od 1 do 5', 'devents') }}">
+                    {% for n in [5,4,3,2,1] %}
+                        <input type="radio" id="rate-{{ n }}" name="rating" value="{{ n }}">
+                        <label for="rate-{{ n }}" title="{{ n }}/5" aria-label="{{ n }}/5"><span class="material-symbols-outlined" aria-hidden="true">star</span></label>
+                    {% endfor %}
+                </div>
+            </fieldset>
+
+            <fieldset class="dv-survey__q">
+                <legend>{{ __('Jak oceniasz łatwość korzystania z serwisu?', 'devents') }}</legend>
+                <div class="dv-rate" role="radiogroup" aria-label="{{ __('Ocena łatwości od 1 do 5', 'devents') }}">
+                    {% for n in [5,4,3,2,1] %}
+                        <input type="radio" id="ease-{{ n }}" name="answers[ease]" value="{{ n }}">
+                        <label for="ease-{{ n }}" title="{{ n }}/5" aria-label="{{ n }}/5"><span class="material-symbols-outlined" aria-hidden="true">star</span></label>
+                    {% endfor %}
+                </div>
+            </fieldset>
+
+            <fieldset class="dv-survey__q">
+                <legend>{{ __('Czy znajdujesz wydarzenia dostępne dla Twoich potrzeb?', 'devents') }}</legend>
+                <div class="dv-choice">
+                    <label><input type="radio" name="answers[found]" value="tak"> {{ __('Tak', 'devents') }}</label>
+                    <label><input type="radio" name="answers[found]" value="czesciowo"> {{ __('Częściowo', 'devents') }}</label>
+                    <label><input type="radio" name="answers[found]" value="nie"> {{ __('Nie', 'devents') }}</label>
+                </div>
+            </fieldset>
+
+            <fieldset class="dv-survey__q">
+                <label class="dv-survey__label" for="dv-survey-comment">{{ __('Co możemy poprawić? (opcjonalnie)', 'devents') }}</label>
+                <textarea id="dv-survey-comment" name="comment" maxlength="2000" placeholder="{{ __('Napisz, czego Ci brakuje lub co działa świetnie...', 'devents') }}"></textarea>
+            </fieldset>
+
+            <button type="submit" class="btn btn--primary btn-lg dv-survey__submit">{{ __('Wyślij ankietę', 'devents') }}</button>
+        </form>
+
+        <div class="dv-survey__done" id="dv-survey-done" hidden>
+            <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+            <h2>{{ __('Dziękujemy!', 'devents') }}</h2>
+            <p>{{ __('Twoja opinia została zapisana i pomoże nam ulepszać DEvents.', 'devents') }}</p>
+        </div>
+    </div>
+</section>
+
+<script>
+(function () {
+    var form = document.getElementById('dv-survey-form');
+    if (!form) return;
+    var msg = document.getElementById('dv-survey-msg');
+    var pageUrl = form.querySelector('[name="page_url"]');
+    if (pageUrl) pageUrl.value = window.location.href;
+
+    function showErr(text) {
+        msg.textContent = text;
+        msg.classList.add('dv-survey__msg--err');
+    }
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        msg.classList.remove('dv-survey__msg--err');
+        var rating = form.querySelector('[name="rating"]:checked');
+        if (!rating) { showErr('Wybierz ogólną ocenę (gwiazdki).'); return; }
+
+        var btn = form.querySelector('button[type="submit"]');
+        var label = btn.textContent;
+        btn.disabled = true; btn.textContent = 'Wysyłanie...';
+
+        var fd = new FormData(form);
+        fd.append('action', 'devents_submit_survey');
+
+        fetch(form.dataset.ajax, { method: 'POST', body: fd, credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (j) {
+                if (j && j.success) {
+                    form.style.display = 'none';
+                    var done = document.getElementById('dv-survey-done');
+                    if (done) done.hidden = false;
+                } else {
+                    showErr((j && j.data && j.data.message) ? j.data.message : 'Nie udało się zapisać ankiety.');
+                    btn.disabled = false; btn.textContent = label;
+                }
+            })
+            .catch(function () {
+                showErr('Błąd połączenia. Spróbuj ponownie.');
+                btn.disabled = false; btn.textContent = label;
+            });
+    });
+})();
+</script>

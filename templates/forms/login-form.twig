@@ -1,0 +1,68 @@
+{# templates/forms/login-form.twig — logowanie (POST → devents_handle_auth_actions).
+   Pola wymagane przez handler: devents_action=login, _wpnonce (devents-login),
+   devents_user_login, devents_user_pass, opcjonalnie devents_rememberme.
+   Dane z render_form(): nonce_field, error_message, flash_message, redirect_to. #}
+<main class="auth-container" id="devents-main-content">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="auth-title">{{ __('Zaloguj się', 'devents') }}</h1>
+            <p class="auth-subtitle">{{ __('Witaj ponownie w DEvents', 'devents') }}</p>
+        </div>
+
+        {% if error_message %}
+            <div class="auth-message auth-message--error" role="alert">{{ error_message }}</div>
+        {% elseif flash_message %}
+            <div class="auth-message auth-message--success" role="status">{{ flash_message }}</div>
+        {% endif %}
+
+        <form method="POST" class="devents-form auth-form" aria-label="{{ __('Formularz logowania', 'devents') }}" novalidate>
+            {{ nonce_field|raw }}
+            <input type="hidden" name="devents_action" value="login">
+
+            <div class="form-group">
+                <label for="devents_user_login" class="form-label">
+                    {{ __('E-mail', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span>
+                </label>
+                <input type="email"
+                       id="devents_user_login"
+                       name="devents_user_login"
+                       class="form-control"
+                       required
+                       autocomplete="username"
+                       placeholder="twoj@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="devents_user_pass" class="form-label">
+                    {{ __('Hasło', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span>
+                </label>
+                <input type="password"
+                       id="devents_user_pass"
+                       name="devents_user_pass"
+                       class="form-control"
+                       required
+                       autocomplete="current-password"
+                       placeholder="••••••••">
+            </div>
+
+            <div class="form-group auth-row">
+                <label class="form-checkbox-group auth-remember">
+                    <input type="checkbox" name="devents_rememberme" value="1">
+                    <span>{{ __('Zapamiętaj mnie', 'devents') }}</span>
+                </label>
+                <a class="auth-link" href="{{ home_url('/odzyskiwanie-hasla/') }}">{{ __('Nie pamiętasz hasła?', 'devents') }}</a>
+            </div>
+
+            <div class="form-group auth-actions">
+                <button type="submit" class="btn btn--primary btn--full-width btn-lg">
+                    {{ __('Zaloguj się', 'devents') }}
+                </button>
+            </div>
+        </form>
+
+        <p class="auth-footer-text">
+            {{ __('Nie masz konta?', 'devents') }}
+            <a class="auth-link" href="{{ home_url('/zarejestruj-sie/') }}">{{ __('Zarejestruj się', 'devents') }}</a>
+        </p>
+    </div>
+</main>

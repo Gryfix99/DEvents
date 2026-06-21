@@ -1,0 +1,57 @@
+<div class="sl-counter-grid">
+  <div class="sl-counter-cell">
+    <span class="sl-counter-icon material-symbols-outlined" aria-hidden="true">event</span>
+    <div class="sl-counter-number" data-target="{{ events }}">0</div>
+    <div class="sl-counter-label">Wydarzenia</div>
+  </div>
+  <div class="sl-counter-cell">
+    <span class="sl-counter-icon material-symbols-outlined" aria-hidden="true">videocam</span>
+    <div class="sl-counter-number" data-target="{{ materials }}">0</div>
+    <div class="sl-counter-label">Filmy</div>
+  </div>
+  <div class="sl-counter-cell">
+    <span class="sl-counter-icon material-symbols-outlined" aria-hidden="true">account_circle</span>
+    <div class="sl-counter-number" data-target="{{ users }}">0</div>
+    <div class="sl-counter-label">Użytkownicy</div>
+  </div>
+</div>
+
+<div class="sl-counter-updated">
+  Dane zaktualizowano {{ last_updated }}
+</div>
+
+<script>
+  (function(){
+    const options = { threshold: 0.5 };
+    const callback = (entries, obs) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        
+        const el = entry.target;
+        const target = parseInt(el.getAttribute('data-target'), 10);
+        const duration = 1500; // Czas trwania animacji w ms
+        const frameDuration = 1000 / 60; // Czas trwania jednej klatki (celujemy w 60 FPS)
+        const totalFrames = Math.round(duration / frameDuration);
+        const increment = target / totalFrames;
+        let current = 0;
+
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            el.textContent = target.toLocaleString('pl-PL'); // Wyświetl finalną wartość i sformatuj ją
+            clearInterval(timer);
+          } else {
+            el.textContent = Math.floor(current).toLocaleString('pl-PL');
+          }
+        }, frameDuration);
+        
+        obs.unobserve(el);
+      });
+    };
+    
+    const observer = new IntersectionObserver(callback, options);
+    document.querySelectorAll('.sl-counter-number').forEach(num => {
+      observer.observe(num);
+    });
+  })();
+</script>

@@ -1,0 +1,159 @@
+{# templates/admin/tabs/api-keys.twig
+   JEDNO MIEJSCE NA WSZYSTKIE KLUCZE API:
+   Stripe (płatności), Facebook/Instagram (publikacja), integracja januszmigowego.pl (PJM)
+   oraz powiadomienia push (VAPID). Formularz korzysta z istniejącej obsługi
+   sub_action=save_settings i skryptu admin-settings.js (te same ID pól). #}
+
+<div class="devents-settings-dashboard">
+
+    <div class="admin-widget" style="margin-bottom:20px;">
+        <h3><span class="material-symbols-outlined" style="font-size:20px;vertical-align:-4px;" aria-hidden="true">vpn_key</span> Klucze API i integracje</h3>
+        <div style="padding:1.25rem;">
+            <p style="margin:0 0 .6rem;color:var(--text-secondary);">
+                To jedno, centralne miejsce na wszystkie klucze API używane przez wtyczkę.
+                Pola z kluczami są zamaskowane — kliknij, by edytować, i zapisz przyciskiem na dole.
+            </p>
+            <div style="display:flex;align-items:flex-start;gap:8px;padding:10px 13px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.30);border-radius:8px;color:var(--text-secondary);font-size:.88rem;">
+                <span class="material-symbols-outlined" style="font-size:18px;color:#2563eb;" aria-hidden="true">security</span>
+                <span>
+                    Ze względów bezpieczeństwa klucz integracji PJM możesz też ustawić poza bazą danych —
+                    stałą <code>DEVENTS_REMOTE_API_KEY</code> w pliku <code>wp-config.php</code>. Jeśli stała jest ustawiona,
+                    ma pierwszeństwo przed polem poniżej.
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <form id="devents-settings-form" class="devents-form">
+        <input type="hidden" name="action" value="devents_admin_general_action">
+        <input type="hidden" name="sub_action" value="save_settings">
+
+        <div class="admin-dashboard-grid" style="gap: 20px;">
+
+            {# --- 1. STRIPE (płatności) --- #}
+            <div class="admin-widget">
+                <h3>Płatności (Stripe)</h3>
+                <div style="padding:1.25rem;">
+                    <div class="form-group">
+                        <label for="stripe_secret_key" style="font-weight:600; display:block; margin-bottom:5px;">Stripe Secret Key (sk_...)</label>
+                        <input type="password" id="stripe_secret_key" name="payload[stripe_secret_key]" value="{{ data.stripe.secret_key }}" class="form-control" style="width:100%;" autocomplete="off">
+                    </div>
+                    <div class="form-group" style="margin-top:15px;">
+                        <label for="stripe_webhook_secret" style="font-weight:600; display:block; margin-bottom:5px;">Stripe Webhook Secret (whsec_...)</label>
+                        <input type="password" id="stripe_webhook_secret" name="payload[stripe_webhook_secret]" value="{{ data.stripe.webhook_secret }}" class="form-control" style="width:100%;" autocomplete="off">
+                    </div>
+                    <div style="margin-top:18px; background:#f0f9ff; border:1px solid #bae6fd; padding:13px; border-radius:6px; font-size:0.88em;">
+                        <p style="margin:0 0 5px 0;"><strong>Endpoint URL (do wklejenia w Stripe):</strong></p>
+                        <code style="background:#e0f2fe; padding:2px 5px; border-radius:3px; display:block; word-break:break-all;">{{ data.stripe.webhook_url }}</code>
+                        <p style="margin:5px 0 0 0; color:#0369a1;"><small>Zdarzenie: <code>checkout.session.completed</code></small></p>
+                    </div>
+                </div>
+            </div>
+
+            {# --- 2. SOCIAL MEDIA (Facebook / Instagram) --- #}
+            <div class="admin-widget">
+                <h3>Social Media (Facebook / Instagram)</h3>
+                <div style="padding:1.25rem;">
+                    <div class="form-group">
+                        <label for="fb_page_id">Facebook Page ID</label>
+                        <input type="text" id="fb_page_id" name="payload[fb_page_id]" value="{{ data.social.fb_page_id }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="ig_account_id">Instagram Account ID</label>
+                        <input type="text" id="ig_account_id" name="payload[ig_account_id]" value="{{ data.social.ig_account_id }}" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="fb_access_token">Access Token</label>
+                        <input type="password" id="fb_access_token" name="payload[fb_access_token]" value="{{ data.social.fb_access_token }}" class="form-control" autocomplete="off">
+                    </div>
+                    <div class="form-group" style="margin-top:12px;">
+                        <label for="post_to_story" style="display:flex; align-items:flex-start; gap:8px; cursor:pointer; font-weight:500;">
+                            <input type="checkbox" id="post_to_story" name="payload[post_to_story]" value="1" {{ data.social.post_to_story ? 'checked' : '' }} style="margin-top:3px;">
+                            <span>
+                                Publikuj też <strong>relację</strong> (Story na FB i IG)
+                                <small style="display:block; color:var(--text-secondary); font-weight:400;">
+                                    Przy każdej publikacji posta ta sama grafika 9:16 trafia również na relację.
+                                </small>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="form-group" style="margin-top:15px;">
+                        <button type="button" class="btn btn--secondary" id="btn-validate-social">
+                            <span class="material-symbols-outlined" aria-hidden="true">fact_check</span>
+                            Sprawdź połączenie FB/IG
+                        </button>
+                        <p style="margin:6px 0 0; font-size:0.82rem; color:var(--text-secondary);">
+                            Zapisz najpierw klucze, potem sprawdź — test odpytuje API Meta i pokaże, czego brakuje.
+                        </p>
+                        <div id="social-validation-result" class="social-validation" style="margin-top:12px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            {# --- 3. INTEGRACJA januszmigowego.pl (PJM) --- #}
+            <div class="admin-widget">
+                <h3>Integracja PJM (januszmigowego.pl)</h3>
+                <div style="padding:1.25rem;">
+                    <div class="form-group">
+                        <label for="remote_api_key" style="font-weight:600; display:block; margin-bottom:5px;">Klucz API (strona-matka)</label>
+                        <input type="password" id="remote_api_key" name="payload[remote_api_key]" value="{{ data.remote.api_key }}" class="form-control" style="width:100%;" autocomplete="off" {{ data.remote.constant_active ? 'disabled' : '' }}>
+                    </div>
+
+                    {% if data.remote.constant_active %}
+                        <div style="margin-top:12px; display:flex; align-items:flex-start; gap:8px; padding:10px 13px; background:rgba(16,185,129,.10); border:1px solid rgba(16,185,129,.35); border-radius:8px; font-size:.86rem; color:var(--text-secondary);">
+                            <span class="material-symbols-outlined" style="font-size:18px;color:#10b981;" aria-hidden="true">verified_user</span>
+                            <span>Klucz jest ustawiony stałą <code>DEVENTS_REMOTE_API_KEY</code> w <code>wp-config.php</code> — pole powyżej jest nieaktywne (stała ma pierwszeństwo).</span>
+                        </div>
+                    {% elseif data.remote.no_key %}
+                        <div style="margin-top:12px; display:flex; align-items:flex-start; gap:8px; padding:10px 13px; background:rgba(245,166,35,.12); border:1px solid rgba(245,166,35,.40); border-radius:8px; font-size:.86rem; color:var(--text-secondary);">
+                            <span class="material-symbols-outlined" style="font-size:18px;color:#d99a29;" aria-hidden="true">warning</span>
+                            <span><strong>Brak klucza.</strong> Integracja PJM (wysyłka zamówień tłumaczeń do strony-matki) nie zadziała, dopóki nie wpiszesz tu klucza. Klucz nie jest już zaszyty w kodzie — wklej go w to pole i zapisz.</span>
+                        </div>
+                    {% endif %}
+
+                    <div style="margin-top:16px; background:#f8fafc; border:1px solid #e5e7eb; padding:13px; border-radius:6px; font-size:0.86em;">
+                        <p style="margin:0 0 5px 0;"><strong>Endpoint strony-matki:</strong></p>
+                        <code style="background:#eef2f4; padding:2px 5px; border-radius:3px; display:block; word-break:break-all;">{{ data.remote.url }}</code>
+                        <p style="margin:6px 0 0; color:var(--text-secondary);"><small>Klucz wysyłany przy zamówieniach tłumaczeń PJM realizowanych przez stronę-matkę.</small></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="margin-top:22px; text-align:right;">
+            <div id="settings-message" class="hidden" style="margin-bottom:10px; text-align:center;"></div>
+            <button type="submit" class="btn btn--primary">
+                <span class="material-symbols-outlined" style="font-size:18px;vertical-align:-4px;" aria-hidden="true">save</span>
+                Zapisz klucze API
+            </button>
+        </div>
+    </form>
+
+    {# --- 4. POWIADOMIENIA WEB PUSH (VAPID) — klucze generowane, nie wklejane --- #}
+    <div class="admin-widget" style="margin-top:20px;">
+        <h3>Powiadomienia push (VAPID)</h3>
+        <div style="padding: 1.25rem;">
+            <p style="margin: 0 0 1rem; color: var(--text-secondary);">
+                Wygeneruj parę kluczy VAPID, aby uruchomić powiadomienia web push. Potem użytkownicy włączają je u siebie
+                (dzwonek powiadomień → „Włącz powiadomienia push").
+            </p>
+            {% if data.vapid_public %}
+                <p style="margin: 0 0 0.85rem; font-size: 0.85rem; color: #10b981;">
+                    <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;" aria-hidden="true">check_circle</span>
+                    Klucze są skonfigurowane — push działa.
+                </p>
+            {% endif %}
+            <button type="button" class="btn btn--secondary" id="btn-generate-vapid" data-has-keys="{{ data.vapid_public ? '1' : '0' }}">
+                <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;" aria-hidden="true">key</span>
+                {{ data.vapid_public ? 'Wygeneruj nowe klucze' : 'Wygeneruj klucze push' }}
+            </button>
+            <button type="button" class="btn btn--secondary" id="btn-test-push" {{ data.vapid_public ? '' : 'disabled' }}>
+                <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;" aria-hidden="true">notifications_active</span>
+                Wyślij test do siebie
+            </button>
+            <p id="vapid-result" role="status" aria-live="polite" style="margin: 0.85rem 0 0; font-weight: 600; color: var(--primary); min-height: 1.2em;"></p>
+        </div>
+    </div>
+
+</div>

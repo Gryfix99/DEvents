@@ -1,0 +1,92 @@
+{# templates/admin/tabs/tools.twig — uspójniona siatka narzędzi #}
+<div class="admin-dashboard-grid">
+
+    {# --- Tryb konserwacyjny --- #}
+    <div class="admin-widget">
+        <h3><span class="material-symbols-outlined" style="font-size:20px; vertical-align:-4px; color:var(--primary);" aria-hidden="true">engineering</span> Tryb konserwacyjny</h3>
+        <div class="admin-widget-body">
+            <div class="form-switch-wrapper">
+                <label class="form-switch">
+                    <input type="checkbox" id="maintenance-mode-toggle" {% if tab_data.maintenance_mode_enabled %}checked{% endif %}>
+                    <span class="slider round"></span>
+                </label>
+                <span class="widget-label">Włącz tryb przerwy technicznej</span>
+            </div>
+            <p class="input-info">Gdy włączone, tylko administratorzy będą mogli przeglądać stronę.</p>
+        </div>
+    </div>
+
+    {# --- Edytor e-maili --- #}
+    <div class="admin-widget">
+        <h3><span class="material-symbols-outlined" style="font-size:20px; vertical-align:-4px; color:var(--primary);" aria-hidden="true">mail</span> Edytor e-maili</h3>
+        <div class="admin-widget-body">
+            <div class="form-group">
+                <label class="widget-label" for="email-template-selector">Wybierz szablon do edycji:</label>
+                <select id="email-template-selector" class="form-control">
+                    {% for key, template in tab_data.email_templates %}
+                        <option value="{{ key }}">{{ key|replace({'_': ' '})|title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% for key, template in tab_data.email_templates %}
+                <div id="form-template-{{ key }}" class="email-editor-form" style="display: none;">
+                    <input type="hidden" name="template_key" value="{{ key }}">
+                    <div class="form-group">
+                        <label class="widget-label" for="subject-{{ key }}">Temat:</label>
+                        <input type="text" id="subject-{{ key }}" class="form-control" value="{{ template.subject }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="widget-label" for="body-{{ key }}">Treść (obsługuje HTML):</label>
+                        <textarea id="body-{{ key }}" class="form-control" rows="10">{{ template.body }}</textarea>
+                    </div>
+                    <button type="button" class="btn btn--primary" data-action="save_email_template" data-key="{{ key }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">save</span> Zapisz szablon
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {# --- Ustawienia Social Media Poster --- #}
+    <div class="admin-widget" style="grid-column: 1 / -1;">
+        <h3><span class="material-symbols-outlined" style="font-size:20px; vertical-align:-4px; color:var(--primary);" aria-hidden="true">share</span> Ustawienia Social Media Poster</h3>
+        <div class="admin-widget-body">
+            <form class="devents-form" method="POST">
+                <input type="hidden" name="sub_action" value="save_social_settings">
+                <input type="hidden" name="nonce" value="{{ wp_create_nonce('devents_admin_general_nonce') }}">
+
+                <p class="input-info">Wprowadź poniższe dane, aby umożliwić automatyczne publikowanie wydarzeń na Facebooku i Instagramie. Token dostępowy musi być tokenem o długim czasie ważności.</p>
+
+                <div class="form-group">
+                    <label for="fb_page_id" class="widget-label">Facebook Page ID</label>
+                    <input type="text" id="fb_page_id" name="payload[fb_page_id]" class="form-control" value="{{ data.social_settings.fb_page_id }}">
+                </div>
+                <div class="form-group">
+                    <label for="ig_account_id" class="widget-label">Instagram Business Account ID</label>
+                    <input type="text" id="ig_account_id" name="payload[ig_account_id]" class="form-control" value="{{ data.social_settings.ig_account_id }}">
+                </div>
+                <div class="form-group">
+                    <label for="fb_access_token" class="widget-label">Facebook Access Token</label>
+                    <input type="password" id="fb_access_token" name="payload[fb_access_token]" class="form-control" value="{{ data.social_settings.fb_access_token }}">
+                </div>
+
+                <button type="submit" class="btn btn--primary">
+                    <span class="material-symbols-outlined" aria-hidden="true">save</span> Zapisz ustawienia Social Media
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {# --- Podgląd logów --- #}
+    <div class="admin-widget" style="grid-column: 1 / -1;">
+        <h3><span class="material-symbols-outlined" style="font-size:20px; vertical-align:-4px; color:var(--primary);" aria-hidden="true">bug_report</span> Podgląd logów błędów (debug.log)</h3>
+        <div class="admin-widget-body">
+            <pre class="log-viewer">{{ tab_data.error_log_content }}</pre>
+        </div>
+    </div>
+
+    {# Panel „Migracja dostępności v8.0" usunięty — funkcja nigdy nie była zaimplementowana
+       (metoda migrate_accessibility_to_relational nie istniała), a dostępność jest
+       synchronizowana automatycznie przy zapisie wydarzenia. #}
+
+</div>

@@ -1,0 +1,802 @@
+{# ========================================================================
+   UNIWERSALNY FORMULARZ PUBLIKACJI / EDYCJI WYDARZENIA — v14.0
+   Zmiany v14.0 (przebudowa układu):
+   - Sekcja 1 „Szczegóły": tytuł, opis, kategoria | wiek, okazja.
+   - Sposób realizacji przeniesiony do sekcji „Miejsce i czas".
+   - Dostępność jako 3 rozwijane akordeony (mniej miejsca, czytelniej).
+   - Miejsce i czas: warunkowo link do transmisji (online/hybryda)
+     lub adres (na żywo/hybryda); „dodatkowe informacje" rozwijane.
+   - Nowa sekcja: akceptacja regulaminu dodawania wydarzeń.
+   ======================================================================== #}
+
+{% set def_lang_code = current_lang_code|default('pl') %}
+{% set def_lang_name = current_lang_name|default(__('Polski', 'devents')) %}
+{% set is_edit_mode = event.id|default(0) != 0 %}
+
+{# --- Renderer pojedynczej opcji dostępności (z właściwym wyborem języka per typ) --- #}
+{% macro acc_option(type, selected_ids, selected_langs, spoken_langs, sign_langs) %}
+    {% set is_checked = type.id in selected_ids %}
+    {% set needs_sign = type.requires_sl_lang == 1 %}
+    {% set needs_spoken = type.requires_spoken_lang == 1 and not needs_sign %}
+    {% if needs_sign or needs_spoken %}
+        <div class="acc-option-wrap acc-option-wrap--has-lang">
+            <label class="acc-option {{ is_checked ? 'acc-option--selected' : '' }}">
+                <input type="checkbox" name="accessibility[]" value="{{ type.id }}" class="acc-checkbox"
+                       {{ is_checked ? 'checked' : '' }} aria-label="{{ type.name }}"
+                       aria-expanded="{{ is_checked ? 'true' : 'false' }}" aria-controls="acc-lang-{{ type.id }}">
+                <span class="material-symbols-outlined acc-option__icon" aria-hidden="true">{{ type.icon }}</span>
+                <span class="acc-option__label">{{ type.name }}</span>
+            </label>
+            <div class="acc-lang-panel {{ not is_checked ? 'acc-lang-panel--hidden' : '' }}" id="acc-lang-{{ type.id }}" aria-hidden="{{ not is_checked ? 'true' : 'false' }}">
+                <label class="acc-lang-label" for="acc-lang-select-{{ type.id }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">{{ needs_sign ? 'sign_language' : 'translate' }}</span>
+                    {{ needs_sign ? __('Wybierz język migowy:', 'devents') : __('Wybierz języki:', 'devents') }}
+                </label>
+                <select name="accessibility_langs[{{ type.id }}][]" id="acc-lang-select-{{ type.id }}" class="form-select choices-multiselect" multiple data-placeholder="{{ __('Szukaj i wybierz...', 'devents') }}">
+                    {% if needs_sign %}
+                        {% for sl in sign_langs %}
+                            <option value="{{ sl.sl_code }}" {{ sl.sl_code in (selected_langs[type.id] ?? []) ? 'selected' : '' }}>{{ sl.sl_abbr|default(sl.sl_code|upper) }} - {{ sl.sl_name }}</option>
+                        {% endfor %}
+                    {% else %}
+                        {% for sp in spoken_langs %}
+                            <option value="{{ sp.spoken_code }}" {{ sp.spoken_code in (selected_langs[type.id] ?? []) ? 'selected' : '' }}>{{ sp.spoken_abbr }} - {{ sp.spoken_name }}</option>
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+        </div>
+    {% else %}
+        <label class="acc-option {{ is_checked ? 'acc-option--selected' : '' }}">
+            <input type="checkbox" name="accessibility[]" value="{{ type.id }}" class="acc-checkbox" {{ is_checked ? 'checked' : '' }} aria-label="{{ type.name }}">
+            <span class="material-symbols-outlined acc-option__icon" aria-hidden="true">{{ type.icon }}</span>
+            <span class="acc-option__label">{{ type.name }}</span>
+        </label>
+    {% endif %}
+{% endmacro %}
+
+{# --- Grupowanie dostępności wg 4 filarów odbiorców --- #}
+{% set acc_hearing = [] %}
+{% set acc_vision = [] %}
+{% set acc_autism = [] %}
+{% set acc_intellect = [] %}
+{% set acc_other = [] %}
+{% set hearing_slugs = ['interpretation','pjm_led','captions_live','captions_deaf','captions_standard','induction_loop','fm_system','spoken_translation'] %}
+{% set vision_slugs = ['audiodescription','audio_guide','lector','film_guide','tactile_materials','preguide'] %}
+{% set autism_slugs = ['quiet_hours','comfort_room','quiet_space','noise_headphones','autism_spectrum'] %}
+{% set intellect_slugs = ['etr','intellectual_disability'] %}
+{% for type in accessibility_types %}
+    {% if type.slug in hearing_slugs %}{% set acc_hearing = acc_hearing|merge([type]) %}
+    {% elseif type.slug in vision_slugs %}{% set acc_vision = acc_vision|merge([type]) %}
+    {% elseif type.slug in autism_slugs %}{% set acc_autism = acc_autism|merge([type]) %}
+    {% elseif type.slug in intellect_slugs %}{% set acc_intellect = acc_intellect|merge([type]) %}
+    {% else %}{% set acc_other = acc_other|merge([type]) %}
+    {% endif %}
+{% endfor %}
+
+<div id="form-messages" class="mb-20" role="alert" aria-live="polite"></div>
+
+{# ==================== PROGRESS INDICATOR ==================== #}
+<nav class="form-progress" aria-label="{{ __('Postęp formularza', 'devents') }}">
+    <ol class="form-progress__list">
+        <li class="form-progress__step form-progress__step--active" data-step="1">
+            <span class="form-progress__number">1</span>
+            <span class="form-progress__label">{{ __('Szczegóły', 'devents') }}</span>
+        </li>
+        <li class="form-progress__step" data-step="2">
+            <span class="form-progress__number">2</span>
+            <span class="form-progress__label">{{ __('Dostępność', 'devents') }}</span>
+        </li>
+        <li class="form-progress__step" data-step="3">
+            <span class="form-progress__number">3</span>
+            <span class="form-progress__label">{{ __('Miejsce i czas', 'devents') }}</span>
+        </li>
+        <li class="form-progress__step" data-step="4">
+            <span class="form-progress__number">4</span>
+            <span class="form-progress__label">{{ __('Media', 'devents') }}</span>
+        </li>
+        <li class="form-progress__step" data-step="5">
+            <span class="form-progress__number">5</span>
+            <span class="form-progress__label">{{ __('Bilety', 'devents') }}</span>
+        </li>
+    </ol>
+</nav>
+
+<form id="publish-event-form" class="devents-form" method="post" enctype="multipart/form-data" novalidate>
+    {{ nonce_field|raw }}
+    <input type="hidden" name="event_id" value="{{ event.id|default(0) }}">
+    {% if is_admin_editing %}
+        <input type="hidden" name="is_admin_edit" value="1">
+    {% endif %}
+
+
+    {# ==================== SEKCJA 1: SZCZEGÓŁY ==================== #}
+    <div class="form-section" data-form-step="1">
+        <h2 class="form-section-title">{{ __('Szczegóły', 'devents') }}</h2>
+
+        {# --- Zakładki językowe (Global Switcher) --- #}
+        <div class="devents-lang-tabs mb-20" role="tablist" aria-label="{{ __('Wersje językowe', 'devents') }}">
+
+            {# Pamięć dla JavaScript #}
+            <input type="hidden" id="init_translations" value="{{ event.translations|default('{}')|e('html_attr') }}">
+
+            {# Domyślny język (PL) #}
+            <div class="lang-tab-wrapper">
+                <button type="button"
+                        class="lang-tab-btn lang-tab-btn--active"
+                        role="tab"
+                        aria-selected="true"
+                        data-lang="{{ def_lang_code }}">
+                    {{ def_lang_name }} ({{ __('Domyślny', 'devents') }})
+                </button>
+            </div>
+
+            {# Istniejące tłumaczenia z bazy (Edycja) #}
+            {% if event.translations is defined and event.translations is iterable %}
+                {% for code, data in event.translations %}
+                    {% if code != def_lang_code %}
+                        <div class="lang-tab-wrapper lang-tab-wrapper--removable">
+                            <button type="button" class="lang-tab-btn" role="tab" aria-selected="false" data-lang="{{ code }}" data-original-label="{{ code|upper }}">
+                                {{ code|upper }}
+                            </button>
+                            <button type="button" class="lang-tab-remove" aria-label="{{ __('Usuń', 'devents') }}" data-lang="{{ code }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                            </button>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            {# Dodawanie nowego języka #}
+            <div class="lang-tab-add">
+                <select id="add-language-select" class="lang-tab-add__select" aria-label="{{ __('Dodaj wersję językową', 'devents') }}">
+                    <option value="">+ {{ __('Dodaj język', 'devents') }}</option>
+                    {% for sp in unique_spoken_languages %}
+                        <option value="{{ sp.spoken_code }}">
+                            {{ sp.spoken_abbr }} - {{ sp.spoken_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        {# GŁÓWNE POLA: Tytuł i Opis #}
+        <div class="form-group">
+            <label for="title" class="form-label">
+                {{ __('Tytuł wydarzenia', 'devents') }} <span class="lang-indicator v-primary bold"></span>
+                <span class="form-required-field" aria-hidden="true">*</span>
+            </label>
+            <input type="text" id="title" name="title" class="form-control" value="{{ event.title|default('')|e }}" required maxlength="80">
+        </div>
+
+        <div class="form-group">
+            <label for="description" class="form-label">
+                {{ __('Opis wydarzenia', 'devents') }} <span class="lang-indicator v-primary bold"></span>
+                <span class="form-required-field" aria-hidden="true">*</span>
+            </label>
+            <textarea id="description" name="description" class="form-textarea devents-mde" required>{{ event.description|default('')|e }}</textarea>
+            <small class="add-form-input-info">
+                <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1rem; vertical-align:middle;">tips_and_updates</span>
+                {{ __('Pisz prostym, przystępnym językiem — krótkie zdania, bez żargonu i skrótów. Dzięki temu opis zrozumie więcej osób (m.in. osoby w spektrum, Głuche i słabowidzące).', 'devents') }}
+            </small>
+        </div>
+
+        {# Admin: przypisanie instytucji #}
+        {% if current_user_can('manage_options') %}
+            <div class="form-group form-group--admin">
+                <label for="admin_institution_id" class="form-label form-label--admin">
+                    <span class="material-symbols-outlined form-label--admin-icon" aria-hidden="true">admin_panel_settings</span>
+                    {{ __('Przypisz do instytucji (DLA ADMINA)', 'devents') }}
+                </label>
+                <select id="admin_institution_id" name="institution_id" class="form-select choices-select">
+                    <option value="">-- {{ __('Brak', 'devents') }} --</option>
+                    {% for inst in all_institutions %}
+                        <option value="{{ inst.id }}" {% if event.institution_id == inst.id %}selected{% endif %}>
+                            {{ inst.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+
+        <div class="form-row two-cols">
+            {# KATEGORIA #}
+            <div class="form-group">
+                <label for="category" class="form-label">
+                    {{ __('Kategoria', 'devents') }}
+                    <span class="form-required-field" aria-hidden="true">*</span>
+                </label>
+                <select id="category" name="category" class="form-select" required aria-required="true">
+                    <option value="">-- {{ __('Wybierz', 'devents') }} --</option>
+                    {% for slug, name in event_categories %}
+                        <option value="{{ slug }}" {{ (event.category == slug) ? 'selected' : '' }}>
+                            {{ name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {# WIEK #}
+            <div class="form-group">
+                <label for="age_rating" class="form-label">
+                    {{ __('Minimalny wiek uczestników', 'devents') }}
+                    <span class="form-required-field" aria-hidden="true">*</span>
+                </label>
+                <div class="form-inline-group">
+                    <input type="number"
+                           id="age_rating"
+                           name="age_rating"
+                           class="form-control form-control--narrow"
+                           value="{{ event.age_rating|default('0')|replace({'+':''}) }}"
+                           min="0"
+                           max="99"
+                           required
+                           aria-required="true">
+                    <span class="form-inline-suffix">{{ __('lat', 'devents') }}</span>
+                </div>
+            </div>
+        </div>
+
+        {# OKAZJA #}
+        <div class="form-group">
+            <label for="special_occasion_id" class="form-label">
+                {{ __('Festiwale / specjalna okazja', 'devents') }}
+            </label>
+            <select id="special_occasion_id" name="special_occasion_id" class="form-select choices-select">
+                <option value="">-- {{ __('Brak', 'devents') }} --</option>
+                {% for occasion in active_occasions %}
+                    <option value="{{ occasion.id }}" {{ event and event.special_occasion_id == occasion.id ? 'selected' : '' }}>
+                        {{ occasion.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if active_occasions is empty %}
+                <p class="form-hint" style="font-size:0.8rem; color:var(--text-light); margin-top:5px;">
+                    {{ __('Aktualnie brak aktywnych festiwali.', 'devents') }}
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+
+    {# ==================== SEKCJA 2: DOSTĘPNOŚĆ (3 ROZWIJANE GRUPY) ==================== #}
+    <div class="form-section mt-30" id="acc-main-fieldset" data-form-step="2">
+        <h2 class="form-section-title">
+            {{ __('Dostępność wydarzenia', 'devents') }}
+            <span class="form-required-field" aria-hidden="true">*</span>
+        </h2>
+        <p class="add-form-input-info mb-15">
+            {{ __('Rozwiń grupę i zaznacz dostępne udogodnienia. Wydarzenia w DEvents są dla różnych grup — osób Głuchych i słabosłyszących, w spektrum autyzmu, niewidomych i innych.', 'devents') }}
+        </p>
+
+        {# Akordeony wg 4 filarów odbiorców (+ „Inne") — każda opcja sama dobiera wybór języka #}
+        {% set acc_pillars = [
+            { 'id': 'hearing',   'icon': 'hearing',    'title': __('Głusi i słabosłyszący', 'devents'),                  'list': acc_hearing },
+            { 'id': 'vision',    'icon': 'visibility', 'title': __('Niewidomi i słabowidzący', 'devents'),               'list': acc_vision },
+            { 'id': 'autism',    'icon': 'psychology', 'title': __('Spektrum autyzmu i potrzeby sensoryczne', 'devents'),'list': acc_autism },
+            { 'id': 'intellect', 'icon': 'menu_book',  'title': __('Niepełnosprawność intelektualna', 'devents'),        'list': acc_intellect },
+            { 'id': 'other',     'icon': 'more_horiz', 'title': __('Inne udogodnienia', 'devents'),                      'list': acc_other }
+        ] %}
+        {% for pillar in acc_pillars %}
+            {% if pillar.list is not empty %}
+                <div class="acc-accordion" data-acc-accordion>
+                    <button type="button" class="acc-accordion__toggle" aria-expanded="false" aria-controls="acc-panel-{{ pillar.id }}">
+                        <span class="material-symbols-outlined acc-accordion__icon" aria-hidden="true">{{ pillar.icon }}</span>
+                        <span class="acc-accordion__title">{{ pillar.title }}</span>
+                        <span class="acc-accordion__count" data-acc-count hidden>0</span>
+                        <span class="material-symbols-outlined acc-accordion__chevron" aria-hidden="true">expand_more</span>
+                    </button>
+                    <div class="acc-accordion__panel" id="acc-panel-{{ pillar.id }}" hidden>
+                        <div class="acc-grid" role="group" aria-label="{{ pillar.title }}">
+                            {% for type in pillar.list %}
+                                {{ _self.acc_option(type, selected_accessibility_ids, selected_acc_languages, unique_spoken_languages, unique_sign_languages) }}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        {# Podpowiedź dostępności — prywatna, opcjonalna, NIE ocenia wydarzenia #}
+        <div class="acc-hint" data-acc-hint hidden role="status" aria-live="polite">
+            <span class="material-symbols-outlined acc-hint__icon" aria-hidden="true">lightbulb</span>
+            <p class="acc-hint__text"></p>
+        </div>
+        <style>
+        .acc-hint{display:flex;gap:10px;align-items:flex-start;margin-top:18px;padding:12px 14px;border:1px solid var(--primary,#00857c);background:var(--primary-alpha-10,rgba(0,133,124,.08));border-radius:var(--border-radius-medium,8px);font-size:.92rem;color:var(--text-primary,#1f2937);line-height:1.55}
+        .acc-hint__icon{color:var(--primary,#00857c);font-size:20px;flex:0 0 auto}
+        .acc-hint__text{margin:0}
+        </style>
+        <script>
+        (function(){
+          function init(){
+            var box=document.querySelector('[data-acc-hint]'); if(!box) return;
+            var txt=box.querySelector('.acc-hint__text');
+            var groups=[].slice.call(document.querySelectorAll('[data-acc-accordion]'));
+            if(!groups.length) return;
+            function esc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+            function update(){
+              var total=0, empty=[];
+              groups.forEach(function(g){
+                var all=g.querySelectorAll('.acc-checkbox');
+                var on=g.querySelectorAll('.acc-checkbox:checked').length;
+                total+=on;
+                var t=g.querySelector('.acc-accordion__title');
+                if(all.length && on===0 && t) empty.push(t.textContent.trim());
+              });
+              if(total===0){ box.hidden=true; return; }
+              box.hidden=false;
+              if(!empty.length){
+                txt.textContent='Świetnie — opisałeś udogodnienia we wszystkich grupach. Dziękujemy, że dbasz o dostępność!';
+              } else {
+                txt.innerHTML='Aby dotrzeć do większej grupy odbiorców, rozważ też udogodnienia z: <strong>'+empty.map(esc).join('</strong>, <strong>')+'</strong>. To w pełni opcjonalne.';
+              }
+            }
+            document.addEventListener('change',function(e){ if(e.target&&e.target.classList&&e.target.classList.contains('acc-checkbox')) update(); });
+            update();
+          }
+          if(document.readyState!=='loading') init(); else document.addEventListener('DOMContentLoaded',init);
+        })();
+        </script>
+    </div>
+
+
+    {# ==================== SEKCJA 3: MIEJSCE I CZAS ==================== #}
+    <div class="form-section mt-30" data-form-step="3">
+        <h2 class="form-section-title">{{ __('Miejsce i czas', 'devents') }}</h2>
+
+        {# SPOSÓB REALIZACJI — steruje widocznością pól poniżej #}
+        <div class="form-group">
+            <label for="delivery_mode" class="form-label">
+                {{ __('Sposób realizacji', 'devents') }}
+                <span class="form-required-field" aria-hidden="true">*</span>
+            </label>
+            <select id="delivery_mode" name="delivery_mode" class="form-select" required aria-required="true">
+                <option value="">-- {{ __('Wybierz', 'devents') }} --</option>
+                {% for slug, name in event_methods %}
+                    <option value="{{ slug }}" {{ (event.delivery_mode == slug) ? 'selected' : '' }}>
+                        {{ name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        {# ONLINE: link do transmisji (widoczny dla online/hybryda) #}
+        <div class="form-group" id="online-link-field" hidden>
+            <label for="online_url" class="form-label">{{ __('Link do transmisji online', 'devents') }}</label>
+            <input type="url"
+                   id="online_url"
+                   name="online_url"
+                   class="form-control"
+                   value="{{ event.online_url|default('')|e }}"
+                   placeholder="https://...">
+            <small class="add-form-input-info">
+                {{ __('Link do transmisji na żywo (np. YouTube, Zoom, Microsoft Teams, Facebook).', 'devents') }}
+            </small>
+        </div>
+
+        {# STACJONARNIE: adres (widoczny dla na żywo/hybryda) #}
+        <div id="address-fields-wrap" hidden>
+            <fieldset class="acc-fieldset mb-20">
+                <legend class="form-label">{{ __('Adres wydarzenia', 'devents') }}</legend>
+
+                <div class="form-group mb-20">
+                    <label for="address_name" class="form-label">{{ __('Nazwa miejsca', 'devents') }}</label>
+                    <input type="text"
+                        id="address_name"
+                        name="address_name"
+                        class="form-control"
+                        value="{{ event.address_name|default('')|e }}"
+                        placeholder="{{ __('np. Muzeum Narodowe, Park Południowy...', 'devents') }}">
+                </div>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label for="address_street" class="form-label">{{ __('Ulica', 'devents') }}</label>
+                        <input type="text" id="address_street" name="address_street" class="form-control" value="{{ event.address_street|default('')|e }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address_building" class="form-label">{{ __('Nr budynku/lokalu', 'devents') }}</label>
+                        <input type="text" id="address_building" name="address_building" class="form-control" value="{{ event.address_building|default('')|e }}">
+                    </div>
+                </div>
+
+                <div class="form-row two-cols">
+                    <div class="form-group">
+                        <label for="address_city" class="form-label">{{ __('Miasto', 'devents') }}</label>
+                        <input type="text" id="address_city" name="address_city" class="form-control" value="{{ event.address_city|default('')|e }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="event_country_code" class="form-label">{{ __('Kraj', 'devents') }}</label>
+                        <select id="event_country_code" name="event_country_code" class="form-select choices-select">
+                            {% for c_code, c_name in countries %}
+                                <option value="{{ c_code }}" {{ (event.event_country_code == c_code) ? 'selected' : '' }}>
+                                    {{ c_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                {# Dodatkowe informacje — zwijane, aby formularz był zwięzły #}
+                <div class="form-group">
+                    <label class="form-checkbox-group">
+                        <input type="checkbox" id="toggle_location_info" {{ event.location_info ? 'checked' : '' }}>
+                        <span>{{ __('Dodaj dodatkowe informacje (dojazd, dostępność architektoniczna)', 'devents') }}</span>
+                    </label>
+                </div>
+                <div id="location-info-fields" class="{{ event.location_info ? '' : 'hidden' }}">
+                    <div class="form-group">
+                        <label for="location_info" class="sr-only">{{ __('Dodatkowe informacje', 'devents') }}</label>
+                        <textarea id="location_info" name="location_info" class="form-textarea" rows="4"
+                                  placeholder="{{ __('np. wejście od podwórza, winda dla wózków, najbliższy przystanek...', 'devents') }}">{{ event.location_info|default('')|e }}</textarea>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        {# CZAS #}
+        <div class="form-group">
+            <label class="form-checkbox-group">
+                <input type="checkbox" id="is_all_day" name="is_all_day" value="1" {{ event and event.is_all_day == 1 ? 'checked' : '' }}>
+                <span>{{ __('Wydarzenie całodniowe', 'devents') }}</span>
+            </label>
+        </div>
+
+        <div class="form-row two-cols">
+            <div class="form-group">
+                <label for="start-datetime" class="form-label">
+                    {{ __('Data i godzina rozpoczęcia', 'devents') }}
+                    <span class="form-required-field" aria-hidden="true">*</span>
+                </label>
+                <input type="text"
+                       id="start-datetime"
+                       name="start_datetime"
+                       class="form-control flatpickr-datetime"
+                       value="{{ event.start_datetime|default('')|e }}"
+                       required
+                       aria-required="true">
+            </div>
+            <div class="form-group">
+                <label for="end-datetime" class="form-label">
+                    {{ __('Data i godzina zakończenia', 'devents') }}
+                </label>
+                <input type="text"
+                       id="end-datetime"
+                       name="end_datetime"
+                       class="form-control flatpickr-datetime"
+                       value="{{ event.end_datetime|default('')|e }}"
+                       aria-describedby="end-datetime-hint">
+                <small class="add-form-input-info" id="end-datetime-hint">
+                    {{ __('Opcjonalne. Musi być późniejsza niż data rozpoczęcia.', 'devents') }}
+                </small>
+            </div>
+        </div>
+    </div>
+
+
+    {# ==================== SEKCJA 4: MEDIA ==================== #}
+    <div class="form-section mt-30" data-form-step="4">
+        <h2 class="form-section-title">{{ __('Media', 'devents') }}</h2>
+
+        {# --- 4a. Plakat wydarzenia --- #}
+        <div class="form-group">
+            <label class="form-checkbox-group">
+                <input type="checkbox" name="add_graphic" id="add_graphic" {{ event.image_alt_text ? 'checked' : '' }}>
+                <span>{{ __('Dodaj plakat wydarzenia', 'devents') }}</span>
+            </label>
+        </div>
+
+        <div id="graphic-fields" class="form-row two-cols {{ event.image_alt_text ? '' : 'hidden' }}">
+            <div class="form-group">
+                <label for="image" class="form-label">{{ __('Grafika (Plik)', 'devents') }}</label>
+                <input type="file"
+                       id="image"
+                       name="image"
+                       accept="image/png, image/jpeg, image/webp"
+                       class="form-control"
+                       aria-describedby="image-hint">
+                <small class="add-form-input-info" id="image-hint">
+                    {{ __('PNG, JPG lub WebP. Zalecany rozmiar: 1200×675px (16:9).', 'devents') }}
+                </small>
+            </div>
+            <div class="form-group">
+                <label for="image_alt_text" class="form-label">
+                    {{ __('Tekst alternatywny (Alt)', 'devents') }}
+                </label>
+                <input type="text"
+                       id="image_alt_text"
+                       name="image_alt_text"
+                       value="{{ event.image_alt_text|default('')|e }}"
+                       class="form-control"
+                       maxlength="300"
+                       aria-describedby="image-alt-hint">
+                <small class="add-form-input-info" id="image-alt-hint">
+                    {{ __('Krótki opis obrazka dla czytników ekranowych.', 'devents') }}
+                    <span id="image_alt_text-count" class="char-count" aria-live="polite">0 / 300 {{ __('znaków', 'devents') }}</span>
+                </small>
+            </div>
+        </div>
+
+        <hr class="form-divider">
+
+        {# --- 4b. Zaproszenie wideo --- #}
+        <div class="form-group">
+            <label class="form-checkbox-group">
+                <input type="checkbox" name="add_invitation_video" id="add_invitation_video" {{ event.invitation_video_url ? 'checked' : '' }}>
+                <span>{{ __('Dodaj zaproszenie na wydarzenie (wideo)', 'devents') }}</span>
+            </label>
+        </div>
+
+        <div id="invitation-video-fields" class="{{ event.invitation_video_url ? '' : 'hidden' }}">
+            <p class="add-form-input-info mb-15">
+                {{ __('Dodaj linki do zaproszeń wideo dla Głuchych. Jeśli posiadasz wiele języków migowych, kliknij "Dodaj zaproszenie".', 'devents') }}
+            </p>
+
+            <div id="invitation-videos-repeater">
+                <div class="video-row repeater-row">
+                    <div class="form-group mb-0 repeater-row__field repeater-row__field--wide">
+                        <label for="invitation_video_url" class="sr-only">{{ __('Link do wideo', 'devents') }}</label>
+                        <input type="url"
+                               name="invitation_video_url[]"
+                               id="invitation_video_url"
+                               placeholder="{{ __('Link do wideo (YouTube / Vimeo / MP4)', 'devents') }}"
+                               class="form-control"
+                               value="{{ event.invitation_video_url|default('')|e }}">
+                    </div>
+                    <div class="form-group mb-0 repeater-row__field repeater-row__field--narrow">
+                        <label class="sr-only">{{ __('Język migowy', 'devents') }}</label>
+                        <select name="invitation_video_lang[]" class="form-control">
+                            <option value="">-- {{ __('Wybierz język migowy', 'devents') }} --</option>
+                            {% for sl in unique_sign_languages %}
+                                <option value="{{ sl.sl_code }}">
+                                    {{ sl.sl_abbr|default(sl.sl_code|upper) }} - {{ sl.sl_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="repeater-row__actions">
+                        <button type="button"
+                                class="btn btn--icon btn--danger remove-video-btn"
+                                aria-label="{{ __('Usuń ten wiersz wideo', 'devents') }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="add-video-btn" class="btn btn--secondary btn--small mt-10">
+                <span class="material-symbols-outlined btn__icon" aria-hidden="true">add</span>
+                {{ __('Dodaj zaproszenie w innym języku', 'devents') }}
+            </button>
+
+            {# Template JS dla nowych wierszy wideo #}
+            <script type="text/template" id="video-row-template">
+                <div class="video-row repeater-row">
+                    <div class="form-group mb-0 repeater-row__field repeater-row__field--wide">
+                        <label class="sr-only">{{ __('Link do wideo', 'devents') }}</label>
+                        <input type="url" name="invitation_video_url[]" placeholder="{{ __('Link do wideo (YouTube / Vimeo / MP4)', 'devents') }}" class="form-control">
+                    </div>
+                    <div class="form-group mb-0 repeater-row__field repeater-row__field--narrow">
+                        <label class="sr-only">{{ __('Język migowy', 'devents') }}</label>
+                        <select name="invitation_video_lang[]" class="form-control">
+                            <option value="">-- {{ __('Wybierz język migowy', 'devents') }} --</option>
+                            {% for sl in unique_sign_languages %}
+                                <option value="{{ sl.sl_code }}">
+                                    {{ sl.sl_abbr|default(sl.sl_code|upper) }} - {{ sl.sl_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="repeater-row__actions">
+                        <button type="button" class="btn btn--icon btn--danger remove-video-btn" aria-label="{{ __('Usuń ten wiersz wideo', 'devents') }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                        </button>
+                    </div>
+                </div>
+            </script>
+        </div>
+    </div>
+
+
+    {# ==================== SEKCJA 5: BILETY I ZAPISY ==================== #}
+    <div class="form-section mt-30" data-form-step="5">
+        <h2 class="form-section-title">{{ __('Bilety i zapisy', 'devents') }}</h2>
+
+        <div class="form-group">
+            <div id="tickets-repeater">
+                {% for ticket in tickets %}
+                    <div class="ticket-row repeater-row">
+                        <div class="repeater-row__field repeater-row__field--wide">
+                            <label class="sr-only">{{ __('Nazwa biletu', 'devents') }}</label>
+                            <input type="text"
+                                   name="ticket_name[]"
+                                   value="{{ ticket.name|e }}"
+                                   placeholder="{{ __('Nazwa biletu', 'devents') }}"
+                                   class="form-control">
+                        </div>
+                        <div class="repeater-row__field repeater-row__field--price">
+                            <label class="sr-only">{{ __('Cena', 'devents') }}</label>
+                            <input type="number"
+                                   name="ticket_price[]"
+                                   value="{{ ticket.price|e }}"
+                                   placeholder="{{ __('Cena', 'devents') }}"
+                                   step="0.01"
+                                   min="0"
+                                   class="form-control">
+                        </div>
+                        <div class="repeater-row__actions">
+                            <button type="button"
+                                    class="btn btn--icon btn--danger remove-ticket-btn"
+                                    aria-label="{{ __('Usuń ten bilet', 'devents') }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button type="button" id="add-ticket-btn" class="btn btn--secondary btn--small mt-10">
+                <span class="material-symbols-outlined btn__icon" aria-hidden="true">add</span>
+                {{ __('Dodaj bilet', 'devents') }}
+            </button>
+        </div>
+
+        <div class="form-group mt-20">
+            <label for="ticket" class="form-label">{{ __('Link do platformy z biletami', 'devents') }}</label>
+            <input type="url"
+                   id="ticket"
+                   name="ticket"
+                   value="{{ event.ticket|default('')|e }}"
+                   placeholder="https://..."
+                   class="form-control"
+                   aria-describedby="ticket-hint">
+            <small class="add-form-input-info" id="ticket-hint">
+                {{ __('Link do zewnętrznej platformy sprzedaży (np. Eventim, Bilety24).', 'devents') }}
+            </small>
+        </div>
+
+        <hr class="form-divider">
+
+        {# Przycisk Akcji (CTA) #}
+        <div class="form-group">
+            <label class="form-checkbox-group">
+                <input type="checkbox"
+                       id="action_button_enabled"
+                       name="action_button_enabled"
+                       value="1"
+                       {{ event and event.action_button_enabled == 1 ? 'checked' : '' }}
+                       aria-controls="action_button_fields">
+                <span>{{ __('Przycisk akcji (np. Zarejestruj się)', 'devents') }}</span>
+            </label>
+        </div>
+
+        <div id="action_button_fields"
+             class="form-row two-cols {{ event and event.action_button_enabled == 1 ? '' : 'hidden' }}">
+            <div class="form-group">
+                <label for="action_button_text" class="form-label">{{ __('Nazwa przycisku', 'devents') }}</label>
+                <input type="text"
+                       id="action_button_text"
+                       name="action_button_text"
+                       class="form-control"
+                       value="{{ event.action_button_text|default('')|e }}"
+                       placeholder="{{ __('np. Zarejestruj się', 'devents') }}">
+            </div>
+            <div class="form-group">
+                <label for="action_button_link" class="form-label">{{ __('Link przycisku', 'devents') }}</label>
+                <input type="url"
+                       id="action_button_link"
+                       name="action_button_link"
+                       class="form-control"
+                       value="{{ event.action_button_link|default('')|e }}"
+                       placeholder="https://...">
+            </div>
+        </div>
+    </div>
+
+
+    {# ==================== SEKCJA ADMIN: KOMENTARZ EDYCJI ==================== #}
+    {% if is_admin_editing %}
+        <div class="form-section form-section--admin-alert mt-30">
+            <h2 class="form-section-title form-section-title--danger">
+                <span class="material-symbols-outlined" aria-hidden="true">edit_note</span>
+                {{ __('Komentarz edycji', 'devents') }}
+            </h2>
+            <div class="form-group">
+                <label for="admin_comment" class="form-label">
+                    {{ __('Dlaczego edytujesz to wydarzenie?', 'devents') }}
+                </label>
+                <textarea id="admin_comment"
+                          name="admin_comment"
+                          class="form-textarea"
+                          maxlength="300"
+                          aria-describedby="admin-comment-hint"></textarea>
+                <small class="add-form-input-info" id="admin-comment-hint">
+                    <span id="admin_comment-count" class="char-count" aria-live="polite">0 / 300 {{ __('znaków', 'devents') }}</span>
+                </small>
+            </div>
+        </div>
+    {% endif %}
+
+
+    {# ==================== AKCEPTACJA REGULAMINU ==================== #}
+    <div class="form-section mt-30 form-section--terms">
+        <h2 class="form-section-title">
+            <span class="material-symbols-outlined" aria-hidden="true">gavel</span>
+            {{ __('Regulamin', 'devents') }}
+        </h2>
+
+        <details class="terms-details">
+            <summary class="terms-details__summary">{{ __('Przeczytaj regulamin dodawania wydarzeń', 'devents') }}</summary>
+            <div class="terms-details__body">
+                <h3>{{ __('Regulamin dodawania wydarzeń w serwisie DEvents', 'devents') }}</h3>
+                <ol>
+                    <li>{{ __('Dodając wydarzenie oświadczasz, że masz prawo je publikować, a podane informacje są prawdziwe i aktualne.', 'devents') }}</li>
+                    <li>{{ __('Treści muszą być Twojego autorstwa lub posiadać zgodę właściciela praw. Zabronione jest kopiowanie cudzych opisów, grafik, zdjęć i materiałów wideo bez zgody (naruszenie praw autorskich).', 'devents') }}</li>
+                    <li>{{ __('Plakat i zaproszenie wideo nie mogą naruszać praw osób trzecich (wizerunek, znaki towarowe, prawa autorskie).', 'devents') }}</li>
+                    <li>{{ __('Zakazane są treści niecenzuralne, wulgarne, pornograficzne, nawołujące do nienawiści, dyskryminujące (m.in. ze względu na niepełnosprawność, narodowość, religię, płeć czy orientację), promujące przemoc, używki lub działalność niezgodną z prawem.', 'devents') }}</li>
+                    <li>{{ __('Wydarzenie nie może wprowadzać w błąd (fałszywe terminy, ceny, organizator) ani służyć wyłącznie ukrytej reklamie lub spamowi.', 'devents') }}</li>
+                    <li>{{ __('Informacje o dostępności (PJM, napisy, audiodeskrypcja itp.) muszą być zgodne z prawdą — to fundament misji DEvents wobec osób z niepełnosprawnościami.', 'devents') }}</li>
+                    <li>{{ __('Dane osobowe uczestników i osób trzecich publikujesz wyłącznie za ich zgodą, zgodnie z RODO.', 'devents') }}</li>
+                    <li>{{ __('Administrator DEvents może w każdej chwili edytować, ukryć, odrzucić lub trwale usunąć wydarzenie, które narusza ten regulamin, prawo lub politykę serwisu — także bez wcześniejszego powiadomienia.', 'devents') }}</li>
+                    <li>{{ __('Wielokrotne lub rażące naruszenia mogą skutkować ograniczeniem albo zablokowaniem konta organizatora.', 'devents') }}</li>
+                    <li>{{ __('Akceptując regulamin, przyjmujesz do wiadomości i akceptujesz powyższe zasady oraz prawo administratora do moderacji treści.', 'devents') }}</li>
+                </ol>
+            </div>
+        </details>
+
+        <div class="form-group mt-15">
+            <label class="form-checkbox-group">
+                <input type="checkbox" id="accept_terms" name="accept_terms" value="1" {{ is_edit_mode ? 'checked' : '' }}>
+                <span>
+                    {{ __('Akceptuję regulamin dodawania wydarzeń', 'devents') }}
+                    <span class="form-required-field" aria-hidden="true">*</span>
+                </span>
+            </label>
+        </div>
+    </div>
+
+
+    {# ==================== STICKY STOPKA Z AKCJAMI ==================== #}
+    <div class="form-actions-footer">
+        <div class="form-actions-footer__inner">
+            <button type="button" id="btn-save-draft" class="btn btn--secondary btn--large">
+                <span class="material-symbols-outlined btn__icon" aria-hidden="true">save</span>
+                {{ __('Zapisz szkic', 'devents') }}
+            </button>
+            <button type="submit" id="btn-publish" class="btn btn--primary btn--large">
+                <span class="material-symbols-outlined btn__icon" aria-hidden="true">send</span>
+                {{ is_edit_mode ? __('Zaktualizuj', 'devents') : __('Opublikuj', 'devents') }}
+            </button>
+        </div>
+    </div>
+</form>
+
+
+{# ==================== LOGI SYSTEMOWE (Tylko edycja) ==================== #}
+{% if event_logs is defined and event_logs is not empty %}
+    <section class="settings-card mt-30" aria-label="{{ __('Logi systemowe', 'devents') }}">
+        <div class="card-header-small mb-20">
+            <h3 class="card-header-small__title">
+                <span class="material-symbols-outlined" aria-hidden="true">history</span>
+                {{ __('Logi systemowe', 'devents') }}
+            </h3>
+        </div>
+        <ol class="timeline-container">
+            {% for log in event_logs %}
+                <li class="timeline-item">
+                    <div class="timeline-icon status-bg-{{ log.action|default('default') }}" aria-hidden="true">
+                        <span class="material-symbols-outlined">{{ log.icon }}</span>
+                    </div>
+                    <div class="timeline-content">
+                        <time class="timeline-date" datetime="{{ log.date }}">{{ log.date }}</time>
+                        <div class="timeline-title">{{ log.action_label }}</div>
+                        <div class="timeline-user">
+                            <span class="material-symbols-outlined" aria-hidden="true">person</span>
+                            <strong>{{ log.user_name }}</strong>
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ol>
+    </section>
+{% endif %}

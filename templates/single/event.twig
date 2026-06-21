@@ -1,0 +1,710 @@
+{# ========================================================================
+   SZABLON POJEDYNCZEGO WYDARZENIA — v14.1 (A11Y)
+
+   Wygląd: identyczny z v13.6.
+   Zmiana: kolejność TAB (sidebar przed main w DOM, CSS grid-template-areas
+   trzyma wizualnie main po lewej, sidebar po prawej).
+
+   Tab order: tytuł → organizator → kiedy i gdzie → wiek → dostępność
+              → bilety → akcje → opis → recenzje
+
+   Inne zmiany A11Y:
+   - Wrapper: <div role="region" aria-labelledby="event-title"> (nie <main>,
+     bo Elementor ma już swój <main>)
+   - Skip-link "Przejdź do opisu" (omija cały sidebar)
+   - WAI tabs na przełączniku języków
+   - aria-label na linkach społecznościowych "(otwiera się w nowej karcie)"
+   - DL w "Kiedy i gdzie": dt widoczne (nie sr-only)
+   - acc-iso-tags: jeden aria-label na grupie zamiast title= na każdym
+   - Age rating przeniesiony z hero tagów do sidebar widgetu
+   - JSON-LD bez zmian
+======================================================================== #}
+
+{% from 'macros/address.twig' import format_address %}
+
+{% if event.verified == 1 %}
+
+{# ── Zmienne pomocnicze ── #}
+{% set has_end_date = (event.end_datetime and event.end_datetime != '0000-00-00 00:00:00') %}
+{% set is_same_day  = (has_end_date and event.start_datetime|date('Y-m-d') == event.end_datetime|date('Y-m-d')) %}
+{% set videos       = event.invitation_videos|default([]) %}
+{% set has_videos   = (videos is not empty and videos[0].url is defined and videos[0].url is not empty) %}
+{% set has_tickets  = (event.ticket_types is not empty and event.ticket_types[0].name is defined and event.ticket_types[0].name is not empty) %}
+{% set address      = format_address(event) %}
+
+{% set days_map = {
+    'Mon': __('poniedziałek', 'devents'),
+    'Tue': __('wtorek', 'devents'),
+    'Wed': __('środa', 'devents'),
+    'Thu': __('czwartek', 'devents'),
+    'Fri': __('piątek', 'devents'),
+    'Sat': __('sobota', 'devents'),
+    'Sun': __('niedziela', 'devents')
+} %}
+
+<div class="event-wrapper" id="devents-main-content" role="region" aria-labelledby="event-title">
+
+    {# ═══════════════════════════════════════════════════════════
+       BREADCRUMBS
+    ═══════════════════════════════════════════════════════════ #}
+    <nav class="event-breadcrumbs" aria-label="{{ __('Nawigacja okruszkowa', 'devents') }}">
+        <ol class="event-breadcrumbs__list">
+            <li class="event-breadcrumbs__item">
+                <a href="{{ home_url('/wydarzenia') }}" class="event-breadcrumbs__link">
+                    {{ __('Wydarzenia', 'devents') }}
+                </a>
+            </li>
+            {% if event.category %}
+                <li class="event-breadcrumbs__item">
+                    <a href="{{ home_url('/wydarzenia?category=' ~ event.category|url_encode) }}" class="event-breadcrumbs__link">
+                        {{ event.category_label|default(event.category)|e }}
+                    </a>
+                </li>
+            {% endif %}
+            <li class="event-breadcrumbs__item event-breadcrumbs__item--current" aria-current="page" data-trans-key="title">
+                {{ content_versions[active_version_code].title|length > 50
+                    ? content_versions[active_version_code].title|slice(0, 50)|e ~ '…'
+                    : content_versions[active_version_code].title|e }}
+            </li>
+        </ol>
+    </nav>
+
+    {# ═══════════════════════════════════════════════════════════
+       ALERTY SYSTEMOWE
+    ═══════════════════════════════════════════════════════════ #}
+    {% if author_role == 'subscriber' %}
+        <div class="event-alert event-alert--info" role="status">
+            <span class="material-symbols-outlined event-alert__icon" aria-hidden="true">info</span>
+            <span>{{ __('To wydarzenie zostało dodane przez użytkownika, który nie jest organizatorem.', 'devents') }}</span>
+        </div>
+    {% elseif author_role == 'administrator' %}
+        <div class="event-alert event-alert--info" role="status">
+            <span class="material-symbols-outlined event-alert__icon" aria-hidden="true">admin_panel_settings</span>
+            <span>{{ __('To wydarzenie zostało dodane przez administratora.', 'devents') }}</span>
+        </div>
+    {% endif %}
+
+    {# ═══════════════════════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════════════════════ #}
+    <header class="event-hero">
+
+        {# Tagi (kategoria, "Trwa teraz", okazja — wiek przeniesiony do sidebara) #}
+        <div class="event-hero__tags">
+            {% if event.category %}
+                <span class="event-pill event-pill--category">
+                    {{ event.category_label|default(event.category)|e }}
+                </span>
+            {% endif %}
+
+            {% if event.is_current %}
+                <span class="event-pill event-pill--now">{{ __('Trwa teraz', 'devents') }}</span>
+            {% endif %}
+
+            {% if event.special_occasion_slug %}
+                <a href="{{ home_url('/wydarzenia?special_occasion=' ~ event.special_occasion_id) }}"
+                   class="event-pill event-pill--occasion"
+                   style="background-color: {{ event.special_occasion_color|default('var(--primary)') }};">
+                    {{ event.special_occasion_name|default(event.special_occasion_slug) }}
+                </a>
+            {% endif %}
+        </div>
+
+        {# Przełącznik języków — WAI tablist #}
+        {% if content_versions|length > 1 %}
+            <div class="event-lang-switcher"
+                 role="tablist"
+                 aria-label="{{ __('Wybierz język wydarzenia', 'devents') }}">
+                {% for lang, version in content_versions %}
+                    {% set is_active = (lang == active_version_code) %}
+                    <button type="button"
+                            id="lang-tab-{{ lang }}"
+                            role="tab"
+                            aria-selected="{{ is_active ? 'true' : 'false' }}"
+                            aria-controls="event-translatable-content"
+                            tabindex="{{ is_active ? '0' : '-1' }}"
+                            class="btn btn--small btn-lang-switch {{ is_active ? 'btn--primary' : 'btn--outline' }}"
+                            data-lang="{{ lang }}">
+                        <span class="material-symbols-outlined btn__icon" aria-hidden="true">translate</span>
+                        {{ version.name }}
+                    </button>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <h1 class="event-hero__title" id="event-title" data-trans-key="title">
+            {{ content_versions[active_version_code].title|e }}
+        </h1>
+
+        <div class="event-hero__organizer">
+            <span class="material-symbols-outlined event-hero__organizer-icon" aria-hidden="true">business_center</span>
+            <span>
+                {{ __('Organizator:', 'devents') }}
+                {% if organizer_is_linkable and organizer_id > 0 %}
+                    <a href="{{ home_url('/organizator/' ~ organizer_id) }}" class="event-hero__organizer-link">
+                        {{ organizer_name|e }}
+                    </a>
+                {% else %}
+                    <strong>{{ organizer_name|e }}</strong>
+                {% endif %}
+            </span>
+
+            {% if is_user_logged_in and user.ID != event.user_id and organizer_is_linkable %}
+                <button type="button"
+                        class="btn-follow btn-follow--inline {{ is_organizer_followed ? 'is-followed' : '' }}"
+                        data-organizer-id="{{ event.user_id }}"
+                        data-nonce="{{ wp_create_nonce('devents_subscription_nonce') }}"
+                        aria-pressed="{{ is_organizer_followed ? 'true' : 'false' }}"
+                        aria-label="{{ __('Obserwuj organizatora:', 'devents') }} {{ organizer_name|e }}">
+                    <span class="material-symbols-outlined state-follow" aria-hidden="true">person_add</span>
+                    <span class="material-symbols-outlined state-unfollow" aria-hidden="true">person_remove</span>
+                    <span class="btn-follow__label btn-follow__label--follow" aria-hidden="true">{{ __('Obserwuj', 'devents') }}</span>
+                    <span class="btn-follow__label btn-follow__label--unfollow" aria-hidden="true">{{ __('Obserwujesz', 'devents') }}</span>
+                </button>
+            {% endif %}
+        </div>
+    </header>
+
+    {# Skip-link wewnętrzny — Tab 2 po wejściu do regionu #}
+    <a href="#event-description" class="devents-skip-link devents-skip-link--inline">
+        {{ __('Przejdź do opisu wydarzenia', 'devents') }}
+    </a>
+
+    {# ═══════════════════════════════════════════════════════════
+       GŁÓWNY GRID
+       DOM: sidebar PRZED main → Tab idzie przez kiedy/gdzie/dostępność
+       zanim dotrze do opisu.
+       CSS: grid-template-areas trzyma wizualnie main po lewej.
+    ═══════════════════════════════════════════════════════════ #}
+    <div class="event-columns" id="event-translatable-content">
+
+        {# ─── SIDEBAR — PIERWSZY W DOM (wizualnie po prawej przez CSS grid) ─── #}
+        <aside class="event-sidebar" aria-labelledby="widget-when-where-title">
+
+            {# Widget: Kiedy i gdzie #}
+            <div class="sidebar-widget" id="widget-when-where">
+                <h2 id="widget-when-where-title" class="sidebar-widget__title">
+                    <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
+                    {{ __('Kiedy i gdzie', 'devents') }}
+                </h2>
+
+                <dl class="sidebar-widget__details">
+
+                    <div class="sidebar-widget__detail-row">
+                        <dt>{{ __('Data', 'devents') }}</dt>
+                        <dd>
+                            <span class="material-symbols-outlined sidebar-widget__detail-icon" aria-hidden="true">calendar_today</span>
+                            <span>
+                                <strong>{{ event.start_datetime|date('d.m.Y') }}</strong>
+                                ({{ days_map[event.start_datetime|date('D')] }})
+                                {% if has_end_date and not is_same_day %}
+                                    <br>— {{ event.end_datetime|date('d.m.Y') }}
+                                    ({{ days_map[event.end_datetime|date('D')] }})
+                                {% endif %}
+                            </span>
+                        </dd>
+                    </div>
+
+                    {% if not event.is_all_day %}
+                        <div class="sidebar-widget__detail-row">
+                            <dt>{{ __('Godzina', 'devents') }}</dt>
+                            <dd>
+                                <span class="material-symbols-outlined sidebar-widget__detail-icon" aria-hidden="true">schedule</span>
+                                <span>
+                                    {% if is_same_day or not has_end_date %}
+                                        {{ event.start_datetime|date('H:i') }}
+                                        {% if has_end_date %} – {{ event.end_datetime|date('H:i') }}{% endif %}
+                                    {% else %}
+                                        <span class="sidebar-widget__multi-date">
+                                            <span>{{ __('Start:', 'devents') }} <strong>{{ event.start_datetime|date('d.m.Y, H:i') }}</strong></span>
+                                            <span>{{ __('Koniec:', 'devents') }} <strong>{{ event.end_datetime|date('d.m.Y, H:i') }}</strong></span>
+                                        </span>
+                                    {% endif %}
+                                </span>
+                            </dd>
+                        </div>
+                    {% else %}
+                        <div class="sidebar-widget__detail-row">
+                            <dt>{{ __('Czas', 'devents') }}</dt>
+                            <dd>
+                                <span class="material-symbols-outlined sidebar-widget__detail-icon" aria-hidden="true">schedule</span>
+                                <span>{{ __('Wydarzenie całodniowe', 'devents') }}</span>
+                            </dd>
+                        </div>
+                    {% endif %}
+
+                    <div class="sidebar-widget__detail-row">
+                        <dt>{{ __('Realizacja', 'devents') }}</dt>
+                        <dd>
+                            <span class="material-symbols-outlined sidebar-widget__detail-icon" aria-hidden="true">
+                                {{ event.delivery_mode == 'online' ? 'language' : (event.delivery_mode == 'hybrid' ? 'devices_other' : 'person_pin_circle') }}
+                            </span>
+                            <span>{{ event.delivery_mode_label|default(event.delivery_mode)|e }}</span>
+                        </dd>
+                    </div>
+
+                    {% if event.online_url is defined and event.online_url %}
+                        <div class="sidebar-widget__detail-row">
+                            <dt>{{ __('Transmisja', 'devents') }}</dt>
+                            <dd>
+                                <span class="material-symbols-outlined sidebar-widget__detail-icon" aria-hidden="true">videocam</span>
+                                <a href="{{ event.online_url|e('html_attr') }}" target="_blank" rel="noopener noreferrer"
+                                   aria-label="{{ __('Dołącz do transmisji online', 'devents') }} ({{ __('otwiera się w nowej karcie', 'devents') }})">
+                                    {{ __('Dołącz do transmisji online', 'devents') }}
+                                    <span class="material-symbols-outlined" aria-hidden="true" style="font-size:1rem; vertical-align:middle;">open_in_new</span>
+                                </a>
+                            </dd>
+                        </div>
+                    {% endif %}
+
+                    {% if address %}
+                        <div class="sidebar-widget__detail-row">
+                            <dt>{{ __('Miejsce', 'devents') }}</dt>
+                            <dd>
+                                <span class="material-symbols-outlined sidebar-widget__detail-icon" aria-hidden="true">location_on</span>
+                                <span class="sidebar-widget__address-block" data-trans-key="address_full">{{ address|e }}</span>
+                            </dd>
+                        </div>
+                    {% endif %}
+
+                    {% if event.country_name %}
+                        <div class="sidebar-widget__detail-row">
+                            <dt>{{ __('Kraj', 'devents') }}</dt>
+                            <dd>
+                                <span class="material-symbols-outlined sidebar-widget__detail-icon" aria-hidden="true">travel_explore</span>
+                                <span>{{ event.country_name|e }}</span>
+                            </dd>
+                        </div>
+                    {% endif %}
+
+                </dl>
+
+                {% if event.action_button_enabled and event.action_button_link %}
+                    {% set action_text = content_versions[active_version_code].action_button_text|default(__('Więcej informacji', 'devents')) %}
+                    <a href="{{ event.action_button_link }}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="btn btn--secondary sidebar-widget__cta"
+                       aria-label="{{ action_text|e }} ({{ __('otwiera się w nowej karcie', 'devents') }})">
+                        <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+                        <span data-trans-key="action_button_text">{{ action_text|e }}</span>
+                    </a>
+                {% endif %}
+            </div>
+
+            {# Widget: Wiek uczestników #}
+            {% if event.age_rating %}
+                {% set check_age = event.age_rating|replace({'+': ''})|trim %}
+                <div class="sidebar-widget sidebar-widget--compact" id="widget-age">
+                    <h2 class="sidebar-widget__title">
+                        <span class="material-symbols-outlined" aria-hidden="true">child_care</span>
+                        {{ __('Wiek uczestników', 'devents') }}
+                    </h2>
+                    <p class="sidebar-widget__age-info">
+                        {% if check_age == '0' %}
+                            {{ __('Dla wszystkich grup wiekowych', 'devents') }}
+                        {% else %}
+                            {{ __('Od', 'devents') }} <strong>{{ check_age }}</strong> {{ __('lat', 'devents') }}
+                        {% endif %}
+                    </p>
+                </div>
+            {% endif %}
+
+            {# Widget: Dostępność #}
+            {% if accessibility_items is not empty %}
+                <div class="sidebar-widget" id="widget-accessibility">
+                    <h2 class="sidebar-widget__title">
+                        <span class="material-symbols-outlined" aria-hidden="true">accessibility_new</span>
+                        {{ __('Dostępność', 'devents') }}
+                    </h2>
+                    <ul class="acc-detail-list" role="list">
+                        {% for item in accessibility_items %}
+                            {% set item_langs = (selected_acc_languages[item.id] ?? []) %}
+                            <li class="acc-detail-list__item">
+                                <span class="material-symbols-outlined acc-detail-list__icon" aria-hidden="true">{{ item.icon }}</span>
+                                <span class="acc-detail-list__content">
+                                    {{ item.name }}
+                                    {% if item_langs is not empty %}
+                                        <span class="acc-iso-tags"
+                                              aria-label="{{ __('Języki:', 'devents') }} {% for lang in item_langs %}{{ lang.name }}{% if not loop.last %}, {% endif %}{% endfor %}">
+                                            {% for lang in item_langs %}
+                                                <span class="acc-iso-tag" aria-hidden="true">{{ lang.abbr|default(lang.code|upper) }}</span>
+                                            {% endfor %}
+                                        </span>
+                                    {% endif %}
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {# Widget: Bilety #}
+            {% if has_tickets %}
+                <div class="sidebar-widget" id="widget-tickets">
+                    <h2 class="sidebar-widget__title">
+                        <span class="material-symbols-outlined" aria-hidden="true">confirmation_number</span>
+                        {{ __('Bilety', 'devents') }}
+                    </h2>
+                    <ul class="tickets-list">
+                        {% for ticket in event.ticket_types %}
+                            {% if ticket.name is not empty %}
+                                <li class="tickets-list__item">
+                                    <span class="tickets-list__name" data-trans-key="tickets_names" data-trans-index="{{ loop.index0 }}">
+                                        {{ content_versions[active_version_code].tickets_names[loop.index0]|default(ticket.name)|e }}
+                                    </span>
+                                    <span class="tickets-list__separator" aria-hidden="true"></span>
+                                    <span class="tickets-list__price">
+                                        {% if ticket.price == 0 %}
+                                            <span class="tickets-list__free">{{ __('Bezpłatny', 'devents') }}</span>
+                                        {% else %}
+                                            {{ ticket.price|number_format(2, ',', ' ') }} zł
+                                        {% endif %}
+                                    </span>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                    {% if event.ticket %}
+                        <a href="{{ event.ticket }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="btn btn--primary sidebar-widget__cta"
+                           aria-label="{{ __('Kup bilet (otwiera się w nowej karcie)', 'devents') }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">shopping_cart_checkout</span>
+                            {{ __('Kup bilet', 'devents') }}
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {# Widget: Akcje #}
+            <div class="sidebar-widget" id="widget-actions">
+                <h2 class="sidebar-widget__title">
+                    <span class="material-symbols-outlined" aria-hidden="true">share</span>
+                    {{ __('Akcje', 'devents') }}
+                </h2>
+
+                <div class="event-actions" role="list">
+
+                    <a href="{{ home_url('/event/ics/' ~ event.id) }}"
+                       class="event-actions__btn"
+                       role="listitem"
+                       aria-label="{{ __('Dodaj do kalendarza (plik .ics)', 'devents') }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">calendar_add_on</span>
+                    </a>
+
+                    {% if is_user_logged_in %}
+                        <button type="button"
+                                class="event-actions__btn event-actions__btn--fav btn-favorite {{ event.is_favorite ? 'is-favorite' : '' }}"
+                                role="listitem"
+                                data-event-id="{{ event.id }}"
+                                data-nonce="{{ wp_create_nonce('devents_favorites_nonce') }}"
+                                aria-pressed="{{ event.is_favorite ? 'true' : 'false' }}"
+                                aria-label="{{ event.is_favorite ? __('Usuń z ulubionych:', 'devents') : __('Dodaj do ulubionych:', 'devents') }} {{ content_versions[active_version_code].title|e }}">
+                            <span class="state-off" aria-hidden="true"><span class="material-symbols-outlined">heart_plus</span></span>
+                            <span class="state-on"  aria-hidden="true"><span class="material-symbols-outlined">favorite</span></span>
+                        </button>
+                    {% endif %}
+
+                    <span class="event-actions__separator" aria-hidden="true" role="none"></span>
+
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ current_url|url_encode }}"
+                       target="_blank" rel="noopener noreferrer"
+                       class="event-actions__btn event-actions__btn--social"
+                       role="listitem"
+                       aria-label="{{ __('Udostępnij na Facebooku (otwiera się w nowej karcie)', 'devents') }}">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M22.675 0h-21.35C.593 0 0 .593 0 1.325v21.351C0 23.407.593 24 1.325 24h11.495v-9.294H9.691v-3.622h3.129V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.464.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116C23.407 24 24 23.407 24 22.676V1.325C24 .593 23.407 0 22.675 0z"/></svg>
+                    </a>
+
+                    <a href="https://twitter.com/intent/tweet?url={{ current_url|url_encode }}&text={{ content_versions[active_version_code].title|e('url') }}"
+                       target="_blank" rel="noopener noreferrer"
+                       class="event-actions__btn event-actions__btn--social"
+                       role="listitem"
+                       aria-label="{{ __('Udostępnij na X (otwiera się w nowej karcie)', 'devents') }}">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </a>
+
+                    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ current_url|url_encode }}"
+                       target="_blank" rel="noopener noreferrer"
+                       class="event-actions__btn event-actions__btn--social"
+                       role="listitem"
+                       aria-label="{{ __('Udostępnij na LinkedIn (otwiera się w nowej karcie)', 'devents') }}">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.853-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                    </a>
+
+                </div>
+
+                {% if is_user_logged_in %}
+                    <button type="button"
+                            class="event-report-btn btn-report"
+                            data-item-id="{{ event.id }}"
+                            data-item-type="event"
+                            aria-label="{{ __('Zgłoś naruszenie regulaminu dla tego wydarzenia', 'devents') }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">flag</span>
+                        {{ __('Zgłoś naruszenie', 'devents') }}
+                    </button>
+                {% endif %}
+            </div>
+
+        </aside>
+
+        {# ─── MAIN — DRUGI W DOM (wizualnie po lewej przez CSS grid) ─── #}
+        <div class="event-main">
+
+            {# Wideo zaproszenia #}
+            {% if has_videos %}
+                <section class="event-videos" aria-labelledby="event-videos-title">
+                    <h2 id="event-videos-title" class="event-videos__title">
+                        <span class="material-symbols-outlined" aria-hidden="true">smart_display</span>
+                        {{ __('Zaproszenie wideo', 'devents') }}
+                    </h2>
+                    <div class="event-videos__grid">
+                        {% for video in videos %}
+                            {% if video.url %}
+                                <div class="event-videos__item">
+                                    {% set embed_url = '' %}
+                                    {% set is_direct_video = false %}
+
+                                    {% if 'youtube.com/' in video.url or 'youtu.be/' in video.url %}
+                                        {% set video_id = video.url|split('v=')|last|split('/')|last|split('?')[0]|split('&')[0] %}
+                                        {% set embed_url = 'https://www.youtube.com/embed/' ~ video_id %}
+                                    {% elseif 'vimeo.com/' in video.url %}
+                                        {% set video_id = video.url|split('/')|last %}
+                                        {% set embed_url = 'https://player.vimeo.com/video/' ~ video_id %}
+                                    {% elseif video.url matches '/\\.(mp4|webm|mov)$/i' %}
+                                        {% set is_direct_video = true %}
+                                    {% endif %}
+
+                                    {% set display_lang = video.lang|default('') %}
+                                    {% if video.lang %}
+                                        {% for sl in unique_sign_languages %}
+                                            {% if sl.sl_code == video.lang %}
+                                                {# Pełna nazwa języka (np. „Polski język migowy"), a nie skrót/kod #}
+                                                {% set display_lang = sl.sl_name|default(sl.sl_abbr|default(sl.sl_code|upper)) %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+
+                                    {% if embed_url %}
+                                        <iframe class="event-videos__iframe"
+                                                src="{{ embed_url }}"
+                                                frameborder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                                                allowfullscreen
+                                                loading="lazy"
+                                                referrerpolicy="strict-origin-when-cross-origin"
+                                                title="{{ __('Zaproszenie wideo', 'devents') }}{% if display_lang %} — {{ __('język migowy:', 'devents') }} {{ display_lang }}{% endif %}">
+                                        </iframe>
+                                    {% elseif is_direct_video %}
+                                        <video controls class="event-videos__iframe" preload="metadata"
+                                               aria-label="{{ __('Zaproszenie wideo', 'devents') }}{% if display_lang %} — {{ display_lang }}{% endif %}">
+                                            <source src="{{ video.url }}" type="video/mp4">
+                                            {{ __('Twoja przeglądarka nie obsługuje odtwarzania wideo.', 'devents') }}
+                                        </video>
+                                    {% else %}
+                                        <a href="{{ video.url }}"
+                                           target="_blank" rel="noopener noreferrer"
+                                           class="btn btn--primary event-videos__fallback-link"
+                                           aria-label="{{ __('Obejrzyj zaproszenie wideo (otwiera się w nowej karcie)', 'devents') }}">
+                                            {{ __('Obejrzyj zaproszenie', 'devents') }}
+                                            <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+                                        </a>
+                                    {% endif %}
+
+                                    {% if display_lang %}
+                                        <div class="event-videos__caption">
+                                            <span class="material-symbols-outlined" aria-hidden="true">sign_language</span>
+                                            {{ __('Język migowy:', 'devents') }} <strong>{{ display_lang }}</strong>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+            {# Zdjęcie #}
+            {% if event.image_url %}
+                <figure class="event-image-container">
+                    <img class="event-image"
+                         src="{{ event.image_url }}"
+                         alt="{{ content_versions[active_version_code].image_alt_text|default(content_versions[active_version_code].title)|e }}"
+                         data-trans-key="image_alt_text"
+                         loading="lazy">
+                </figure>
+            {% endif %}
+
+            {# Opis — cel skip-linka #}
+            <article class="event-description content-typography"
+                     id="event-description"
+                     tabindex="-1"
+                     data-trans-key="description_html">
+                {{ content_versions[active_version_code].description_html|raw }}
+            </article>
+
+            {# Informacje o dojeździe #}
+            {% if content_versions[active_version_code].location_info_html %}
+                <section class="event-location-info content-typography mt-30" aria-labelledby="event-location-info-title">
+                    <h2 id="event-location-info-title">
+                        <span class="material-symbols-outlined" aria-hidden="true">directions_bus</span>
+                        {{ __('Informacje o dojeździe i miejscu', 'devents') }}
+                    </h2>
+                    <div data-trans-key="location_info_html">
+                        {{ content_versions[active_version_code].location_info_html|raw }}
+                    </div>
+                </section>
+            {% endif %}
+
+        </div>{# end .event-main #}
+
+    </div>{# end .event-columns #}
+
+    {# ═══════════════════════════════════════════════════════════
+       PYTANIA DO ORGANIZATORA
+    ═══════════════════════════════════════════════════════════ #}
+    <section class="event-questions" aria-labelledby="event-questions-title">
+        <div class="questions-header">
+            <h2 id="event-questions-title">{{ __('Pytania do organizatora', 'devents') }}</h2>
+            <button type="button" class="btn btn--primary btn-trigger-review">
+                <span class="material-symbols-outlined" aria-hidden="true">help</span>
+                {{ __('Zadaj pytanie', 'devents') }}
+            </button>
+        </div>
+        {% include 'components/reviews.twig' with {'item': event, 'item_type': 'event'} %}
+    </section>
+
+</div>{# end .event-wrapper #}
+
+{% include 'components/report-modal.twig' %}
+
+{# ═══════════════════════════════════════════════════════════
+   SKRYPT PRZEŁĄCZANIA JĘZYKÓW
+═══════════════════════════════════════════════════════════ #}
+{% if content_versions|length > 1 %}
+<script type="application/json" id="event-translations-dict">
+    {{ content_versions|json_encode|raw }}
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var dictEl = document.getElementById('event-translations-dict');
+    if (!dictEl) return;
+
+    var translations = JSON.parse(dictEl.textContent);
+    var langTabs     = document.querySelectorAll('[role="tab"][data-lang]');
+    var announce     = window.deventsAnnounce || function () {};
+
+    function activateTab(targetTab) {
+        var lang = targetTab.getAttribute('data-lang');
+        var data = translations[lang];
+        if (!data) return;
+
+        langTabs.forEach(function (tab) {
+            var isThis = (tab === targetTab);
+            tab.setAttribute('aria-selected', isThis ? 'true' : 'false');
+            tab.setAttribute('tabindex',       isThis ? '0' : '-1');
+            tab.classList.toggle('btn--primary', isThis);
+            tab.classList.toggle('btn--outline', !isThis);
+        });
+
+        document.querySelectorAll('[data-trans-key]').forEach(function (el) {
+            var key   = el.getAttribute('data-trans-key');
+            var idx   = el.getAttribute('data-trans-index');
+            var value;
+
+            if (key === 'tickets_names' && idx !== null) {
+                value = data[key] && data[key][idx] ? data[key][idx] : undefined;
+            } else {
+                value = data[key];
+            }
+
+            if (value !== undefined && value !== '') {
+                if (key.endsWith('_html')) {
+                    el.innerHTML = value;
+                } else if (key === 'image_alt_text') {
+                    el.setAttribute('alt', value);
+                } else {
+                    el.textContent = value;
+                }
+            }
+        });
+
+        announce('{{ __('Zmieniono język na:', 'devents') }} ' + targetTab.textContent.trim());
+    }
+
+    langTabs.forEach(function (tab) {
+        tab.addEventListener('click', function () { activateTab(this); });
+    });
+    // Klawiatura ←→ Home End obsługuje wcag-core.js initTablists()
+});
+</script>
+{% endif %}
+
+{# ═══════════════════════════════════════════════════════════
+   JSON-LD Schema.org/Event
+═══════════════════════════════════════════════════════════ #}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Event",
+    "name": {{ content_versions[active_version_code].title|e|json_encode|raw }},
+    "startDate": "{{ event.start_datetime|date('c') }}"
+    {% if has_end_date %},
+    "endDate": "{{ event.end_datetime|date('c') }}"
+    {% endif %}
+    {% if content_versions[active_version_code].description_html %},
+    "description": {{ content_versions[active_version_code].description_html|striptags|slice(0, 300)|e|json_encode|raw }}
+    {% endif %}
+    {% set _online_url = event.online_url|default(current_url) %},
+    {# Google Events wymaga location dla KAŻDEGO wydarzenia: Place (stacjonarne),
+       VirtualLocation (online) lub oba (hybryda). Wcześniej online/hybryda nie miały
+       location i były odrzucane z wyników Google. #}
+    "location": {% if event.delivery_mode == 'online' or event.address_city is empty %}{ "@type": "VirtualLocation", "url": {{ _online_url|json_encode|raw }} }{% elseif event.delivery_mode == 'hybrid' %}[ { "@type": "VirtualLocation", "url": {{ _online_url|json_encode|raw }} }, { "@type": "Place", "name": "{{ content_versions[active_version_code].address_name|default('')|e }}", "address": { "@type": "PostalAddress"{% if event.address_street %}, "streetAddress": "{{ event.address_street|e }}{% if event.address_building %} {{ event.address_building|e }}{% endif %}"{% endif %}, "addressLocality": "{{ content_versions[active_version_code].address_city|default(event.address_city)|e }}", "addressCountry": "{{ event.event_country_code|default('PL')|e }}" } } ]{% else %}{ "@type": "Place", "name": "{{ content_versions[active_version_code].address_name|default('')|e }}", "address": { "@type": "PostalAddress"{% if event.address_street %}, "streetAddress": "{{ event.address_street|e }}{% if event.address_building %} {{ event.address_building|e }}{% endif %}"{% endif %}, "addressLocality": "{{ content_versions[active_version_code].address_city|default(event.address_city)|e }}", "addressCountry": "{{ event.event_country_code|default('PL')|e }}" } }{% endif %}
+    {% if event.image_url %},
+    "image": "{{ event.image_url }}"
+    {% endif %}
+    {% if organizer_name %},
+    "organizer": {
+        "@type": "Organization",
+        "name": {{ organizer_name|e|json_encode|raw }}
+    }
+    {% endif %}
+    {% if has_tickets %},
+    "offers": [
+        {% for ticket in event.ticket_types %}
+            {% if ticket.name is not empty %}
+            {
+                "@type": "Offer",
+                "name": {{ content_versions[active_version_code].tickets_names[loop.index0]|default(ticket.name)|e|json_encode|raw }},
+                "price": "{{ ticket.price|default(0) }}",
+                "priceCurrency": "PLN",
+                "availability": "https://schema.org/InStock"
+                {% if event.ticket %},
+                "url": "{{ event.ticket }}"
+                {% endif %}
+            }{% if not loop.last %},{% endif %}
+            {% endif %}
+        {% endfor %}
+    ]
+    {% else %},
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "PLN", "availability": "https://schema.org/InStock"{% if event.action_button_link %}, "url": "{{ event.action_button_link|e }}"{% endif %} }
+    {% endif %},
+    "eventStatus": "https://schema.org/EventScheduled",
+    "eventAttendanceMode": "{{ event.delivery_mode == 'online' ? 'https://schema.org/OnlineEventAttendanceMode' : (event.delivery_mode == 'hybrid' ? 'https://schema.org/MixedEventAttendanceMode' : 'https://schema.org/OfflineEventAttendanceMode') }}"
+}
+</script>
+
+{% else %}
+
+{# ═══════════════════════════════════════════════════════════
+   WYDARZENIE NIEZWERYFIKOWANE
+═══════════════════════════════════════════════════════════ #}
+<div class="event-wrapper" id="devents-main-content" role="region">
+    <div class="event-alert event-alert--warning" role="alert">
+        <span class="material-symbols-outlined event-alert__icon" aria-hidden="true">pending</span>
+        <span>{{ __('To wydarzenie nie zostało jeszcze zweryfikowane przez administratora.', 'devents') }}</span>
+    </div>
+</div>
+
+{% endif %}

@@ -1,0 +1,130 @@
+{# templates/user/rewards.twig — v13.0 (i18n ready) #}
+
+    <div class="rewards-header">
+        <h2 style="margin:0 0 6px; font-size:1.5rem; color: var(--text-primary);">{{ __('Twoje nagrody', 'devents') }}</h2>
+        <p style="margin:0; color: var(--text-secondary); font-size: 15px;">
+            {{ __('Liczba Twoich zatwierdzonych wydarzeń:', 'devents') }}
+            <strong style="font-size: 1.6em; color: var(--primary); margin-left: 8px; vertical-align: middle;">
+                {{ data.count }}
+            </strong>
+        </p>
+    </div>
+
+    {# --- GRID KAFELKÓW --- #}
+    <div class="rewards-grid">
+        {% for badge in data.history %}
+            
+            {# Zmienne pomocnicze dla czytelności #}
+            {% set is_locked = (badge.status == 'locked') %}
+            {% set is_claimed = (badge.status == 'claimed') %}
+            {% set is_pending = (badge.status == 'pending') %}
+
+            <div class="reward-item" style="
+                border: 1px solid {{ is_claimed ? '#22c55e' : (is_pending ? '#f59e0b' : '#e5e7eb') }}; 
+                background: {{ badge.bg }}; 
+                opacity: {{ is_locked ? '0.6' : '1' }};
+                filter: {{ is_locked ? 'grayscale(100%)' : 'none' }};
+            ">
+                {# GÓRA KARTY: IKONA I TYTUŁ #}
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
+                    <div style="background: #fff; border-radius: 50%; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,0.06);">
+                        <span class="material-symbols-outlined" style="font-size: 32px; color: {{ badge.color }};" aria-hidden="true">
+                            {{ badge.icon }}
+                        </span>
+                    </div>
+                    <div>
+                        {# Zwróć uwagę: badge.label (np. "Brązowy Certyfikat") powinien być już tłumaczony z bazy w PHP,
+                           jeśli jest statyczny, dodaj go do funkcji __(), np. __(badge.label, 'devents') #}
+                        <h3 style="margin: 0; font-size: 20px; color: {{ badge.color }}; font-weight:800;">
+                            {{ badge.label|e }}
+                        </h3>
+                        <span style="font-size: 13px; color: #64748b; background: #fff; padding: 4px 10px; border-radius: 20px; border: 1px solid #e2e8f0; display:inline-block; margin-top:6px; font-weight: 500;">
+                            {{ __('Wymagane:', 'devents') }} {{ badge.min }}+
+                        </span>
+                    </div>
+                </div>
+
+                {# DÓŁ KARTY: AKCJE / STATUS #}
+                <div style="border-top: 1px solid rgba(0,0,0,0.05); padding-top: 20px;">
+                    
+                    {% if is_locked %}
+                        <div style="color: #64748b; font-size: 14px; display: flex; align-items: center; gap: 8px; font-weight: 500;">
+                            <span class="material-symbols-outlined" style="font-size: 20px;" aria-hidden="true">lock</span>
+                            {{ __('Brakuje:', 'devents') }} <strong>{{ badge.missing }}</strong>
+                        </div>
+
+                    {% elseif is_pending %}
+                        <div style="color: #b45309; font-size: 14px; font-weight: 600; line-height: 1.4; display: flex; align-items: center; gap: 10px;">
+                            <span class="material-symbols-outlined" style="font-size: 24px;" aria-hidden="true">hourglass_top</span>
+                            {{ __('Oczekuje na zatwierdzenie.', 'devents') }}
+                        </div>
+
+                    {% elseif is_claimed %}
+                        <div style="text-align: center;">
+                            <span style="display: flex; align-items: center; justify-content: center; gap: 6px; color: #15803d; font-size: 13px; font-weight: 700; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                <span class="material-symbols-outlined" style="font-size: 18px;" aria-hidden="true">check_circle</span> {{ __('Zdobyto', 'devents') }}
+                            </span>
+                            
+                            <button type="button" class="btn btn--secondary js-open-diploma" 
+                                    style="width: 100%; justify-content: center; padding: 12px; font-weight: 600; font-size: 15px;"
+                                    data-label="{{ badge.label|e }}"
+                                    data-color="{{ badge.color }}"
+                                    data-icon="{{ badge.icon }}"
+                                    data-bg="{{ badge.bg }}">
+                                <span class="material-symbols-outlined" style="margin-right: 8px;" aria-hidden="true">redeem</span> {{ __('Twoja Nagroda', 'devents') }}
+                            </button>
+
+                            {# UKRYTE DANE KODÓW (Dla JS) #}
+                            <div class="hidden-codes" style="display:none;">
+                                {% for c in badge.codes %}
+                                    <div data-type="{{ c.type|e }}" data-code="{{ c.code|e }}"></div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+{# --- MODAL PODGLĄDU --- #}
+<div id="diploma-modal" class="modal devents-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="devents-modal-content">
+
+        <div class="devents-modal-header">
+            <button type="button" class="close-modal btn btn--icon" aria-label="{{ __('Zamknij', 'devents') }}">
+                <span class="material-symbols-outlined" style="font-size: 20px;" aria-hidden="true">close</span>
+            </button>
+        </div>
+        
+        <div class="devents-modal-body" style="padding: 0 50px 50px 50px; text-align: center;">
+            
+            <div class="modal-badge-visual">
+                <div class="modal-badge-circle" id="modal-circle-bg">
+                    <span id="modal-icon" class="material-symbols-outlined" style="font-size: 56px;" aria-hidden="true"></span>
+                </div>
+                <h2 class="modal-badge-label" id="modal-title"></h2>
+                <p class="modal-congrats">{{ __('Gratulacje! Osiągnąłeś ten poziom.', 'devents') }}</p>
+            </div>
+
+            <div class="modal-coupons-container">
+                <h4 style="margin: 0 0 20px 0; font-size: 14px; text-transform: uppercase; color: #475569; letter-spacing: 1px; font-weight: 700;">
+                    {{ __('Twoje Nagrody Cyfrowe', 'devents') }}
+                </h4>
+                <div id="modal-codes-list"></div>
+            </div>
+            
+            <div class="postal-info">
+                <div class="postal-icon">
+                    <span class="material-symbols-outlined" style="font-size: 28px;" aria-hidden="true">local_post_office</span>
+                </div>
+                <div>
+                    <strong style="font-size: 16px; color: #78350f;">{{ __('Pamiątkowy Dyplom Papierowy', 'devents') }}</strong><br>
+                    {{ __('Oryginał dyplomu zostanie wysłany do Ciebie pocztą tradycyjną w najbliższym czasie na adres podany w profilu.', 'devents') }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

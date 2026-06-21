@@ -1,0 +1,479 @@
+{# ========================================================================
+   WYSZUKIWARKA WYDARZEŃ — v14.2 (A11Y + UI UNIFICATION)
+   ======================================================================== #}
+
+{# --- 1. Inicjalizacja tablic --- #}
+{% set acc_none = [] %}
+{% set acc_spoken = [] %}
+{% set acc_sign = [] %}
+
+{% for type in accessibility_types|default([]) %}
+    {% if type.requires_sl_lang == 1 and type.requires_spoken_lang == 0 %}
+        {% set acc_sign = acc_sign | merge([type]) %}
+    {% elseif type.requires_sl_lang == 0 and type.requires_spoken_lang == 1 %}
+        {% set acc_spoken = acc_spoken | merge([type]) %}
+    {% else %}
+        {% set acc_none = acc_none | merge([type]) %}
+    {% endif %}
+{% endfor %}
+
+{# --- 2. Zmienne pomocnicze --- #}
+{% set has_active_filters = (
+    filters.search_query or
+    filters.location or
+    filters.category or
+    filters.delivery_mode or
+    filters.start_date or
+    filters.end_date or
+    filters.age_rating or
+    filters.accessibility is not empty or
+    filters.only_current or
+    filters.special_occasion
+) %}
+
+<main class="search-page" id="devents-main-content">
+
+    {# ==================== NAGŁÓWEK ==================== #}
+    <header class="search-header">
+        <h1 class="search-header__title">{{ __('Wyszukiwarka Wydarzeń', 'devents') }}</h1>
+        <p class="search-header__subtitle">{{ __('Znajdź interesujące Cię wydarzenia i sprawdź ich dostępność.', 'devents') }}</p>
+    </header>
+
+    {# ==================== SKIP-LINK WEWNĘTRZNY ==================== #}
+    <a href="#search-results" class="devents-skip-link devents-skip-link--inline">
+        {{ __('Przejdź do wyników wyszukiwania', 'devents') }}{% if total_results > 0 %} ({{ total_results }}){% endif %}
+    </a>
+
+    {# ==================== SEARCH BAR (STICKY) ==================== #}
+    <form method="GET"
+          action="{{ current_base_url }}"
+          class="search-bar devents-form"
+          id="devents-search-form"
+          role="search"
+          aria-label="{{ __('Wyszukiwanie wydarzeń', 'devents') }}">
+
+        <div class="search-bar__main">
+            {# Słowo kluczowe #}
+            <div class="search-bar__field">
+                <label for="search-query-input" class="sr-only">{{ __('Szukaj po słowach kluczowych', 'devents') }}</label>
+                <span class="material-symbols-outlined search-bar__icon" aria-hidden="true">search</span>
+                <input type="search"
+                       id="search-query-input"
+                       name="search_query"
+                       class="search-bar__input"
+                       placeholder="{{ __('Słowa kluczowe...', 'devents') }}"
+                       value="{{ filters.search_query|e }}"
+                       autocomplete="off">
+            </div>
+
+            {# Lokalizacja #}
+            <div class="search-bar__field">
+                <label for="search-location" class="sr-only">{{ __('Szukaj po lokalizacji', 'devents') }}</label>
+                <span class="material-symbols-outlined search-bar__icon" aria-hidden="true">location_on</span>
+                <input type="text"
+                       name="location"
+                       id="search-location"
+                       class="search-bar__input"
+                       placeholder="{{ __('Miasto...', 'devents') }}"
+                       value="{{ filters.location|e }}"
+                       autocomplete="off"
+                       role="combobox"
+                       aria-autocomplete="list"
+                       aria-expanded="false"
+                       aria-controls="search-autocomplete-results">
+            </div>
+
+            {# Data szybka #}
+            <div class="search-bar__field search-bar__field--date">
+                <label for="search-date-quick" class="sr-only">{{ __('Data od', 'devents') }}</label>
+                <span class="material-symbols-outlined search-bar__icon" aria-hidden="true">calendar_today</span>
+                <input type="text"
+                       id="search-date-quick"
+                       name="start_date"
+                       class="search-bar__input flatpickr-date"
+                       placeholder="{{ __('Kiedy...', 'devents') }}"
+                       value="{{ filters.start_date|e }}">
+            </div>
+
+            <button type="submit" class="search-bar__submit" id="search-submit-btn">
+                <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                {{ __('Szukaj', 'devents') }}
+            </button>
+
+            <button type="button"
+                    class="search-bar__filters-toggle {{ has_active_filters ? 'search-bar__filters-toggle--active' : '' }}"
+                    id="toggle-advanced-search"
+                    aria-expanded="{{ has_active_filters ? 'true' : 'false' }}"
+                    aria-controls="advanced-search-panel">
+                <span class="material-symbols-outlined" aria-hidden="true">tune</span>
+                <span class="search-bar__filters-label">{{ __('Filtry', 'devents') }}</span>
+                {% if has_active_filters %}
+                    <span class="search-bar__filters-badge" aria-label="{{ __('aktywne', 'devents') }}"></span>
+                {% endif %}
+            </button>
+        </div>
+
+        {# ==================== PANEL FILTRÓW ZAAWANSOWANYCH ==================== #}
+        <div class="search-advanced {{ has_active_filters ? 'search-advanced--open' : '' }}"
+             id="advanced-search-panel"
+             aria-hidden="{{ has_active_filters ? 'false' : 'true' }}"
+             aria-label="{{ __('Filtry zaawansowane', 'devents') }}">
+
+            <div class="search-advanced__grid">
+                <div class="search-advanced__group">
+                    <label for="filter-category" class="search-advanced__label">{{ __('Kategoria', 'devents') }}</label>
+                    <select id="filter-category" name="category" class="search-advanced__select choices-select">
+                        <option value="" disabled hidden selected>{{ __('Wszystkie kategorie', 'devents') }}</option>
+                        {% for slug, name in all_categories %}
+                            <option value="{{ slug }}" {{ filters.category == slug ? 'selected' : '' }}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="search-advanced__group">
+                    <label for="filter-delivery" class="search-advanced__label">{{ __('Sposób realizacji', 'devents') }}</label>
+                    <select id="filter-delivery" name="delivery_mode" class="search-advanced__select choices-select">
+                        <option value="" disabled hidden selected>{{ __('Dowolny sposób', 'devents') }}</option>
+                        {% for slug, name in all_delivery_modes %}
+                            <option value="{{ slug }}" {{ filters.delivery_mode == slug ? 'selected' : '' }}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="search-advanced__group">
+                    <label for="filter-age" class="search-advanced__label">{{ __('Wiek uczestnika', 'devents') }}</label>
+                    <select id="filter-age" name="age_rating" class="search-advanced__select choices-select">
+                        <option value="" disabled hidden selected>{{ __('Dowolny wiek', 'devents') }}</option>
+                        {% for age in ['0', '3', '7', '12', '16'] %}
+                            <option value="{{ age }}" {{ filters.age_rating == age ? 'selected' : '' }}>{{ age }}+</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                {% if all_special_occasions is not empty %}
+                    <div class="search-advanced__group">
+                        <label for="filter-occasion" class="search-advanced__label">{{ __('Okazja specjalna', 'devents') }}</label>
+                        <select id="filter-occasion" name="special_occasion" class="search-advanced__select choices-select">
+                            <option value="" disabled hidden selected>{{ __('Wszystkie okazje', 'devents') }}</option>
+                            {% for occasion in all_special_occasions %}
+                                <option value="{{ occasion.id }}" {{ filters.special_occasion == occasion.id ? 'selected' : '' }}>
+                                    {{ occasion.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% endif %}
+            </div>
+
+            <fieldset class="search-advanced__date-row">
+                <legend class="search-advanced__label">{{ __('Zakres dat', 'devents') }}</legend>
+                <div class="search-advanced__date-range">
+                    <label for="filter-date-from" class="sr-only">{{ __('Data od', 'devents') }}</label>
+                    <input type="text"
+                           id="filter-date-from"
+                           name="start_date"
+                           class="search-advanced__date-input flatpickr-date"
+                           placeholder="{{ __('Od', 'devents') }}"
+                           value="{{ filters.start_date|e }}">
+                    <span class="search-advanced__date-separator" aria-hidden="true">–</span>
+                    <label for="filter-date-to" class="sr-only">{{ __('Data do', 'devents') }}</label>
+                    <input type="text"
+                           id="filter-date-to"
+                           name="end_date"
+                           class="search-advanced__date-input flatpickr-date"
+                           placeholder="{{ __('Do', 'devents') }}"
+                           value="{{ filters.end_date|e }}">
+                </div>
+            </fieldset>
+
+            <fieldset class="search-advanced__accessibility">
+                <legend class="search-advanced__label">{{ __('Wymagana dostępność', 'devents') }}</legend>
+                
+                <div class="search-acc-groups">
+                    {% for group_name, group_items in {'Infrastruktura': acc_none, 'Foniczne': acc_spoken, 'Migowe': acc_sign} %}
+                        {% if group_items is not empty %}
+                            <div class="search-acc-group" role="group" aria-label="{{ group_name }}">
+                                <span class="search-acc-group__title" aria-hidden="true">{{ group_name }}</span>
+                                <div class="search-acc-chips">
+                                    {% for type in group_items %}
+                                        {% set is_checked = type.id in filters.accessibility %}
+                                        <label class="search-acc-chip {{ is_checked ? 'search-acc-chip--on' : '' }}" 
+                                               tabindex="0" 
+                                               role="checkbox" 
+                                               aria-checked="{{ is_checked ? 'true' : 'false' }}"
+                                               onkeydown="if(event.key === 'Enter' || event.key === ' ') { this.click(); event.preventDefault(); }">
+                                            <input type="checkbox" name="accessibility[]" value="{{ type.id }}" class="sr-only acc-checkbox" {{ is_checked ? 'checked' : '' }}>
+                                            <span class="material-symbols-outlined" aria-hidden="true">{{ type.icon }}</span>
+                                            <span class="search-acc-chip__tooltip" aria-hidden="true">{{ type.name }}</span>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="search-global-langs">
+                    <div class="search-advanced__group">
+                        <label class="search-advanced__label" for="global-spoken-langs">{{ __('Języki foniczne (np. tłumacz, lektor)', 'devents') }}</label>
+                        <select id="global-spoken-langs" name="global_spoken_langs[]" class="choices-multiselect" multiple>
+                            <option value="" disabled hidden selected>{{ __('Wybierz język foniczny...', 'devents') }}</option>
+                            {% for code, lang in all_spoken_langs %}
+                                <option value="{{ code }}" {{ code in global_spoken_langs ? 'selected' : '' }}>
+                                    {{ lang.name }} ({{ lang.abbr }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="search-advanced__group">
+                        <label class="search-advanced__label" for="global-sign-langs">{{ __('Języki migowe (np. PJM)', 'devents') }}</label>
+                        <select id="global-sign-langs" name="global_sign_langs[]" class="choices-multiselect" multiple>
+                            <option value="" disabled hidden selected>{{ __('Wybierz język migowy...', 'devents') }}</option>
+                            {% for code, lang in all_sign_langs %}
+                                <option value="{{ code }}" {{ code in global_sign_langs ? 'selected' : '' }}>
+                                    {{ lang.name }} ({{ lang.abbr }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="search-advanced__footer">
+                <label class="search-advanced__check">
+                    <input type="checkbox" name="only_current" value="1" {{ filters.only_current ? 'checked' : '' }}>
+                    <span>{{ __('Tylko trwające teraz', 'devents') }}</span>
+                </label>
+            </div>
+        </div>
+    </form>
+
+    {# ==================== AKTYWNE FILTRY (CHIPY) ==================== #}
+    {% if has_active_filters %}
+        <div class="search-chips" id="search-active-chips" role="region" aria-label="{{ __('Aktywne filtry', 'devents') }}">
+
+            {% if filters.search_query %}
+                <a href="{{ current_base_url }}{{ build_query_without('search_query') }}"
+                   class="search-chip"
+                   aria-label="{{ __('Usuń filtr:', 'devents') }} {{ filters.search_query|e }}">
+                    „{{ filters.search_query|e }}"
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </a>
+            {% endif %}
+
+            {% if filters.location %}
+                <a href="{{ current_base_url }}{{ build_query_without('location') }}"
+                   class="search-chip"
+                   aria-label="{{ __('Usuń filtr lokalizacji:', 'devents') }} {{ filters.location|e }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                    {{ filters.location|e }}
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </a>
+            {% endif %}
+
+            {% if filters.category and all_categories[filters.category] %}
+                <a href="{{ current_base_url }}{{ build_query_without('category') }}"
+                   class="search-chip"
+                   aria-label="{{ __('Usuń filtr kategorii:', 'devents') }} {{ all_categories[filters.category] }}">
+                    {{ all_categories[filters.category] }}
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </a>
+            {% endif %}
+
+            {% if filters.delivery_mode and all_delivery_modes[filters.delivery_mode] %}
+                <a href="{{ current_base_url }}{{ build_query_without('delivery_mode') }}"
+                   class="search-chip"
+                   aria-label="{{ __('Usuń filtr sposobu:', 'devents') }} {{ all_delivery_modes[filters.delivery_mode] }}">
+                    {{ all_delivery_modes[filters.delivery_mode] }}
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </a>
+            {% endif %}
+
+            {% if filters.age_rating %}
+                <a href="{{ current_base_url }}{{ build_query_without('age_rating') }}"
+                   class="search-chip"
+                   aria-label="{{ __('Usuń filtr wieku:', 'devents') }} {{ filters.age_rating }}+">
+                    {{ filters.age_rating }}+
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </a>
+            {% endif %}
+
+            {% if filters.start_date %}
+                <a href="{{ current_base_url }}{{ build_query_without('start_date') }}"
+                   class="search-chip"
+                   aria-label="{{ __('Usuń filtr daty od:', 'devents') }} {{ filters.start_date }}">
+                    {{ __('Od:', 'devents') }} {{ filters.start_date }}
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </a>
+            {% endif %}
+
+            {% if filters.end_date %}
+                <a href="{{ current_base_url }}{{ build_query_without('end_date') }}"
+                   class="search-chip"
+                   aria-label="{{ __('Usuń filtr daty do:', 'devents') }} {{ filters.end_date }}">
+                    {{ __('Do:', 'devents') }} {{ filters.end_date }}
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </a>
+            {% endif %}
+
+            {% if filters.special_occasion %}
+                {% for occasion in all_special_occasions %}
+                    {% if occasion.id == filters.special_occasion %}
+                        <a href="{{ current_base_url }}{{ build_query_without('special_occasion') }}"
+                           class="search-chip"
+                           aria-label="{{ __('Usuń filtr okazji:', 'devents') }} {{ occasion.name }}">
+                            {{ occasion.name }}
+                            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            {% if filters.only_current %}
+                <a href="{{ current_base_url }}{{ build_query_without('only_current') }}"
+                   class="search-chip"
+                   aria-label="{{ __('Usuń filtr: tylko trwające teraz', 'devents') }}">
+                    {{ __('Trwające teraz', 'devents') }}
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </a>
+            {% endif %}
+
+            {% if filters.accessibility is not empty %}
+                {% for acc_id in filters.accessibility %}
+                    {% for type in accessibility_types %}
+                        {% if type.id == acc_id %}
+                            <a href="{{ current_base_url }}{{ build_query_without_value('accessibility', acc_id) }}"
+                               class="search-chip"
+                               aria-label="{{ __('Usuń filtr dostępności:', 'devents') }} {{ type.name }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">{{ type.icon }}</span>
+                                {{ type.name }}
+                                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+
+            <a href="{{ current_base_url }}" class="search-chip search-chip--clear">
+                <span class="material-symbols-outlined" aria-hidden="true">delete_sweep</span>
+                {{ __('Wyczyść wszystko', 'devents') }}
+            </a>
+        </div>
+    {% endif %}
+
+
+    {# Profil dostępności — informacja, że lista jest zawężona do potrzeb użytkownika #}
+    {% if accessibility_prefs_applied %}
+        <div class="search-prefs-notice" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 16px;padding:10px 14px;border:1px solid color-mix(in srgb,var(--primary,#00857c) 35%,transparent);background:color-mix(in srgb,var(--primary,#00857c) 10%,var(--bg-secondary,#fff));color:var(--text-primary,#1f2937);border-radius:10px;font-size:.92rem;">
+            <span class="material-symbols-outlined" aria-hidden="true" style="color:var(--primary,#00857c)">accessibility_new</span>
+            <span>{{ __('Pokazujemy wydarzenia dopasowane do Twoich potrzeb dostępności.', 'devents') }}</span>
+            <a href="{{ show_all_url }}" style="font-weight:700;color:var(--primary,#00857c)">{{ __('Pokaż wszystkie', 'devents') }}</a>
+            <a href="{{ prefs_url }}" style="margin-left:auto;color:var(--text-secondary,#475569)">{{ __('Zmień potrzeby', 'devents') }}</a>
+        </div>
+    {% endif %}
+
+    {# ==================== TOOLBAR (LICZBA + SORTOWANIE) ==================== #}
+    <div class="search-toolbar">
+        <div class="search-toolbar__left">
+            {# BUGFIX: total_results przekazane z PHP — poprawna liczba ze wszystkich stron #}
+            <div class="search-toolbar__count"
+                 id="search-results-count"
+                 role="status"
+                 aria-live="polite"
+                 aria-atomic="true">
+                {{ __('Znaleziono:', 'devents') }}
+                <span class="search-toolbar__badge" id="results-count-badge">{{ total_results }}</span>
+                {{ __('wydarzeń', 'devents') }}
+            </div>
+        </div>
+
+        <div class="search-toolbar__right">
+            {% if is_user_logged_in() %}
+                <button type="button" class="btn btn--secondary btn--small js-save-search">
+                    <span class="material-symbols-outlined" aria-hidden="true">bookmark_add</span>
+                    {{ __('Zapisz to wyszukiwanie', 'devents') }}
+                </button>
+            {% endif %}
+            <label for="search-sort" class="sr-only">{{ __('Sortuj wyniki według', 'devents') }}</label>
+            <select id="search-sort"
+                    name="sort"
+                    class="search-toolbar__sort"
+                    data-current-base-url="{{ current_base_url }}">
+                <option value="date_asc"  {{ filters.sort == 'date_asc'  ? 'selected' : '' }}>{{ __('Data: najbliższe', 'devents') }}</option>
+                <option value="date_desc" {{ filters.sort == 'date_desc' ? 'selected' : '' }}>{{ __('Data: najdalsze', 'devents') }}</option>
+                <option value="price_asc" {{ filters.sort == 'price_asc' ? 'selected' : '' }}>{{ __('Cena: rosnąco', 'devents') }}</option>
+                <option value="price_desc"{{ filters.sort == 'price_desc'? 'selected' : '' }}>{{ __('Cena: malejąco', 'devents') }}</option>
+            </select>
+        </div>
+    </div>
+
+
+    {# ==================== LISTA WYNIKÓW ==================== #}
+    <section class="search-results"
+             id="search-results"
+             tabindex="-1"
+             aria-labelledby="search-results-heading">
+        <h2 id="search-results-heading" class="sr-only">{{ __('Wyniki wyszukiwania', 'devents') }}</h2>
+        <div class="cards_grid"
+             id="events-results-container"
+             aria-busy="false">
+            {% if all_events is not empty %}
+                {% for event in all_events %}
+                    {% include 'components/event-card.twig' with {'event': event} %}
+                {% endfor %}
+            {% else %}
+                <div class="search-empty" id="search-empty-state">
+                    <span class="material-symbols-outlined search-empty__icon" aria-hidden="true">event_busy</span>
+                    <h2>{{ __('Nie znaleziono wydarzeń', 'devents') }}</h2>
+                    <p>{{ __('Spróbuj zmienić kryteria wyszukiwania.', 'devents') }}</p>
+                    <a href="{{ current_base_url }}" class="btn btn--secondary mt-20">{{ __('Wyczyść filtry', 'devents') }}</a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+
+    {# ==================== PAGINACJA ==================== #}
+    {% if total_pages > 1 %}
+        <nav class="search-pagination" aria-label="{{ __('Nawigacja stron wyników', 'devents') }}">
+            <ul class="search-pagination__list">
+                {% if current_page > 1 %}
+                    <li>
+                        <a href="{{ current_base_url }}{{ build_query_with('page', current_page - 1) }}"
+                           class="search-pagination__btn"
+                           aria-label="{{ __('Poprzednia strona', 'devents') }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for p in 1..total_pages %}
+                    {% if p == 1 or p == total_pages or (p >= current_page - 2 and p <= current_page + 2) %}
+                        <li>
+                            <a href="{{ current_base_url }}{{ build_query_with('page', p) }}"
+                               class="search-pagination__btn {{ p == current_page ? 'search-pagination__btn--active' : '' }}"
+                               aria-label="{{ __('Strona', 'devents') }} {{ p }}"
+                               {% if p == current_page %}aria-current="page"{% endif %}>
+                                {{ p }}
+                            </a>
+                        </li>
+                    {% elseif p == current_page - 3 or p == current_page + 3 %}
+                        <li><span class="search-pagination__dots" aria-hidden="true">…</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if current_page < total_pages %}
+                    <li>
+                        <a href="{{ current_base_url }}{{ build_query_with('page', current_page + 1) }}"
+                           class="search-pagination__btn"
+                           aria-label="{{ __('Następna strona', 'devents') }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+
+</main>

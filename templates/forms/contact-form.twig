@@ -1,0 +1,83 @@
+{# templates/forms/contact-form.twig — WCAG 2.2 AA v13.0 #}
+<div class="auth-container" id="devents-main-content" role="main">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1 class="auth-title">{{ __('Skontaktuj się z nami', 'devents') }}</h1>
+            <p class="auth-info-text" style="text-align:center;margin-top:1rem;">
+                {{ __('Masz pytania lub sugestie? Chętnie Cię wysłuchamy.', 'devents') }}
+            </p>
+        </div>
+
+        <div class="form-messages" role="alert" aria-live="polite" aria-atomic="true"
+             style="display:none;margin-bottom:20px;"></div>
+
+        <form id="devents-contact-form" class="devents-form" method="POST" novalidate
+              aria-label="{{ __('Formularz kontaktowy', 'devents') }}">
+            
+            <input type="hidden" name="action" value="devents_send_contact">
+            
+            {# TUTAJ BRAKOWAŁO ZABEZPIECZENIA NONCE #}
+            <input type="hidden" name="_wpnonce" value="{{ contact_nonce }}">
+
+            {# Honeypot #}
+            <div style="display:none;opacity:0;position:absolute;left:-9999px;" aria-hidden="true">
+                <label for="contact_phone_honey">{{ __('Nie wypełniaj tego pola:', 'devents') }}</label>
+                <input type="text" id="contact_phone_honey" name="contact_phone_honey" tabindex="-1" autocomplete="off">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="contact_name" class="form-label">
+                        {{ __('Imię i nazwisko', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span>
+                    </label>
+                    <input type="text" id="contact_name" name="contact_name" class="form-control"
+                           required aria-required="true" aria-describedby="contact_name-error" autocomplete="name">
+                    <span id="contact_name-error" class="field-error-msg" role="alert" aria-live="polite"></span>
+                </div>
+                <div class="form-group">
+                    <label for="contact_email" class="form-label">
+                        {{ __('Twój e-mail', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span>
+                    </label>
+                    <input type="email" id="contact_email" name="contact_email" class="form-control"
+                           required aria-required="true" aria-describedby="contact_email-error" autocomplete="email">
+                    <span id="contact_email-error" class="field-error-msg" role="alert" aria-live="polite"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="contact_subject" class="form-label">{{ __('Temat', 'devents') }}</label>
+                <input type="text" id="contact_subject" name="contact_subject" class="form-control"
+                       placeholder="{{ __('Czego dotyczy wiadomość?', 'devents') }}">
+            </div>
+
+            <div class="form-group">
+                <label for="contact_message" class="form-label">
+                    {{ __('Wiadomość', 'devents') }} <span class="form-required-field" aria-hidden="true">*</span>
+                </label>
+                <textarea id="contact_message" name="contact_message" class="form-textarea"
+                          rows="6" required aria-required="true" minlength="10"
+                          aria-describedby="contact_message-error"></textarea>
+                <span id="contact_message-error" class="field-error-msg" role="alert" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-checkbox-group" style="align-items:flex-start;">
+                    <input type="checkbox" id="contact_consent" name="contact_consent"
+                           required aria-required="true" aria-describedby="contact_consent-error" style="margin-top:4px;">
+                    <span style="font-size:0.9rem;line-height:1.4;">
+                        {{ __('Wyrażam zgodę na przetwarzanie moich danych osobowych w celu obsługi zapytania. Zapoznałem się z %sPolityką Prywatności%s.', 'devents')|replace({
+                            '%sPolityką Prywatności%s': '<a href="' ~ home_url('/polityka-prywatnosci/') ~ '" target="_blank" style="text-decoration:underline;" rel="noopener noreferrer">' ~ __('Polityką Prywatności', 'devents') ~ '</a>'
+                        })|raw }}
+                    </span>
+                </label>
+                <span id="contact_consent-error" class="field-error-msg" role="alert" aria-live="polite"></span>
+            </div>
+
+            <div class="form-group" style="margin-top:20px;">
+                <button type="submit" class="btn btn--primary btn--full-width">
+                    {{ __('Wyślij wiadomość', 'devents') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

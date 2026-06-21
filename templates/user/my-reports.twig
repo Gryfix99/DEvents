@@ -1,0 +1,217 @@
+{# „Raporty" — płatne zestawienia wydarzeń instytucji (proforma, koszt {{ price }} zł).
+   Właściciel wybiera okres (rok lub konkretny miesiąc), zamawia raport → proforma →
+   po zaksięgowaniu wpłaty raport jest dostępny do druku/PDF pod ?devents_report=ID. #}
+<style>
+.dv-rep{max-width:var(--dv-content-max,1240px);margin:0 auto}
+.dv-rep__title{font-size:1.6rem;font-weight:800;margin:0 0 6px;color:var(--text-primary,#0f172a)}
+.dv-rep__lead{margin:0 0 22px;color:var(--text-secondary,#475569);line-height:1.55}
+.dv-rep__card{border:1.5px solid var(--border-primary,#e5e7eb);border-radius:14px;padding:20px 22px;margin:0 0 26px;background:var(--bg-secondary,#fff)}
+.dv-rep__card h2{font-size:1.12rem;font-weight:700;margin:0 0 4px;color:var(--text-primary,#0f172a)}
+.dv-rep__inst{color:var(--text-secondary,#475569);margin:0 0 16px;font-size:.92rem}
+.dv-rep__row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+.dv-rep__field{display:flex;flex-direction:column;gap:5px}
+.dv-rep__field label{font-weight:600;font-size:.85rem;color:var(--text-primary,#0f172a)}
+.dv-rep__field select{padding:10px 12px;border:1.5px solid var(--border-primary,#e5e7eb);border-radius:10px;font-size:.95rem;background:var(--bg-primary,#fff);min-width:160px}
+.dv-rep__price{margin-left:auto;text-align:right}
+.dv-rep__price b{font-size:1.5rem;color:var(--primary,#00857c)}
+.dv-rep__price span{display:block;font-size:.78rem;color:var(--text-secondary,#475569)}
+.dv-rep__actions{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.dv-rep__note{font-size:.82rem;color:var(--text-secondary,#475569);margin:14px 0 0;line-height:1.5}
+.dv-rep__msg{margin:12px 0 0;font-weight:600;min-height:1.2em}
+.dv-rep__msg--ok{color:var(--primary,#00857c)}
+.dv-rep__msg--err{color:#dc2626}
+.dv-rep__hist h2{font-size:1.12rem;font-weight:700;margin:0 0 12px;color:var(--text-primary,#0f172a)}
+.dv-rep__table{width:100%;border-collapse:collapse;font-size:.92rem}
+.dv-rep__table th,.dv-rep__table td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--border-primary,#e5e7eb)}
+.dv-rep__table th{color:var(--text-secondary,#475569);font-weight:700;font-size:.82rem}
+.dv-rep__st{display:inline-block;padding:3px 10px;border-radius:999px;font-size:.78rem;font-weight:700}
+.dv-rep__st--pending{background:#fef3c7;color:#92400e}
+.dv-rep__st--ready{background:#d1fae5;color:#065f46}
+.dv-rep__st--cancelled{background:#fee2e2;color:#991b1b}
+.dv-rep__empty{color:var(--text-secondary,#475569)}
+.dv-rep__link{color:var(--primary,#00857c);font-weight:600;text-decoration:none}
+.dv-rep__link:hover{text-decoration:underline}
+</style>
+
+<section class="dv-rep" id="devents-main-content">
+    {# Tytuł sekcji jest w nagłówku powłoki (panel.twig); tu zostaje tylko opis. #}
+    <p class="dv-rep__lead">{{ __('Zamów profesjonalne zestawienie wydarzeń Twojej instytucji za wybrany okres — liczba wydarzeń, wyświetlenia, kategorie i udział wydarzeń z udogodnieniami dostępności. Raport otrzymasz do druku lub zapisu PDF.', 'devents') }}</p>
+
+    <div class="dv-rep__card">
+        <h2>{{ __('Zamów nowy raport', 'devents') }}</h2>
+        <p class="dv-rep__inst">{{ __('Instytucja:', 'devents') }} <strong>{{ institution.name }}</strong></p>
+        <form id="dv-report-form" data-ajax="{{ ajax_url }}" data-nonce="{{ nonce }}">
+            <div class="dv-rep__row">
+                <div class="dv-rep__field">
+                    <label for="dv-rep-year">{{ __('Rok', 'devents') }}</label>
+                    <select id="dv-rep-year" name="year">
+                        {% for y in years %}
+                            <option value="{{ y }}" {{ y == current_year ? 'selected' : '' }}>{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="dv-rep__field">
+                    <label for="dv-rep-month">{{ __('Miesiąc', 'devents') }}</label>
+                    <select id="dv-rep-month" name="month">
+                        <option value="0">{{ __('Cały rok', 'devents') }}</option>
+                        {% for num, name in months %}
+                            <option value="{{ num }}">{{ name|capitalize }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="dv-rep__price">
+                    <b>{{ price|number_format(2, ',', ' ') }} zł</b>
+                    <span>{{ __('za raport', 'devents') }}</span>
+                </div>
+            </div>
+            <div class="dv-rep__actions">
+                <button type="submit" class="btn btn--primary">{{ __('Zamów raport', 'devents') }}</button>
+            </div>
+            <p class="dv-rep__note">{{ __('Po kliknięciu „Zamów raport" uzupełnisz dane i wybierzesz sposób płatności: online (karta/BLIK/Przelewy24) lub faktura proforma (przelew). Raport stanie się dostępny po opłaceniu — status śledzisz poniżej oraz w sekcji „Zamówienia".', 'devents') }}</p>
+            <p class="dv-rep__msg" role="status" aria-live="polite"></p>
+        </form>
+    </div>
+
+    <div class="dv-rep__hist">
+        <h2>{{ __('Twoje raporty', 'devents') }}</h2>
+        {% if orders is empty %}
+            <p class="dv-rep__empty">{{ __('Nie zamówiłeś jeszcze żadnego raportu.', 'devents') }}</p>
+        {% else %}
+            <table class="dv-rep__table">
+                <thead>
+                    <tr>
+                        <th>{{ __('Okres', 'devents') }}</th>
+                        <th>{{ __('Nr zamówienia', 'devents') }}</th>
+                        <th>{{ __('Kwota', 'devents') }}</th>
+                        <th>{{ __('Status', 'devents') }}</th>
+                        <th>{{ __('Akcje', 'devents') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for o in orders %}
+                        <tr>
+                            <td>{{ o.period }}</td>
+                            <td>{{ o.order_number }}</td>
+                            <td>{{ o.amount|number_format(2, ',', ' ') }} zł</td>
+                            <td>
+                                {% if o.ready %}
+                                    <span class="dv-rep__st dv-rep__st--ready">{{ __('Gotowy', 'devents') }}</span>
+                                {% elseif o.status == 'cancelled' %}
+                                    <span class="dv-rep__st dv-rep__st--cancelled">{{ __('Anulowano', 'devents') }}</span>
+                                {% else %}
+                                    <span class="dv-rep__st dv-rep__st--pending">{{ __('Oczekuje na płatność', 'devents') }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if o.ready %}
+                                    <a class="dv-rep__link" href="{{ o.report_url }}" target="_blank" rel="noopener">{{ __('Pobierz raport', 'devents') }}</a>
+                                {% else %}
+                                    <a class="dv-rep__link" href="{{ o.proforma_url }}" target="_blank" rel="noopener">{{ __('Proforma', 'devents') }}</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</section>
+
+{# Modal zamówienia raportu — dane (zaciągane: użytkownik + instytucja) + wybór płatności
+   (online przez Stripe albo faktura proforma). Ten sam komponent formularza co
+   w modalach wyróżnienia i PJM (components/order-billing-form.twig). #}
+<div id="dv-report-modal" class="devents-modal hidden" role="dialog" aria-modal="true" aria-labelledby="dv-report-modal-title">
+    <div class="devents-modal-content pjm-modal-layout">
+        <button type="button" class="modal-close material-symbols-outlined close-modal" aria-label="{{ __('Zamknij', 'devents') }}"><span aria-hidden="true">close</span></button>
+
+        <div class="card-header-small" style="padding:22px 26px 0;">
+            <h3 id="dv-report-modal-title" style="margin:0 0 4px;">{{ __('Zamówienie raportu', 'devents') }}</h3>
+            <p class="section-subtitle" style="margin:0;color:var(--text-secondary);">{{ __('Sprawdź dane i wybierz sposób płatności.', 'devents') }}</p>
+        </div>
+
+        <form id="dv-report-order-form">
+            <div class="modal-body-scrollable">
+                <p style="margin:0 0 16px;font-size:.95rem;color:var(--text-primary);">
+                    {{ __('Okres:', 'devents') }} <strong id="dv-rep-period-label"></strong>
+                    &middot; {{ __('Kwota:', 'devents') }} <strong>{{ price|number_format(2, ',', ' ') }} zł</strong>
+                </p>
+                {% include 'components/order-billing-form.twig' %}
+            </div>
+
+            <input type="hidden" name="year" id="dv-rep-modal-year">
+            <input type="hidden" name="month" id="dv-rep-modal-month">
+
+            <div style="display:flex;justify-content:flex-end;gap:12px;padding:16px 26px;border-top:1px solid var(--border-primary);">
+                <button type="button" class="btn btn--secondary close-modal">{{ __('Anuluj', 'devents') }}</button>
+                <button type="submit" class="btn btn--primary">{{ __('Przejdź do płatności', 'devents') }}</button>
+            </div>
+            <p class="dv-rep__msg" role="status" aria-live="polite" style="padding:0 26px 18px;margin:0;"></p>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    var cardForm  = document.getElementById('dv-report-form');        // wybór roku/miesiąca
+    var modal     = document.getElementById('dv-report-modal');
+    var orderForm = document.getElementById('dv-report-order-form');  // dane + płatność
+    if (!cardForm || !modal || !orderForm) return;
+
+    var yearSel  = document.getElementById('dv-rep-year');
+    var monthSel = document.getElementById('dv-rep-month');
+    var msg      = orderForm.querySelector('.dv-rep__msg');
+
+    function openModal() {
+        document.getElementById('dv-rep-modal-year').value  = yearSel ? yearSel.value : '';
+        document.getElementById('dv-rep-modal-month').value = monthSel ? monthSel.value : '';
+        var lbl = (monthSel && monthSel.value !== '0')
+            ? (monthSel.options[monthSel.selectedIndex].text + ' ' + (yearSel ? yearSel.value : ''))
+            : ('cały rok ' + (yearSel ? yearSel.value : ''));
+        var lblEl = document.getElementById('dv-rep-period-label');
+        if (lblEl) lblEl.textContent = lbl;
+        if (window.deventsApplyOrderPrefill) { window.deventsApplyOrderPrefill(orderForm); }
+        if (msg) { msg.textContent = ''; msg.className = 'dv-rep__msg'; }
+        modal.classList.remove('hidden');
+        modal.classList.add('active');
+    }
+    function closeModal() {
+        modal.classList.add('hidden');
+        modal.classList.remove('active');
+    }
+
+    cardForm.addEventListener('submit', function (e) { e.preventDefault(); openModal(); });
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal || (e.target.closest && e.target.closest('.close-modal'))) { closeModal(); }
+    });
+    document.addEventListener('keydown', function (e) {
+        if ((e.key === 'Escape' || e.key === 'Esc') && modal.classList.contains('active')) { closeModal(); }
+    });
+
+    orderForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var btn = orderForm.querySelector('button[type="submit"]');
+        var label = btn.textContent;
+        btn.disabled = true; btn.textContent = 'Przetwarzanie...';
+        var fd = new FormData(orderForm);
+        fd.append('action', 'devents_order_report');
+        fd.append('nonce', cardForm.dataset.nonce);
+        fetch(cardForm.dataset.ajax, { method: 'POST', body: fd, credentials: 'same-origin' })
+            .then(function (r) { return r.json(); })
+            .then(function (j) {
+                if (j && j.success && j.data && j.data.redirect) {
+                    window.location.href = j.data.redirect;
+                    return;
+                }
+                if (msg) {
+                    msg.textContent = (j && j.data && j.data.message) ? j.data.message : 'Nie udało się zamówić raportu.';
+                    msg.className = 'dv-rep__msg dv-rep__msg--err';
+                }
+                btn.disabled = false; btn.textContent = label;
+            })
+            .catch(function () {
+                if (msg) { msg.textContent = 'Błąd połączenia. Spróbuj ponownie.'; msg.className = 'dv-rep__msg dv-rep__msg--err'; }
+                btn.disabled = false; btn.textContent = label;
+            });
+    });
+})();
+</script>

@@ -1,0 +1,162 @@
+{# templates/components/region-switcher.twig
+   Widget wyboru regionu i języka migowego.
+   Wyświetla aktywny kraj + select z krajami + opcjonalny filtr języka migowego.
+   Dane: region_prefs, country_options, sign_languages (z PHP)
+#}
+
+<div class="devents-region-switcher" id="devents-region-switcher"
+     role="region" aria-label="{{ __('Wybór regionu i języka migowego') }}">
+
+    {# ── Aktywny region — badge ── #}
+    <button type="button"
+            class="region-switcher__trigger"
+            id="region-switcher-trigger"
+            aria-expanded="false"
+            aria-controls="region-switcher-panel"
+            aria-haspopup="dialog">
+        <span class="material-symbols-outlined" aria-hidden="true">public</span>
+        <span class="region-switcher__label">
+            {% if region_prefs.worldwide %}
+                {{ __('Cały świat') }}
+            {% else %}
+                {{ region_prefs.country_name|default(region_prefs.country) }}
+            {% endif %}
+        </span>
+        {% if region_prefs.sl_filter %}
+            <span class="region-switcher__sl-badge" aria-label="{{ __('Język migowy') }}: {{ region_prefs.sl_name }}">
+                <span class="material-symbols-outlined" aria-hidden="true">sign_language</span>
+                {{ region_prefs.sl_code }}
+            </span>
+        {% endif %}
+        <span class="material-symbols-outlined region-switcher__chevron" aria-hidden="true">expand_more</span>
+    </button>
+
+    {# ── Panel wyboru ── #}
+    <div class="region-switcher__panel"
+         id="region-switcher-panel"
+         role="dialog"
+         aria-modal="true"
+         aria-label="{{ __('Wybierz region') }}"
+         hidden>
+
+        <div class="region-switcher__panel-inner">
+            <h2 class="region-switcher__panel-title">
+                <span class="material-symbols-outlined" aria-hidden="true">travel_explore</span>
+                {{ __('Wybierz region i język migowy') }}
+            </h2>
+
+            <div class="region-switcher__form" id="region-form">
+
+                {# ── Kraj ── #}
+                <div class="form-group">
+                    <label for="region-country-select" class="region-switcher__field-label">
+                        <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                        {{ __('Kraj / Region') }}
+                    </label>
+                    <select id="region-country-select"
+                            name="country"
+                            class="form-select region-switcher__select"
+                            aria-describedby="region-country-hint">
+                        {% for opt in country_options %}
+                            <option value="{{ opt.code }}"
+                                    data-sl="{{ opt.sl_code }}"
+                                    data-sl-name="{{ opt.sl_name }}"
+                                    {% if opt.code == region_prefs.country %}selected{% endif %}>
+                                {% if opt.code == 'WW' %}
+                                    🌍 {{ __('Cały świat') }}
+                                {% else %}
+                                    {{ opt.name }} ({{ opt.code }})
+                                {% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <small id="region-country-hint" class="add-form-input-info">
+                        {{ __('Wybierz kraj aby zobaczyć tylko lokalne wydarzenia.') }}
+                    </small>
+                </div>
+
+                {# ── Język migowy (filtr) ── #}
+                <div class="form-group" id="region-sl-group">
+                    <label for="region-sl-select" class="region-switcher__field-label">
+                        <span class="material-symbols-outlined" aria-hidden="true">sign_language</span>
+                        {{ __('Język migowy') }}
+                        <span class="region-switcher__optional">{{ __('(opcjonalnie)') }}</span>
+                    </label>
+                    <select id="region-sl-select"
+                            name="sl_filter"
+                            class="form-select region-switcher__select"
+                            aria-describedby="region-sl-hint">
+                        <option value="">— {{ __('Dowolny / bez filtra') }} —</option>
+                        {% for lang in sign_languages %}
+                            <option value="{{ lang.sl_code }}"
+                                    {% if lang.sl_code == region_prefs.sl_filter %}selected{% endif %}>
+                                {{ lang.sl_name }} ({{ lang.country_name }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <small id="region-sl-hint" class="add-form-input-info">
+                        {{ __('Filtruj wydarzenia po konkretnym języku migowym — niezależnie od kraju.') }}
+                    </small>
+                </div>
+
+                {# ── Szybkie wybory ── #}
+                <div class="region-switcher__quick" role="group" aria-label="{{ __('Szybkie wybory') }}">
+                    <button type="button" class="region-quick-btn" data-country="WW" data-sl="">
+                        🌍 {{ __('Cały świat') }}
+                    </button>
+                    <button type="button" class="region-quick-btn" data-country="PL" data-sl="pso">
+                        🇵🇱 {{ __('Polska (PJM)') }}
+                    </button>
+                    <button type="button" class="region-quick-btn" data-country="US" data-sl="ase">
+                        🇺🇸 {{ __('USA (ASL)') }}
+                    </button>
+                    <button type="button" class="region-quick-btn" data-country="GB" data-sl="bfi">
+                        🇬🇧 {{ __('UK (BSL)') }}
+                    </button>
+                    <button type="button" class="region-quick-btn" data-country="DE" data-sl="gsg">
+                        🇩🇪 {{ __('Niemcy (DGS)') }}
+                    </button>
+                </div>
+
+                {# ── Akcje ── #}
+                <div class="region-switcher__actions">
+                    <button type="button"
+                            id="region-save-btn"
+                            class="btn btn--primary"
+                            aria-busy="false">
+                        <span class="material-symbols-outlined" aria-hidden="true">check</span>
+                        {{ __('Zastosuj') }}
+                    </button>
+                    <button type="button"
+                            id="region-cancel-btn"
+                            class="btn btn--secondary">
+                        {{ __('Anuluj') }}
+                    </button>
+                </div>
+
+            </div>
+
+            {# ── Info o filtrach języków UI ── #}
+            <div class="region-switcher__ui-langs">
+                <p class="region-switcher__ui-title">
+                    {{ __('Język interfejsu wtyczki') }}:
+                </p>
+                <div class="region-switcher__lang-pills">
+                    {% for code, uil in ui_languages %}
+                        <a href="?lang={{ code }}"
+                           class="lang-pill {{ uil.status }} {{ code == active_ui_lang ? 'lang-pill--active' : '' }}"
+                           hreflang="{{ code }}"
+                           aria-current="{{ code == active_ui_lang ? 'true' : 'false' }}"
+                           aria-label="{{ uil.name }} — {{ uil.status == 'stable' ? __('dostępny') : (uil.status == 'beta' ? __('beta') : __('planowany')) }}">
+                            {{ uil.flag }} {{ uil.name }}
+                            {% if uil.status == 'beta' %}<span class="lang-pill__badge">beta</span>{% endif %}
+                            {% if uil.status == 'planned' %}<span class="lang-pill__badge lang-pill__badge--gray">{{ __('wkrótce') }}</span>{% endif %}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>{# /.region-switcher__panel-inner #}
+    </div>{# /.region-switcher__panel #}
+
+</div>{# /.devents-region-switcher #}

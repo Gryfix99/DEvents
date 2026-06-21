@@ -1,0 +1,32 @@
+{# templates/components/report-modal.twig — v13.0 (i18n ready) #}
+<div id="report-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="report-modal-title">
+    <div class="modal-content">
+        <button type="button" class="modal-close" aria-label="{{ __('Zamknij', 'devents') }}"><span aria-hidden="true">&times;</span></button>
+        <h3 id="report-modal-title">{{ __('Zgłoś nieprawidłowość', 'devents') }}</h3>
+        <p>{{ __('Dziękujemy, że pomagasz nam dbać o jakość treści w serwisie.', 'devents') }}</p>
+        
+        <form id="report-form" class="devents-form">
+            <input type="hidden" name="item_id" id="report-item-id">
+            <input type="hidden" name="item_type" id="report-item-type">
+            <input type="hidden" name="security" value="{{ wp_create_nonce('devents_report_nonce') }}">
+
+            <div class="form-group">
+                <label for="report-reason" class="form-label">{{ __('Powód zgłoszenia', 'devents') }}</label>
+                <select name="reason" id="report-reason" class="form-select" required>
+                    <option value="">-- {{ __('Wybierz powód', 'devents') }} --</option>
+                    <option value="spam">{{ __('Spam lub treści wprowadzające w błąd', 'devents') }}</option>
+                    <option value="obraźliwe">{{ __('Treści obraźliwe lub nienawistne', 'devents') }}</option>
+                    <option value="nieprawdziwe">{{ __('Nieprawdziwe informacje (np. błędna data, miejsce)', 'devents') }}</option>
+                    <option value="prawa_autorskie">{{ __('Naruszenie praw autorskich', 'devents') }}</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <button type="submit" class="btn btn--danger btn--full-width">
+                    {{ __('Wyślij zgłoszenie', 'devents') }}
+                </button>
+            </div>
+            <div id="report-form-messages" role="alert" aria-live="assertive" style="margin-top: 1rem;"></div>
+        </form>
+    </div>
+</div>

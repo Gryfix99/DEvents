@@ -1,0 +1,319 @@
+{# templates/admin/tabs/events.twig v2.0
+   Zmiany v2.0:
+   - Dodane akcje: Duplikuj, Odwołaj, Przywróć
+   - Pigułka "Odwołane" (status=cancelled)
+   - Fallbacki dla author_name, social_published
+   - Bulk actions: dodane cancel_event, restore_event
+#}
+
+{# --- KONFIGURACJA STATUSÓW --- #}
+{% set status_config = {
+    '0': { 'label': 'DO WERYFIKACJI', 'class': 'status-badge--warning' },
+    '1': { 'label': 'OPUBLIKOWANE',   'class': 'status-badge--success' },
+    '2': { 'label': 'SZKIC',          'class': 'status-badge--neutral' },
+    '3': { 'label': 'ODRZUCONE',      'class': 'status-badge--danger' },
+    '4': { 'label': 'ODWOŁANE',       'class': 'status-badge--danger' }
+} %}
+
+<div class="my-content-list">
+
+    <div class="admin-tab-head">
+        <span class="admin-widget__chip"><span class="material-symbols-outlined" aria-hidden="true">event_note</span></span>
+        <h2 class="admin-widget__title">Wydarzenia</h2>
+        {% if data.total_items %}<span class="admin-tab-count">{{ data.total_items }}</span>{% endif %}
+        <button type="button" class="btn btn--primary" id="open-csv-import-modal-btn" style="margin-left:auto;">
+            <span class="material-symbols-outlined" aria-hidden="true">upload_file</span> Importuj z CSV
+        </button>
+    </div>
+
+    <details class="filter-details-box">
+        <summary>Rozwiń filtry i sortowanie</summary>
+        <form id="events-list-form" method="GET" class="filter-form">
+            <input type="hidden" name="view" value="panel-admina">
+            <input type="hidden" name="tab" value="events">
+            
+            <div class="filter-grid grid-cols-3">
+                <div class="form-group">
+                    <label for="search-input">Szukaj (tytuł, autor)</label>
+                    <input type="search" id="search-input" name="search" placeholder="Wpisz frazę..." value="{{ data.filters.search|e }}" class="form-control form-input">
+                </div>
+                <div class="form-group">
+                    <label for="date-from-input">Data od</label>
+                    <input type="text" id="date-from-input" name="date_from" value="{{ data.filters.date_from|e }}" class="form-control form-input flatpickr-date-only" placeholder="DD.MM.RRRR">
+                </div>
+                <div class="form-group">
+                    <label for="date-to-input">Data do</label>
+                    <input type="text" id="date-to-input" name="date_to" value="{{ data.filters.date_to|e }}" class="form-control form-input flatpickr-date-only" placeholder="DD.MM.RRRR">
+                </div>
+            </div>
+
+            <div class="filter-grid grid-cols-2">
+                <div class="form-group">
+                    <label for="event-category-filter">Kategorie (wiele)</label>
+                    <select id="event-category-filter" name="category[]" class="form-control" multiple>
+                        {% for cat in data.all_categories %}
+                            <option value="{{ cat }}" {{ cat in data.filters.category ? 'selected' : '' }}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group search-acc-filter">
+                    <fieldset class="acc-fieldset acc-fieldset--compact">
+                        <legend>Dostępność</legend>
+                        {# Kompaktowe ikony-chipy (jak w wyszukiwarce) zamiast dużej siatki #}
+                        <div class="search-acc-chips">
+                            {% for type in data.accessibility_types %}
+                                {% set is_checked = type.id in data.filters.accessibility %}
+                                <label class="search-acc-chip {{ is_checked ? 'search-acc-chip--on' : '' }}"
+                                       tabindex="0"
+                                       role="checkbox"
+                                       aria-checked="{{ is_checked ? 'true' : 'false' }}"
+                                       onkeydown="if(event.key === 'Enter' || event.key === ' ') { this.click(); event.preventDefault(); }">
+                                    <input type="checkbox" name="accessibility[]" value="{{ type.id }}" class="sr-only acc-checkbox" {{ is_checked ? 'checked' : '' }}>
+                                    <span class="material-symbols-outlined" aria-hidden="true">{{ type.icon }}</span>
+                                    <span class="search-acc-chip__tooltip" aria-hidden="true">{{ type.name }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+            {# Filtr publikacji w social media #}
+            <div class="filter-grid grid-cols-3">
+                <div class="form-group">
+                    <label for="social-filter">Publikacja w social media</label>
+                    <select id="social-filter" name="social" class="form-control">
+                        {% set sf = data.filters.social|default('all') %}
+                        <option value="all"           {{ sf == 'all'           ? 'selected' : '' }}>Wszystkie</option>
+                        <option value="published"     {{ sf == 'published'     ? 'selected' : '' }}>Opublikowane</option>
+                        <option value="not_published" {{ sf == 'not_published' ? 'selected' : '' }}>Nieopublikowane</option>
+                        <option value="scheduled"     {{ sf == 'scheduled'     ? 'selected' : '' }}>Zaplanowane</option>
+                        <option value="auto"          {{ sf == 'auto'          ? 'selected' : '' }}>Automatycznie</option>
+                        <option value="manual"        {{ sf == 'manual'        ? 'selected' : '' }}>Ręcznie</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-actions">
+                <button type="submit" class="btn btn--primary">Filtruj</button>
+                <a href="{{ data.clear_filters_url }}" class="btn btn--secondary">Wyczyść filtry</a>
+            </div>
+        </form>
+    </details>
+
+    <div class="filter-pills">
+        <a href="{{ data.clear_filters_url }}&status=all" class="filter-pill {{ data.filters.status == 'all' ? 'active' : '' }}">Wszystkie</a>
+        <a href="{{ data.clear_filters_url }}&status=pending" class="filter-pill {{ data.filters.status == 'pending' ? 'active' : '' }}">Do weryfikacji</a>
+        <a href="{{ data.clear_filters_url }}&status=published" class="filter-pill {{ data.filters.status == 'published' ? 'active' : '' }}">Zweryfikowane</a>
+        <a href="{{ data.clear_filters_url }}&status=draft" class="filter-pill {{ data.filters.status == 'draft' ? 'active' : '' }}">Robocze</a>
+        <a href="{{ data.clear_filters_url }}&status=cancelled" class="filter-pill {{ data.filters.status == 'cancelled' ? 'active' : '' }}">Odwołane</a>
+    </div>
+
+    <div class="tablenav top" style="margin-top: 20px; margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
+        <select name="bulk_action" id="bulk-action-selector-top" class="form-control devents-select">
+            <option value="-1">Masowe działania</option>
+            <option value="delete_event">Usuń</option>
+            <option value="verify_event">Zweryfikuj</option>
+            <option value="unverify_event">Cofnij weryfikację</option>
+            <option value="cancel_event">Odwołaj</option>
+            <option value="restore_event">Przywróć jako szkic</option>
+        </select>
+        <button type="button" class="btn btn--secondary do-bulk-action-btn" data-item-type="event">Zastosuj</button>
+    </div>
+
+    <div class="table-responsive-wrapper">
+        {# DODANO ID="events-table" tutaj, co jest kluczowe dla poprawki JS usuwania #}
+        <table id="events-table" class="my-content-list__table sortable devents-responsive-table devents-table--cards">
+            <thead>
+                <tr>
+                    <th scope="col" style="width: 1%;"><div class="form-checkbox-group">
+                        <input type="checkbox" id="select-all-events" class="select-all" data-target-class=".event-checkbox">
+                    </div></th>
+                    <th scope="col"><a href="{{ data.sort_links.id }}">ID {{ data.sort_arrows.id|raw }}</a></th>
+                    <th scope="col"><a href="{{ data.sort_links.title }}">Tytuł {{ data.sort_arrows.title|raw }}</a></th>
+                    <th scope="col" class="desktop-only"><a href="{{ data.sort_links.author }}">Opublikował {{ data.sort_arrows.author|raw }}</a></th>
+                    <th scope="col" class="desktop-only"><a href="{{ data.sort_links.start_datetime }}">Data rozpoczęcia {{ data.sort_arrows.start_datetime|raw }}</a></th>
+                    <th scope="col"><a href="{{ data.sort_links.views }}" aria-label="Sortuj według wyświetleń"><span class="material-symbols-outlined" aria-hidden="true">visibility</span>{{ data.sort_arrows.views|raw }}</a></th>
+                    <th scope="col" class="desktop-only">Status</th>
+                    <th scope="col" class="desktop-only">Publikacja SM</th>
+                    <th scope="col" style="text-align: right;">Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in data.events %}
+                    {# Ustalanie statusu na podstawie verified #}
+                    {% set current_status = status_config[event.verified] ?? {'label': 'NIEZNANY', 'class': 'status-badge--neutral'} %}
+
+                    <tr>
+                        <td><div class="form-checkbox-group"><input type="checkbox" name="event_ids[]" value="{{ event.id }}" class="event-checkbox"></div></td>
+                        
+                        <td data-label="ID" class="desktop-only">{{ event.id }}</td>
+
+                        <td class="responsive-main-info" data-label="Tytuł">
+                            <strong>{{ event.title }}</strong>
+                            {% if event.is_featured %}
+                                <span title="Wyróżnione" style="color: var(--accent); margin-left: 5px;">★</span>
+                            {% endif %}
+
+                            <div style="margin-top: 4px;">
+                                <span class="status-badge status-badge--neutral" style="font-size: 0.75rem; padding: 2px 6px;">
+                                    <span class="material-symbols-outlined" style="font-size: 12px; vertical-align: middle;" aria-hidden="true">child_care</span>
+                                    {{ event.age_rating|default('0+') }}
+                                </span>
+                            </div>
+                            
+                            {# MOBILE META #}
+                            <div class="mobile-meta">
+                                <div class="mobile-meta-row">
+                                    <span class="mobile-meta-label">Status:</span>
+                                    <span class="status-badge {{ current_status.class }}">{{ current_status.label }}</span>
+                                </div>
+                                <div class="mobile-meta-row">
+                                    <span class="mobile-meta-label">Data:</span>
+                                    <span>{{ event.start_datetime|date('d.m.Y, H:i') }}</span>
+                                </div>
+                                <div class="mobile-meta-row">
+                                    <span class="mobile-meta-label">Autor:</span>
+                                    <span>{{ event.author_name|default('—') }}</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td data-label="Autor" class="desktop-only">{{ event.author_name|default('—') }}</td>
+                        <td data-label="Data" class="desktop-only">{{ event.start_datetime|date('d.m.Y, H:i') }}</td>
+                        <td data-label="Wyświetlenia" class="desktop-only">{{ event.views|default(0) }}</td>
+                        
+                        <td data-label="Status" class="desktop-only">
+                            <span class="status-badge {{ current_status.class }}">{{ current_status.label }}</span>
+                        </td>
+
+                        {# PUBLIKACJA W SOCIAL MEDIA — sposób + styl (jasny/ciemny) lub plan #}
+                        <td data-label="Publikacja SM" class="desktop-only">
+                            {% set s = event.social_status %}
+                            <span class="social-badge {{ s.class }}">
+                                <span class="material-symbols-outlined" aria-hidden="true">{{ s.icon }}</span>
+                                {{ s.label }}{% if s.state == 'scheduled' and s.date %}: {{ s.date }}{% endif %}
+                            </span>
+                            {% if s.theme %}
+                                <span class="social-theme social-theme--{{ s.theme == 'jasny' ? 'light' : 'dark' }}">
+                                    <span class="material-symbols-outlined" aria-hidden="true">{{ s.theme == 'jasny' ? 'light_mode' : 'dark_mode' }}</span>{{ s.theme }}
+                                </span>
+                            {% endif %}
+                            {% if s.state == 'published' and s.date %}<span class="social-when">{{ s.date }}</span>{% endif %}
+                        </td>
+
+                        <td data-label="Akcje" class="actions-cell">
+                            <div class="actions-group">
+                                
+                                {# 1. LINK EDYCJI #}
+                                <a href="{{ data.clean_url }}?view=edytuj-wydarzenie&event_id={{ event.id }}" class="btn btn--secondary btn--small btn--icon" title="Edytuj" aria-label="Edytuj">
+                                    <span class="material-symbols-outlined" aria-hidden="true">edit</span>
+                                </a>
+
+                                {# 2. WERYFIKACJA (Widoczne jeśli niezweryfikowane lub odrzucone) #}
+                                {% if event.verified == 0 or event.verified == 3 %}
+                                    <button type="button" class="btn btn--primary btn--small btn--icon js-admin-verify-event" data-id="{{ event.id }}" title="Zatwierdź" aria-label="Zatwierdź">
+                                        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+                                    </button>
+                                {% endif %}
+
+                                {# 3. COFNIĘCIE WERYFIKACJI (Widoczne jeśli opublikowane) #}
+                                {% if event.verified == 1 %}
+                                    <button type="button" class="btn btn--secondary btn--small btn--icon js-admin-unverify-event" data-id="{{ event.id }}" title="Cofnij weryfikację" aria-label="Cofnij weryfikację">
+                                        <span class="material-symbols-outlined" aria-hidden="true">unpublished</span>
+                                    </button>
+                                {% endif %}
+
+                                {# 3b. ODWOŁANIE (v2.0) — widoczne dla opublikowanych #}
+                                {% if event.verified == 1 %}
+                                    <button type="button" class="btn btn--warning btn--small btn--icon js-admin-cancel-event" data-id="{{ event.id }}" title="Odwołaj wydarzenie" aria-label="Odwołaj wydarzenie">
+                                        <span class="material-symbols-outlined" aria-hidden="true">event_busy</span>
+                                    </button>
+                                {% endif %}
+
+                                {# 3c. PRZYWRÓCENIE (v2.0) — widoczne dla odwołanych #}
+                                {% if event.verified == 4 %}
+                                    <button type="button" class="btn btn--primary btn--small btn--icon js-admin-restore-event" data-id="{{ event.id }}" title="Przywróć jako szkic" aria-label="Przywróć jako szkic">
+                                        <span class="material-symbols-outlined" aria-hidden="true">restore</span>
+                                    </button>
+                                {% endif %}
+
+                                {# 3d. DUPLIKACJA (v2.0) — zawsze dostępna #}
+                                <button type="button" class="btn btn--secondary btn--small btn--icon js-admin-duplicate-event" data-id="{{ event.id }}" title="Duplikuj (kopia jako szkic z datą +7 dni)" aria-label="Duplikuj (kopia jako szkic z datą +7 dni)">
+                                    <span class="material-symbols-outlined" aria-hidden="true">content_copy</span>
+                                </button>
+
+                                {# 3e. WYRÓŻNIENIE NA DOWOLNY CZAS (admin) #}
+                                <button type="button" class="btn {{ event.is_featured ? 'btn--warning' : 'btn--secondary' }} btn--small btn--icon js-admin-feature-event" data-id="{{ event.id }}" data-featured="{{ event.is_featured ? '1' : '0' }}" title="Wyróżnij na wybrany czas" aria-label="Wyróżnij na wybrany czas">
+                                    <span class="material-symbols-outlined" aria-hidden="true">{{ event.is_featured ? 'star' : 'star_outline' }}</span>
+                                </button>
+
+                                {# 4. GENEROWANIE GRAFIKI #}
+                                <button type="button" class="btn btn--secondary btn--small btn--icon js-admin-generate-graphic" data-id="{{ event.id }}" title="Generuj grafikę" aria-label="Generuj grafikę">
+                                    <span class="material-symbols-outlined" aria-hidden="true">image</span>
+                                </button>
+                                
+                                {# 5. PUBLIKACJA TERAZ na FB/IG (realny post — status pokazuje kolumna „Publikacja SM") #}
+                                <button type="button"
+                                        class="btn btn--small btn--icon btn--primary js-admin-publish-social"
+                                        data-id="{{ event.id }}"
+                                        title="Opublikuj teraz na Facebooku/Instagramie"
+                                        aria-label="Opublikuj teraz na Facebooku i Instagramie">
+                                    <span class="material-symbols-outlined" aria-hidden="true">share</span>
+                                </button>
+
+                                {# 6. USUWANIE #}
+                                <button type="button" class="btn btn--danger btn--small btn--icon js-admin-delete-event" data-id="{{ event.id }}" title="Usuń trwale" aria-label="Usuń trwale">
+                                    <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="tablenav bottom">
+        <div class="tablenav-pages">
+            <div class="pagination-per-page-selector">
+                <form id="events-per-page-form" method="GET">
+                    <input type="hidden" name="view" value="panel-admina">
+                    <input type="hidden" name="tab" value="events">
+                    {% if data.filters.search %}<input type="hidden" name="search" value="{{ data.filters.search|e('html_attr') }}">{% endif %}
+                    <input type="hidden" name="status" value="{{ data.filters.status|e('html_attr') }}">
+                    {% if data.filters.orderby %}<input type="hidden" name="orderby" value="{{ data.filters.orderby|e('html_attr') }}">{% endif %}
+                    {% if data.filters.order %}<input type="hidden" name="order" value="{{ data.filters.order|e('html_attr') }}">{% endif %}
+                    {% if data.filters.date_from %}<input type="hidden" name="date_from" value="{{ data.filters.date_from|e('html_attr') }}">{% endif %}
+                    {% if data.filters.date_to %}<input type="hidden" name="date_to" value="{{ data.filters.date_to|e('html_attr') }}">{% endif %}
+                    
+                    {% for cat_val in data.filters.category %}
+                        <input type="hidden" name="category[]" value="{{ cat_val|e('html_attr') }}">
+                    {% endfor %}
+                    {% for acc_val in data.filters.accessibility %}
+                        <input type="hidden" name="accessibility[]" value="{{ acc_val|e('html_attr') }}">
+                    {% endfor %}
+                    
+                    <select name="per_page" onchange="this.form.submit()" class="form-control" style="width: auto;">
+                        <option value="20" {{ data.filters.per_page == 20 ? 'selected' : '' }}>20</option>
+                        <option value="50" {{ data.filters.per_page == 50 ? 'selected' : '' }}>50</option>
+                        <option value="100" {{ data.filters.per_page == 100 ? 'selected' : '' }}>100</option>
+                        <option value="-1" {{ data.filters.per_page == -1 ? 'selected' : '' }}>Wszystko</option>
+                    </select>
+                    <span>na stronę</span>
+                </form>
+            </div>
+            <span class="displaying-num">{{ data.total_items }} elementów</span>
+            <span class="pagination-links">{{ data.pagination_links|raw }}</span>
+        </div>
+    </div>
+</div>
+
+{# Kontener Modala Generatora Grafik - struktura zgodna z nowym CSS #}
+<div id="graphic-modal" class="modal" style="display: none;">
+    <div class="modal-background graphic-modal-overlay"></div>
+    <div class="modal-content" style="width: 95%; max-width: 1400px; max-height: 95vh; display: flex; flex-direction: column;">
+        <div class="box" id="graphic-modal-body" style="position: relative; padding: 0; background: transparent; box-shadow: none; flex: 1; overflow-y: auto;">
+            </div>
+    </div>
+    <button type="button" class="modal-close is-large graphic-modal-close" aria-label="{{ __('Zamknij', 'devents') }}"><span class="material-symbols-outlined" aria-hidden="true">close</span></button>
+</div>

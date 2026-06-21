@@ -1,0 +1,404 @@
+{# templates/user/my-pulpit.twig — v13.0 (i18n ready) #}
+
+{% if is_registration_success %}
+     <div class="message-box message-box--success">
+        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
+        {{ __('Konto zostało pomyślnie aktywowane! Witamy w serwisie.', 'devents') }}
+     </div>
+{% endif %}
+
+{# Powiadomienie o niezweryfikowanej instytucji #}
+{% if (is_organizer or is_master) and not is_verified_org %}
+     <div class="message-box message-box--warning">
+        <span class="material-symbols-outlined" aria-hidden="true">pending_actions</span>
+        <strong>{{ __('Konto niezweryfikowane:', 'devents') }}</strong> 
+        {{ __('Twoja instytucja oczekuje na weryfikację. Wszystkie Twoje nowo dodane wydarzenia będą miały status "szkicu" do momentu weryfikacji.', 'devents') }}
+     </div>
+{% endif %}
+
+{# ==========================================
+   SEKCJA 1: Statystyki na górze
+   ========================================== #}
+<div class="dashboard-stats-grid">
+    
+    {# 1. Kafelki dla SUPER ADMINA #}
+    {% if is_admin %}
+        <div class="stat-card stat-card--purple">
+            <span class="material-symbols-outlined" aria-hidden="true">group</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ dashboard_data.total_users|default(0) }}</span>
+                <span class="stat-card__label">{{ __('Wszyscy Użytkownicy', 'devents') }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="material-symbols-outlined" aria-hidden="true">domain</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ dashboard_data.total_institutions|default(0) }}</span>
+                <span class="stat-card__label">{{ __('Zarejestrowane Instytucje', 'devents') }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="material-symbols-outlined" aria-hidden="true">public</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ dashboard_data.total_global_events|default(0) }}</span>
+                <span class="stat-card__label">{{ __('Wydarzenia (Globalnie)', 'devents') }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ dashboard_data.total_global_views|default(0)|number_format(0, ',', ' ') }}</span>
+                <span class="stat-card__label">{{ __('Wyświetlenia (Globalnie)', 'devents') }}</span>
+            </div>
+        </div>
+
+    {# 2. Kafelki dla KADRY #}
+    {% elseif is_organizer or is_master or is_moderator %}
+        <div class="stat-card">
+            <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ dashboard_data.events_count|default(0) }}</span>
+                <span class="stat-card__label">{{ __('Aktywne wydarzenia', 'devents') }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="material-symbols-outlined" aria-hidden="true">monitoring</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ dashboard_data.total_views|default(0) }}</span>
+                <span class="stat-card__label">{{ __('Łącznie wyświetleń', 'devents') }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="material-symbols-outlined" aria-hidden="true">star_rate</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ dashboard_data.average_rating|default(0)|number_format(1, ',', '') }}</span>
+                <span class="stat-card__label">{{ __('Średnia ocena', 'devents') }}</span>
+            </div>
+        </div>
+        
+        {% if is_master %}
+            <div class="stat-card stat-card--purple">
+                <span class="material-symbols-outlined" aria-hidden="true">hub</span>
+                <div class="stat-card__content">
+                    <span class="stat-card__value">{{ dashboard_data.units_count|default(0) }}</span>
+                    <span class="stat-card__label">{{ __('Zarządzane Jednostki', 'devents') }}</span>
+                </div>
+            </div>
+        {% else %}
+            <div class="stat-card">
+                <span class="material-symbols-outlined" aria-hidden="true">diversity_3</span>
+                <div class="stat-card__content">
+                    <span class="stat-card__value">{{ dashboard_data.subscribers_count|default(0) }}</span>
+                    <span class="stat-card__label">{{ __('Obserwujących', 'devents') }}</span>
+                </div>
+            </div>
+        {% endif %}
+
+    {# 3. Kafelki dla SUBSKRYBENTA #}
+    {% else %}
+        <div class="stat-card">
+            <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ dashboard_data.favorites_count|default(0) }}</span>
+                <span class="stat-card__label">{{ __('Ulubione wydarzenia', 'devents') }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="material-symbols-outlined" aria-hidden="true">rss_feed</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ dashboard_data.followed_orgs_count|default(0) }}</span>
+                <span class="stat-card__label">{{ __('Obserwowane miejsca', 'devents') }}</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <span class="material-symbols-outlined" aria-hidden="true">reviews</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ dashboard_data.reviews_given_count|default(0) }}</span>
+                <span class="stat-card__label">{{ __('Wystawione opinie', 'devents') }}</span>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+
+{# ==========================================
+   NAJBLIŻSZE WYDARZENIE (karta)
+   ========================================== #}
+{% if nearest_event %}
+<div class="dashboard-nearest">
+    <h3><span class="material-symbols-outlined" aria-hidden="true">event_upcoming</span> {{ __('Najbliższe wydarzenie', 'devents') }}</h3>
+    <div class="dashboard-nearest__card">
+        {% include 'components/event-card.twig' with {'event': nearest_event, 'is_user_logged_in': true} %}
+    </div>
+</div>
+{% endif %}
+
+{# ==========================================
+   SEKCJA 2: Akcje i Profil
+   ========================================== #}
+<div class="dashboard-main-grid">
+    
+    <div class="dashboard-actions-column">
+        <h3><span class="material-symbols-outlined" aria-hidden="true">rocket_launch</span> {{ __('Szybkie akcje', 'devents') }}</h3>
+        <div class="dashboard-actions">
+            
+            {% if is_admin %}
+                <a href="{{ panel_url }}?view=panel-admina" class="action-card action-card--primary">
+                    <span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span>
+                    <span>{{ __('Zarządzaj platformą', 'devents') }}</span>
+                </a>
+                <a href="{{ panel_url }}?view=panel-admina&tab=institutions" class="action-card">
+                    <span class="material-symbols-outlined" aria-hidden="true">fact_check</span>
+                    <span>{{ __('Instytucje', 'devents') }}</span>
+                </a>
+                <a href="{{ panel_url }}?view=dodaj-wydarzenie" class="action-card">
+                    <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
+                    <span>{{ __('Opublikuj jako admin', 'devents') }}</span>
+                </a>
+
+            {% elseif is_organizer or is_master or is_moderator %}
+                <a href="{{ panel_url }}?view=dodaj-wydarzenie" class="action-card action-card--primary">
+                    <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
+                    <span>{{ __('Opublikuj wydarzenie', 'devents') }}</span>
+                </a>
+                <a href="{{ panel_url }}?view=moje-wydarzenia" class="action-card">
+                    <span class="material-symbols-outlined" aria-hidden="true">edit_calendar</span>
+                    <span>{{ __('Zarządzaj wydarzeniami', 'devents') }}</span>
+                </a>
+                <a href="{{ panel_url }}?view=moja-instytucja" class="action-card">
+                    <span class="material-symbols-outlined" aria-hidden="true">domain</span>
+                    <span>{{ __('Profil instytucji i kadra', 'devents') }}</span>
+                </a>
+                
+                {% if is_master %}
+                    <a href="{{ panel_url }}?view=moje-jednostki" class="action-card">
+                        <span class="material-symbols-outlined" aria-hidden="true">hub</span>
+                        <span>{{ __('Zarządzaj siecią (jednostki)', 'devents') }}</span>
+                    </a>
+                {% endif %}
+
+            {% else %}
+                <a href="/" class="action-card action-card--primary">
+                    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                    <span>{{ __('Szukaj nowych wydarzeń', 'devents') }}</span>
+                </a>
+                <a href="{{ panel_url }}?view=moje-ulubione" class="action-card">
+                    <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+                    <span>{{ __('Przeglądaj ulubione', 'devents') }}</span>
+                </a>
+                <a href="{{ panel_url }}?view=moje-subskrypcje" class="action-card">
+                    <span class="material-symbols-outlined" aria-hidden="true">rss_feed</span>
+                    <span>{{ __('Moje subskrypcje', 'devents') }}</span>
+                </a>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="dashboard-profile-column">
+        <h3><span class="material-symbols-outlined" aria-hidden="true">badge</span> {{ __('Twój profil', 'devents') }}</h3>
+        <div class="profile-card-dashboard">
+            <div class="profile-avatar">
+                <div class="avatar-circle">
+                    {% if profile_card.logo_url %}
+                        <img src="{{ profile_card.logo_url|e }}" alt="{{ __('Logo', 'devents') }}">
+                    {% else %}
+                        <span class="material-symbols-outlined" aria-hidden="true">
+                            {% if is_admin %}admin_panel_settings{% elseif is_organizer or is_master or is_moderator %}domain{% else %}account_circle{% endif %}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="profile-card__info">
+                <h3 class="name">{{ user.first_name|e }} {{ user.last_name|e }}</h3>
+                <p class="details" style="font-weight: 600; color: var(--primary);">
+                    {% if is_admin %}
+                        <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle; color: var(--danger);" aria-hidden="true">shield_person</span>
+                        <span style="color: var(--danger);">{{ __('Administrator Systemu', 'devents') }}</span>
+                    {% elseif is_master %}
+                        <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;" aria-hidden="true">hub</span>
+                        {{ __('Sieć Główna:', 'devents') }} {{ profile_card.org_name|e }}
+                    {% elseif is_organizer or is_moderator %}
+                        <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;" aria-hidden="true">apartment</span>
+                        {{ __('Instytucja:', 'devents') }} {{ profile_card.org_name|e }}
+                    {% else %}
+                        <span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;" aria-hidden="true">person</span>
+                        {{ __('Konto Uczestnika', 'devents') }}
+                    {% endif %}
+                </p>
+                <p class="details" style="margin-top: 5px;">{{ user.user_email|e }}</p>
+            </div>
+            
+            <a href="{{ panel_url }}?view=ustawienia" class="btn btn--outline btn--full-width" style="margin-top: 15px;">
+                <span class="material-symbols-outlined" style="font-size: 18px;" aria-hidden="true">manage_accounts</span>
+                {{ __('Zarządzaj kontem', 'devents') }}
+            </a>
+        </div>
+    </div>
+</div>
+
+
+{# ==========================================
+   SEKCJA 3: Plakaty do pobrania
+   ========================================== #}
+
+<div class="pdl-section">
+
+    <h3>
+        <span class="material-symbols-outlined" aria-hidden="true">print</span>
+        {{ __('Materiały do druku', 'devents') }}
+    </h3>
+
+    <div class="pdl-grid">
+{% if is_organizer or is_master or is_moderator %}
+        {# ---- KARTA 1: Plakat instytucji ---- #}
+        <a
+            href="{{ my_poster_url }}"
+            target="_blank"
+            rel="noopener"
+            class="pdl-card"
+            aria-label="{{ __('Pobierz Plakat Instytucji – otwiera się w nowej karcie i pobiera PDF', 'devents') }}"
+        >
+
+            {# Miniatura – styl plakatu instytucji #}
+            <div class="pdl-thumb" aria-hidden="true">
+
+                <div class="pdl-thumb__bar pdl-thumb__bar--top"></div>
+
+                <div class="pdl-thumb__hero" data-deco="D">
+                    <div class="pdl-thumb__lines">
+                        <div class="pdl-thumb__line pdl-thumb__line--short"></div>
+                        <div class="pdl-thumb__line pdl-thumb__line--accent"></div>
+                        <div class="pdl-thumb__line pdl-thumb__line--mid"></div>
+                    </div>
+                    <div class="pdl-thumb__logo">
+                        <span>{{ profile_card.org_name|slice(0,1)|upper|default('I') }}</span>
+                    </div>
+                </div>
+
+                <div class="pdl-thumb__wave"></div>
+
+                <div class="pdl-thumb__lower">
+                    <div class="pdl-thumb__inst"></div>
+                    <div class="pdl-thumb__feat">
+                        <div class="pdl-thumb__feat-row">
+                            <div class="pdl-thumb__feat-dot"></div>
+                            <div class="pdl-thumb__feat-line"></div>
+                        </div>
+                        <div class="pdl-thumb__feat-row">
+                            <div class="pdl-thumb__feat-dot"></div>
+                            <div class="pdl-thumb__feat-line" style="width:60%"></div>
+                        </div>
+                        <div class="pdl-thumb__feat-row">
+                            <div class="pdl-thumb__feat-dot"></div>
+                            <div class="pdl-thumb__feat-line" style="width:75%"></div>
+                        </div>
+                    </div>
+                    <div class="pdl-thumb__url-box">
+                        <span><em>D</em>Events.pl</span>
+                    </div>
+                </div>
+
+                <div class="pdl-thumb__bar pdl-thumb__bar--bottom"></div>
+
+            </div>
+
+            {# Info #}
+            <div class="pdl-info">
+                <span class="pdl-info__tag">
+                    <span class="material-symbols-outlined" style="font-size:10px" aria-hidden="true">domain</span>
+                    {{ __('Dla instytucji', 'devents') }}
+                </span>
+                <p class="pdl-info__title">
+                    {{ __('Plakat dostępności', 'devents') }}
+                </p>
+                <p class="pdl-info__desc">
+                    {{ __('Spersonalizowany plakat A4 z logo i nazwą Twojej instytucji – gotowy do wydruku.', 'devents') }}
+                </p>
+                <span class="pdl-info__btn">
+                    <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                    {{ __('Pobierz PDF', 'devents') }}
+                </span>
+            </div>
+
+        </a>
+{% endif %}
+        {# ---- KARTA 2: Plakat ogólny DEvents ---- #}
+        <a
+            href="{{ devents_poster_url }}"
+            target="_blank"
+            rel="noopener"
+            class="pdl-card pdl-card--devents"
+            aria-label="{{ __('Pobierz Plakat DEvents – otwiera się w nowej karcie i pobiera PDF', 'devents') }}"
+        >
+
+            {# Miniatura – styl plakatu ogólnego (duży znak zapytania) #}
+            <div class="pdl-thumb" aria-hidden="true">
+
+                <div class="pdl-thumb__bar pdl-thumb__bar--top"></div>
+
+                <div class="pdl-thumb__hero" data-deco="?">
+                    <div class="pdl-thumb__lines">
+                        <div class="pdl-thumb__line pdl-thumb__line--short"></div>
+                        <div class="pdl-thumb__line pdl-thumb__line--accent"></div>
+                        <div class="pdl-thumb__line pdl-thumb__line--short"></div>
+                        <div class="pdl-thumb__line" style="width:40%;background:rgba(255,255,255,.3)"></div>
+                    </div>
+                </div>
+
+                <div class="pdl-thumb__wave"></div>
+
+                <div class="pdl-thumb__lower">
+                    <div class="pdl-thumb__feat">
+                        <div class="pdl-thumb__feat-row">
+                            <div class="pdl-thumb__feat-dot"></div>
+                            <div class="pdl-thumb__feat-line"></div>
+                        </div>
+                        <div class="pdl-thumb__feat-row">
+                            <div class="pdl-thumb__feat-dot"></div>
+                            <div class="pdl-thumb__feat-line" style="width:65%"></div>
+                        </div>
+                        <div class="pdl-thumb__feat-row">
+                            <div class="pdl-thumb__feat-dot"></div>
+                            <div class="pdl-thumb__feat-line" style="width:80%"></div>
+                        </div>
+                        <div class="pdl-thumb__feat-row">
+                            <div class="pdl-thumb__feat-dot"></div>
+                            <div class="pdl-thumb__feat-line" style="width:55%"></div>
+                        </div>
+                    </div>
+                    <div class="pdl-thumb__url-box">
+                        <span><em>D</em>Events.pl</span>
+                    </div>
+                </div>
+
+                <div class="pdl-thumb__bar pdl-thumb__bar--bottom"></div>
+
+            </div>
+
+            {# Info #}
+            <div class="pdl-info">
+                <span class="pdl-info__tag">
+                    <span class="material-symbols-outlined" style="font-size:10px" aria-hidden="true">travel_explore</span>
+                    {{ __('DEvents', 'devents') }}
+                </span>
+                <p class="pdl-info__title">
+                    {{ __('Plakat dostępnych wydarzeń', 'devents') }}
+                </p>
+                <p class="pdl-info__desc">
+                    {{ __('Ogólny plakat DEvents z listą dostępności i kodem QR – idealny do ekspozycji w Twojej placówce.', 'devents') }}
+                </p>
+                <span class="pdl-info__btn">
+                    <span class="material-symbols-outlined" aria-hidden="true">picture_as_pdf</span>
+                    {{ __('Pobierz PDF', 'devents') }}
+                </span>
+            </div>
+
+        </a>
+
+    </div>
+
+</div>
+
+

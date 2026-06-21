@@ -1,0 +1,64 @@
+{# ========================================================================
+   CENNIK — karty produktowe ([devents_cennik])
+   Style inline, bo shortcode renderuje się w trakcie the_content
+   (wp_enqueue_style nie trafiłby już do <head>).
+   ======================================================================== #}
+<style>
+.dv-pricing{max-width:1080px;margin:0 auto;padding:8px 0 40px}
+.dv-pricing__head{text-align:center;max-width:680px;margin:0 auto 28px}
+.dv-pricing__title{font-size:2rem;font-weight:800;margin:0 0 10px;color:var(--text-primary,#0f172a)}
+.dv-pricing__lead{font-size:1.02rem;line-height:1.6;color:var(--text-secondary,#475569);margin:0}
+.dv-pricing__grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;align-items:stretch}
+.dv-price-card{position:relative;display:flex;flex-direction:column;background:var(--bg-secondary,#fff);border:1px solid var(--border-primary,#e5e7eb);border-radius:16px;padding:24px 20px;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.dv-price-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.08)}
+.dv-price-card--featured{border-color:var(--primary,#00857c);box-shadow:0 8px 26px rgba(0,133,124,.16)}
+.dv-price-card__badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--primary,#00857c);color:#fff;font-size:.74rem;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:4px 12px;border-radius:999px;white-space:nowrap}
+.dv-price-card__icon{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:14px;background:color-mix(in srgb,var(--primary,#00857c) 12%,transparent);color:var(--primary,#00857c);margin-bottom:14px}
+.dv-price-card__icon .material-symbols-outlined{font-size:28px}
+.dv-price-card__name{font-size:1.12rem;font-weight:700;margin:0 0 8px;color:var(--text-primary,#0f172a)}
+.dv-price-card__price{margin:0;line-height:1;color:var(--text-primary,#0f172a)}
+.dv-price-card__amount{font-size:2.2rem;font-weight:800}
+.dv-price-card__cur{font-size:1rem;font-weight:700;color:var(--text-secondary,#475569)}
+.dv-price-card__unit{margin:4px 0 12px;font-size:.85rem;color:var(--text-light,#64748b)}
+.dv-price-card__desc{margin:0 0 14px;font-size:.92rem;line-height:1.55;color:var(--text-secondary,#475569)}
+.dv-price-card__features{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;margin-top:auto}
+.dv-price-card__features li{display:flex;align-items:flex-start;gap:8px;font-size:.9rem;color:var(--text-primary,#0f172a)}
+.dv-price-card__features .material-symbols-outlined{font-size:18px;color:var(--primary,#00857c);flex:0 0 auto;margin-top:1px}
+.dv-pricing__cta{text-align:center;margin-top:32px}
+.dv-pricing__note{max-width:620px;margin:14px auto 0;font-size:.86rem;line-height:1.55;color:var(--text-light,#64748b)}
+@media (max-width:520px){.dv-pricing__title{font-size:1.6rem}.dv-price-card__amount{font-size:1.9rem}}
+</style>
+
+<section class="dv-pricing" id="devents-main-content">
+    <header class="dv-pricing__head">
+        <h1 class="dv-pricing__title">{{ __('Cennik', 'devents') }}</h1>
+        <p class="dv-pricing__lead">{{ __('Dodawanie i publikacja wydarzeń są bezpłatne. Płatne są tylko opcje dodatkowe — wyróżnienie wydarzenia oraz tłumaczenie na polski język migowy.', 'devents') }}</p>
+    </header>
+
+    <div class="dv-pricing__grid">
+        {% for p in products %}
+            <article class="dv-price-card{{ p.featured ? ' dv-price-card--featured' : '' }}">
+                {% if p.featured %}<span class="dv-price-card__badge">{{ __('Polecane', 'devents') }}</span>{% endif %}
+                <span class="dv-price-card__icon"><span class="material-symbols-outlined" aria-hidden="true">{{ p.icon }}</span></span>
+                <h2 class="dv-price-card__name">{{ p.name }}</h2>
+                <p class="dv-price-card__price"><span class="dv-price-card__amount">{{ p.price }}</span> <span class="dv-price-card__cur">zł</span></p>
+                <p class="dv-price-card__unit">{{ p.unit }}</p>
+                <p class="dv-price-card__desc">{{ p.desc }}</p>
+                <ul class="dv-price-card__features">
+                    {% for f in p.features %}
+                        <li><span class="material-symbols-outlined" aria-hidden="true">check_circle</span> <span>{{ f }}</span></li>
+                    {% endfor %}
+                </ul>
+            </article>
+        {% endfor %}
+    </div>
+
+    <div class="dv-pricing__cta">
+        {% if is_user_logged_in %}
+            <a href="{{ panel_url }}" class="btn btn--primary btn-lg">{{ __('Przejdź do moich wydarzeń', 'devents') }}</a>
+        {% else %}
+            <a href="{{ register_url }}" class="btn btn--primary btn-lg">{{ __('Załóż bezpłatne konto', 'devents') }}</a>
+        {% endif %}
+        <p class="dv-pricing__note">{{ __('Wyróżnienie i tłumaczenie zamawiasz z poziomu panelu, przy swoim wydarzeniu. Dostępna płatność online (karta, BLIK) lub przelewem na podstawie faktury proforma (14 dni).', 'devents') }}</p>
+    </div>
+</section>

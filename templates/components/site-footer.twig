@@ -1,0 +1,77 @@
+{# ========================================================================
+   STOPKA WITRYNY (samodzielna, granatowa — spójna z nagłówkiem [devents_header]).
+   Renderowana przez [devents_footer] i/lub auto-wstrzykiwana w wp_footer.
+   Zmienne (z site-footer-handler.php): home_url, logo, mission, year,
+   columns[ {label, items[ {label,url} ]} ], social{facebook,instagram}.
+   ======================================================================== #}
+<footer class="devents-footer" role="contentinfo" aria-label="{{ __('Stopka', 'devents') }}">
+    <div class="devents-footer__inner">
+
+        <div class="devents-footer__top">
+
+            {# --- Marka --- #}
+            <div class="devents-footer__brand">
+                <a href="{{ home_url }}" class="devents-footer__logo-link" aria-label="DEvents — {{ __('Strona główna', 'devents') }}">
+                    <img src="{{ logo }}" alt="DEvents" class="devents-footer__logo" width="150" height="96">
+                </a>
+                <p class="devents-footer__mission">{{ mission }}</p>
+
+                {% if social.facebook or social.instagram %}
+                    <div class="devents-footer__social">
+                        {% if social.facebook %}
+                            <a href="{{ social.facebook }}" class="devents-footer__social-link" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+                                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.51 1.49-3.9 3.78-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.88h2.78l-.44 2.9h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94Z"/></svg>
+                            </a>
+                        {% endif %}
+                        {% if social.instagram %}
+                            <a href="{{ social.instagram }}" class="devents-footer__social-link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+                                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2c2.72 0 3.06.01 4.12.06 1.07.05 1.79.22 2.43.47.66.26 1.22.6 1.77 1.16.56.55.9 1.11 1.16 1.77.25.64.42 1.36.47 2.43.05 1.07.06 1.4.06 4.12s-.01 3.06-.06 4.12c-.05 1.07-.22 1.79-.47 2.43a4.9 4.9 0 0 1-1.16 1.77c-.55.56-1.11.9-1.77 1.16-.64.25-1.36.42-2.43.47-1.07.05-1.4.06-4.12.06s-3.06-.01-4.12-.06c-1.07-.05-1.79-.22-2.43-.47a4.9 4.9 0 0 1-1.77-1.16 4.9 4.9 0 0 1-1.16-1.77c-.25-.64-.42-1.36-.47-2.43C2.01 15.06 2 14.72 2 12s.01-3.06.06-4.12c.05-1.07.22-1.79.47-2.43.26-.66.6-1.22 1.16-1.77.55-.56 1.11-.9 1.77-1.16.64-.25 1.36-.42 2.43-.47C8.94 2.01 9.28 2 12 2Zm0 1.8c-2.67 0-2.99.01-4.04.06-.98.04-1.51.21-1.86.35-.47.18-.8.4-1.15.75-.35.35-.57.68-.75 1.15-.14.35-.31.88-.35 1.86-.05 1.05-.06 1.37-.06 4.03s.01 2.99.06 4.04c.04.98.21 1.51.35 1.86.18.47.4.8.75 1.15.35.35.68.57 1.15.75.35.14.88.31 1.86.35 1.05.05 1.37.06 4.04.06s2.99-.01 4.04-.06c.98-.04 1.51-.21 1.86-.35.47-.18.8-.4 1.15-.75.35-.35.57-.68.75-1.15.14-.35.31-.88.35-1.86.05-1.05.06-1.37.06-4.04s-.01-2.99-.06-4.03c-.04-.98-.21-1.51-.35-1.86a3.1 3.1 0 0 0-.75-1.15 3.1 3.1 0 0 0-1.15-.75c-.35-.14-.88-.31-1.86-.35-1.05-.05-1.37-.06-4.04-.06Zm0 3.06a5.14 5.14 0 1 1 0 10.28 5.14 5.14 0 0 1 0-10.28Zm0 1.8a3.34 3.34 0 1 0 0 6.68 3.34 3.34 0 0 0 0-6.68Zm5.34-3.2a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4Z"/></svg>
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            {# --- Kolumny linków --- #}
+            {% for col in columns %}
+                <nav class="devents-footer__col" aria-labelledby="devents-foot-col-{{ loop.index }}">
+                    <h2 class="devents-footer__col-title" id="devents-foot-col-{{ loop.index }}">{{ col.label }}</h2>
+                    <ul>
+                        {% for item in col.items %}
+                            <li><a href="{{ item.url }}">{{ item.label }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </nav>
+            {% endfor %}
+
+        </div>
+
+        {% if partners %}
+            <div class="devents-footer__partners">
+                <h2 class="devents-footer__partners-title">{{ __('Usługi dostępności', 'devents') }}</h2>
+                <div class="devents-footer__partners-grid">
+                    {% for p in partners %}
+                        <a class="devents-footer__partner" href="{{ p.url }}" target="_blank" rel="noopener noreferrer">
+                            <span class="devents-footer__partner-logo">
+                                <img src="{{ p.logo }}" alt="{{ p.brand }}" loading="lazy">
+                            </span>
+                            <span class="devents-footer__partner-text">
+                                <strong>{{ p.service }}</strong>
+                                <span>{{ p.brand }} · {{ p.domain }}</span>
+                            </span>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="devents-footer__bottom">
+            <p class="devents-footer__copy">© {{ year }} DEvents. {{ __('Wszelkie prawa zastrzeżone.', 'devents') }}</p>
+            <button type="button" class="devents-footer__totop js-devents-totop">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span>
+                {{ __('Do góry', 'devents') }}
+            </button>
+        </div>
+
+    </div>
+</footer>

@@ -1,0 +1,103 @@
+{# templates/components/order-billing-form.twig
+   Wspólny formularz danych do zamówienia: Sprzedawca + Zamawiający / Nabywca / Odbiorca
+   + sposób płatności (online / proforma). Włączany w modalach „Wyróżnienie" i „Zamówienie PJM"
+   (templates/user/my-events.twig), aby nie powielać tego samego formularza dwa razy.
+   Pola buyer_* / want_invoice / billing_* / different_recipient / recipient_* / payment_mode
+   są zgodne z collect_billing_data() (order-handler.php) i my-events.js. #}
+<div class="billing-grid-columns scrollable-content">
+    <div class="seller-info-column">
+        <h4>Sprzedawca</h4>
+        <div class="seller-details-card">
+            <strong>Janusz Pierzchalski - Janusz Migowego</strong><br>
+            ul. Jana Olbrachta 120/44<br>
+            01-373 Warszawa<br>
+            NIP: PL5223259430
+        </div>
+    </div>
+    <div class="buyer-info-column">
+        {# SEKCJA 1: ZAMAWIAJĄCY #}
+        <h4>Zamawiający (Kontakt)</h4>
+        <div class="form-group">
+            <label>Imię i nazwisko / Nazwa <span class="req" aria-hidden="true">*</span></label>
+            <input type="text" name="buyer_name" value="{{ user.display_name }}" class="form-control" autocomplete="name" required>
+        </div>
+        <div class="form-group">
+            <label>E-mail <span class="req" aria-hidden="true">*</span></label>
+            <input type="email" name="buyer_email" value="{{ user.user_email }}" class="form-control" autocomplete="email" required>
+        </div>
+
+        <label>Adres zamawiającego</label>
+        <div class="address-grid">
+            <input type="text" name="buyer_street" placeholder="Ulica*" aria-label="Ulica*" class="form-control span-2" autocomplete="address-line1" required>
+            <input type="text" name="buyer_house_no" placeholder="Nr domu*" aria-label="Nr domu*" class="form-control" autocomplete="address-line2" required>
+            <input type="text" name="buyer_flat_no" placeholder="Nr lokalu" aria-label="Nr lokalu" class="form-control">
+            <input type="text" name="buyer_zip" placeholder="Kod pocztowy*" aria-label="Kod pocztowy*" class="form-control" autocomplete="postal-code" required>
+            <input type="text" name="buyer_city" placeholder="Miasto*" aria-label="Miasto*" class="form-control" autocomplete="address-level2" required>
+        </div>
+
+        <div class="form-group checkbox-group toggle-section-trigger" style="margin-top: 15px;">
+            <label>
+                <input type="checkbox" name="want_invoice">
+                <strong>Chcę Fakturę VAT (Dane Nabywcy)</strong>
+            </label>
+        </div>
+
+        {# SEKCJA 2: NABYWCA (FAKTURA) #}
+        <div class="invoice-section-wrapper hidden subsection-box">
+            <h5>Nabywca (Dane do Faktury)</h5>
+            <div class="form-row-gus">
+                <div class="form-group" style="flex-grow:1;">
+                    <label>NIP <span class="req" aria-hidden="true">*</span></label>
+                    <input type="text" name="billing_nip" class="form-control">
+                </div>
+            </div>
+            <div class="form-group"><label>Nazwa firmy / Nabywcy</label><input type="text" name="billing_company_name" class="form-control"></div>
+            <div class="form-group"><label>Email do faktury</label><input type="email" name="billing_email" class="form-control"></div>
+            <label>Adres Nabywcy</label>
+            <div class="address-grid">
+                <input type="text" name="billing_street" placeholder="Ulica" aria-label="Ulica" class="form-control span-2">
+                <input type="text" name="billing_house_no" placeholder="Nr domu" aria-label="Nr domu" class="form-control">
+                <input type="text" name="billing_flat_no" placeholder="Nr lokalu" aria-label="Nr lokalu" class="form-control">
+                <input type="text" name="billing_zip" placeholder="Kod" aria-label="Kod" class="form-control">
+                <input type="text" name="billing_city" placeholder="Miasto" aria-label="Miasto" class="form-control">
+            </div>
+
+            <div class="form-group checkbox-group toggle-section-trigger" style="margin-top: 10px;">
+                <label>
+                    <input type="checkbox" name="different_recipient">
+                    <strong>Inny odbiorca faktury</strong>
+                </label>
+            </div>
+
+            {# SEKCJA 3: ODBIORCA #}
+            <div class="recipient-section-wrapper hidden subsection-box">
+                <h5>Odbiorca</h5>
+                <div class="form-row-gus">
+                    <div class="form-group" style="flex-grow:1;">
+                        <label>NIP</label><input type="text" name="recipient_nip" class="form-control">
+                    </div>
+                </div>
+                <div class="form-group"><label>Nazwa Odbiorcy</label><input type="text" name="recipient_company_name" class="form-control"></div>
+                <label>Adres Odbiorcy</label>
+                <div class="address-grid">
+                    <input type="text" name="recipient_street" placeholder="Ulica" aria-label="Ulica" class="form-control span-2">
+                    <input type="text" name="recipient_house_no" placeholder="Nr domu" aria-label="Nr domu" class="form-control">
+                    <input type="text" name="recipient_flat_no" placeholder="Nr lokalu" aria-label="Nr lokalu" class="form-control">
+                    <input type="text" name="recipient_zip" placeholder="Kod" aria-label="Kod" class="form-control">
+                    <input type="text" name="recipient_city" placeholder="Miasto" aria-label="Miasto" class="form-control">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<fieldset class="payment-mode">
+    <legend class="payment-mode__legend">Sposób płatności</legend>
+    <label class="payment-mode__option">
+        <input type="radio" name="payment_mode" value="online" checked>
+        <span><strong>Zapłać online</strong> — karta, BLIK, Przelewy24 (natychmiast)</span>
+    </label>
+    <label class="payment-mode__option">
+        <input type="radio" name="payment_mode" value="proforma">
+        <span><strong>Faktura proforma (przelew)</strong> — 14 dni na płatność</span>
+    </label>
+</fieldset>

@@ -1,0 +1,184 @@
+{# templates/components/hero-event.twig — v14.0 (A11Y + Address Macro)
+
+   Zmiany v14.0:
+   - Adres przez makro format_address (DRY)
+   - acc-pill: aria-label zawiera typ + języki, dzieci aria-hidden
+   - hero__btn--outline (target=_blank): sufiks "(otwiera się w nowej karcie)" w aria-label
+   - rel="noopener" → rel="noopener noreferrer"
+   - aria-label dla kart sidebar (zawiera label+value)
+   - section aria-labelledby wskazuje na H1
+#}
+
+{% from 'macros/address.twig' import format_address %}
+
+{% if event %}
+    {% set address = format_address(event) %}
+
+    <section class="hero {{ event.is_featured ? 'hero--featured' : '' }}"
+             style="background-image: url('{{ event.image_url|e }}');"
+             aria-labelledby="hero-event-title-{{ event.id }}">
+
+        <div class="hero__overlay" aria-hidden="true"></div>
+
+        <div class="hero__inner">
+            {# Badges #}
+            <div class="hero__badges">
+                {% if event.is_featured %}
+                    <span class="hero__badge hero__badge--gold">
+                        <span class="material-symbols-outlined" aria-hidden="true">stars</span>
+                        {{ __('Polecane', 'devents') }}
+                    </span>
+                {% endif %}
+
+                <span class="hero__badge hero__badge--category">
+                    {{ event.category_label|default(event.category)|e }}
+                </span>
+
+                {% if event.is_current %}
+                    <span class="hero__badge hero__badge--live">
+                        <span class="hero__badge-dot" aria-hidden="true"></span>
+                        {{ __('Trwa teraz', 'devents') }}
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="hero__columns">
+                {# === LEWA: tytuł + meta + CTA === #}
+                <div class="hero__main">
+                    <h1 class="hero__title" id="hero-event-title-{{ event.id }}">{{ event.title|e }}</h1>
+
+                    <div class="hero__meta">
+                        <div class="hero__meta-item">
+                            <span class="material-symbols-outlined" aria-hidden="true">calendar_month</span>
+                            <span class="sr-only">{{ __('Data:', 'devents') }}</span>
+                            <span>
+                                {% if event.is_all_day %}
+                                    {{ event.start_datetime|date('d.m.Y') }}
+                                    {% if event.end_datetime and event.end_datetime != '0000-00-00 00:00:00' and event.start_datetime|date('Y-m-d') != event.end_datetime|date('Y-m-d') %}
+                                        – {{ event.end_datetime|date('d.m.Y') }}
+                                    {% endif %}
+                                {% else %}
+                                    {{ event.start_datetime|date('d.m.Y, H:i') }}
+                                    {% if event.end_datetime and event.end_datetime != '0000-00-00 00:00:00' %}
+                                        {% if event.start_datetime|date('Y-m-d') == event.end_datetime|date('Y-m-d') %}
+                                            – {{ event.end_datetime|date('H:i') }}
+                                        {% else %}
+                                            – {{ event.end_datetime|date('d.m.Y, H:i') }}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        {# LOKALIZACJA — przez makro #}
+                        {% if address %}
+                            <div class="hero__meta-item">
+                                <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+                                <span class="sr-only">{{ __('Lokalizacja:', 'devents') }}</span>
+                                <span>{{ address|e }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="hero__actions">
+                        <a href="{{ event.permalink }}" class="hero__btn hero__btn--primary">
+                            {{ __('Zobacz szczegóły', 'devents') }}
+                            <span class="sr-only">: {{ event.title|e }}</span>
+                        </a>
+                        {% if event.ticket %}
+                            {% set btn_text = event.price > 0
+                                ? __('Kup bilet', 'devents') ~ ' — ' ~ event.price|number_format(2, ',', ' ') ~ ' zł'
+                                : __('Wejście wolne', 'devents') %}
+                            <a href="{{ event.ticket }}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="hero__btn hero__btn--outline"
+                               aria-label="{{ btn_text }} ({{ __('otwiera się w nowej karcie', 'devents') }})">
+                                {{ btn_text }}
+                                <span class="material-symbols-outlined hero__btn-icon--external" aria-hidden="true">open_in_new</span>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# === PRAWA: detail cards === #}
+                <div class="hero__sidebar">
+
+                    {# Organizator #}
+                    {% if event.organizer_name %}
+                        <div class="hero__card" role="group" aria-label="{{ __('Organizator', 'devents') }}: {{ event.organizer_name|e }}">
+                            <span class="material-symbols-outlined hero__card-icon" aria-hidden="true">person</span>
+                            <div>
+                                <small class="hero__card-label" aria-hidden="true">{{ __('Organizator', 'devents') }}</small>
+                                <span class="hero__card-value">{{ event.organizer_name|e }}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {# Dostępność #}
+                    {% if event.accessibility_items is not empty %}
+                        <div class="hero__card" role="group" aria-label="{{ __('Dostępność wydarzenia', 'devents') }}">
+                            <span class="material-symbols-outlined hero__card-icon" aria-hidden="true">accessibility_new</span>
+                            <div>
+                                <small class="hero__card-label" aria-hidden="true">{{ __('Dostępność', 'devents') }}</small>
+                                <ul class="hero__acc-pills" role="list">
+                                    {% for item in event.accessibility_items|slice(0, 5) %}
+                                        {% set event_langs = (selected_acc_languages[event.id][item.id] ?? []) %}
+
+                                        {# Buduj pełny opis dla SR i tooltipa #}
+                                        {% set acc_label = item.name %}
+                                        {% if event_langs is not empty %}
+                                            {% set lang_codes = [] %}
+                                            {% for l in event_langs %}
+                                                {% set lang_codes = lang_codes|merge([l.abbr]) %}
+                                            {% endfor %}
+                                            {% set acc_label = acc_label ~ ': ' ~ lang_codes|join(', ') %}
+                                        {% endif %}
+
+                                        <li class="hero__acc-pill"
+                                            data-tooltip="{{ acc_label }}"
+                                            aria-label="{{ acc_label }}">
+                                            <span class="material-symbols-outlined" aria-hidden="true">{{ item.icon }}</span>
+                                            {% if event_langs is not empty %}
+                                                <span class="card_acc-iso-box" aria-hidden="true">
+                                                    {% for l in event_langs|slice(0, 4) %}
+                                                        <span class="card_acc-iso">{{ l.abbr }}</span>
+                                                    {% endfor %}
+                                                    {% if event_langs|length > 4 %}
+                                                        <span class="card_acc-iso">+</span>
+                                                    {% endif %}
+                                                </span>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+
+                                    {% if event.accessibility_items|length > 5 %}
+                                        <li class="hero__acc-pill hero__acc-pill--more"
+                                            data-tooltip="{{ __('i więcej form dostępności', 'devents') }}"
+                                            aria-label="{{ __('i więcej:', 'devents') }} {{ event.accessibility_items|length - 5 }}">
+                                            <span aria-hidden="true">+{{ event.accessibility_items|length - 5 }}</span>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {# Sposób realizacji #}
+                    {% if event.delivery_mode %}
+                        <div class="hero__card" role="group" aria-label="{{ __('Sposób realizacji', 'devents') }}: {{ event.delivery_mode_label|default(event.delivery_mode)|e }}">
+                            <span class="material-symbols-outlined hero__card-icon" aria-hidden="true">
+                                {% if event.delivery_mode == 'online' %}language{% elseif event.delivery_mode == 'hybrid' %}devices_other{% else %}person_pin_circle{% endif %}
+                            </span>
+                            <div>
+                                <small class="hero__card-label" aria-hidden="true">{{ __('Sposób', 'devents') }}</small>
+                                <span class="hero__card-value">{{ event.delivery_mode_label|default(event.delivery_mode)|e }}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </section>
+{% endif %}

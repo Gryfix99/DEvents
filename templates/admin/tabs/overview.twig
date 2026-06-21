@@ -1,0 +1,138 @@
+{# templates/admin/tabs/overview.twig — przebudowa wg wizualizacji: spójna anatomia kart
+   (kafelek ikony + tytuł + akcja + treść), równe karty statystyk, tokeny (dark-mode safe). #}
+<div class="admin-dashboard-grid">
+
+    {# --- Statystyki globalne (4 równe karty) --- #}
+    <div class="admin-stats-grid">
+        <div class="stat-card stat-card--info">
+            <span class="material-symbols-outlined" aria-hidden="true">group</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ data.stats.total_users }}</span>
+                <span class="stat-card__label">Wszystkich użytkowników</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card--accent">
+            <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ data.stats.total_views|number_format(0, ',', ' ') }}</span>
+                <span class="stat-card__label">Wszystkich wyświetleń</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card--success">
+            <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ data.stats.avg_time_spent }}</span>
+                <span class="stat-card__label">Średni czas na wydarzeniu</span>
+            </div>
+        </div>
+        <div class="stat-card stat-card--info">
+            <span class="material-symbols-outlined" aria-hidden="true">domain</span>
+            <div class="stat-card__content">
+                <span class="stat-card__value">{{ data.stats.total_institutions }}</span>
+                <span class="stat-card__label">Instytucji</span>
+            </div>
+        </div>
+    </div>
+
+    {# --- Ranking publikacji --- #}
+    <div class="admin-widget">
+        <div class="admin-widget__head">
+            <span class="admin-widget__chip"><span class="material-symbols-outlined" aria-hidden="true">leaderboard</span></span>
+            <h3 class="admin-widget__title">Ranking publikacji</h3>
+            <a href="{{ data.panel_url }}&tab=institutions" class="admin-widget__action">Instytucje</a>
+        </div>
+        <div class="admin-widget-body">
+            {% if data.user_ranking is not empty %}
+                <ul class="ranking-list">
+                    {% for user_rank in data.user_ranking %}
+                        <li><span>{{ user_rank.display_name }}</span><strong>{{ user_rank.count }}</strong></li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color: var(--text-secondary); margin: 0;">Brak danych do rankingu.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {# --- Ostatni użytkownicy --- #}
+    <div class="admin-widget">
+        <div class="admin-widget__head">
+            <span class="admin-widget__chip"><span class="material-symbols-outlined" aria-hidden="true">person_add</span></span>
+            <h3 class="admin-widget__title">Ostatni użytkownicy</h3>
+            <a href="{{ data.panel_url }}&tab=users" class="admin-widget__action">Wszyscy</a>
+        </div>
+        <div class="admin-widget-body">
+            {% if data.recent_users is not empty %}
+                <ul class="users-list">
+                    {% for user in data.recent_users %}
+                        <li>
+                            <div>
+                                <strong>{{ user.full_name|default(user.display_name) }}</strong>
+                                <small style="display:block; color:var(--text-secondary);">{{ user.user_email }}</small>
+                                <small style="display:block; color:var(--text-secondary);">
+                                    <span class="status-badge status-badge--neutral" style="font-size:0.7rem;">{{ user.role_label }}</span>
+                                    {% if user.institution %} · {{ user.institution }}{% endif %}
+                                </small>
+                            </div>
+                            <span style="font-size:0.8rem; color:var(--text-secondary); white-space:nowrap;">{{ user.user_registered|date('d.m') }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="color: var(--text-secondary); margin: 0;">Brak nowych użytkowników.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {# --- Statystyki miesięczne --- #}
+    <div class="admin-widget" style="grid-column: 1 / -1;">
+        <div class="admin-widget__head">
+            <span class="admin-widget__chip"><span class="material-symbols-outlined" aria-hidden="true">calendar_month</span></span>
+            <h3 class="admin-widget__title">Statystyki miesięczne</h3>
+        </div>
+        <div class="admin-widget-body">
+            <div class="admin-month-bar">
+                <label for="stats-month-picker">Wybierz miesiąc:</label>
+                <input type="month" id="stats-month-picker" class="form-control" style="max-width: 200px;" value="{{ 'now'|date('Y-m') }}">
+                <button type="button" id="btn-refresh-stats" class="btn btn--primary">
+                    <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;" aria-hidden="true">refresh</span> Pokaż
+                </button>
+            </div>
+            <div class="admin-stats-grid" style="margin-bottom: 0; margin-top: 1.25rem;">
+                <div class="stat-card stat-card--info">
+                    <span class="material-symbols-outlined" aria-hidden="true">group_add</span>
+                    <div class="stat-card__content">
+                        <div id="stat-users-val" class="stat-card__value">-</div>
+                        <span class="stat-card__label">Nowych użytkowników</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--accent">
+                    <span class="material-symbols-outlined" aria-hidden="true">event_available</span>
+                    <div class="stat-card__content">
+                        <div id="stat-events-val" class="stat-card__value">-</div>
+                        <span class="stat-card__label">Odbytych wydarzeń</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-card--success">
+                    <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+                    <div class="stat-card__content">
+                        <div id="stat-views-val" class="stat-card__value">-</div>
+                        <span class="stat-card__label">Wyświetlenia (w msc)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# --- Wykres aktywności --- #}
+    <div class="admin-widget" style="grid-column: 1 / -1;">
+        <div class="admin-widget__head">
+            <span class="admin-widget__chip"><span class="material-symbols-outlined" aria-hidden="true">show_chart</span></span>
+            <h3 class="admin-widget__title">Aktywność w tym miesiącu</h3>
+        </div>
+        <div class="admin-widget-body" style="position: relative; height: 350px;">
+            <canvas id="devents-stats-chart"></canvas>
+        </div>
+    </div>
+
+</div>

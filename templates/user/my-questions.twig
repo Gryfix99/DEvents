@@ -1,0 +1,63 @@
+{# templates/user/my-questions.twig — pytania użytkownika do organizatorów + odpowiedzi #}
+<div class="reviews-wrapper" id="questions-wrapper">
+
+    <div class="rewards-header" style="margin-bottom: 1.5rem;">
+        <h2 style="margin:0;">{{ __('Moje pytania', 'devents') }}</h2>
+        <p style="margin:.25rem 0 0; color: var(--text-secondary);">
+            {{ __('Twoje pytania do organizatorów oraz ich odpowiedzi.', 'devents') }}
+        </p>
+    </div>
+
+    <div class="reviews-list">
+        {% if questions is empty %}
+            <div class="empty-state-reviews">
+                <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+                <p>{{ __('Nie zadałeś jeszcze żadnego pytania. Pytanie możesz zadać na karcie wydarzenia lub na profilu organizatora.', 'devents') }}</p>
+            </div>
+        {% else %}
+            {% for q in questions %}
+                <div class="review-item" id="review-{{ q.id }}">
+                    <div class="review-header">
+                        <strong>{{ __('Twoje pytanie', 'devents') }}</strong>
+                        <span class="review-date">{{ q.created_at }}</span>
+                    </div>
+
+                    {% if q.item_title %}
+                        <div class="review-meta" style="font-size:.85rem; color: var(--text-secondary); margin-bottom:.4rem;">
+                            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:16px; vertical-align:middle;">link</span>
+                            {% if q.item_link %}<a href="{{ q.item_link }}">{{ q.item_title }}</a>{% else %}{{ q.item_title }}{% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="review-content">{{ q.comment }}</div>
+
+                    {% if q.replies is not empty %}
+                        <div class="review-replies">
+                            {% for reply in q.replies %}
+                                <div class="review-reply" id="review-{{ reply.id }}">
+                                    <div class="review-header">
+                                        <strong>{{ reply.author }}</strong>
+                                        <span class="review-badge">{{ __('Odpowiedź', 'devents') }}</span>
+                                        <span class="review-date">{{ reply.created_at }}</span>
+                                    </div>
+                                    <div class="review-content">{{ reply.comment }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="review-awaiting" style="font-size:.85rem; color: var(--text-light); margin-top:.5rem; display:flex; align-items:center; gap:6px;">
+                            <span class="material-symbols-outlined" aria-hidden="true" style="font-size:18px;">hourglass_top</span>
+                            {{ __('Oczekuje na odpowiedź organizatora.', 'devents') }}
+                        </div>
+                    {% endif %}
+
+                    <div class="review-actions">
+                        <button class="btn-text btn-delete-review" data-review-id="{{ q.id }}" data-nonce="{{ review_nonce }}">
+                            {{ __('Usuń pytanie', 'devents') }}
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>

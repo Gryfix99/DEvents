@@ -1,0 +1,3247 @@
+# DEvents — Translation Template
+# Copyright (C) 2024-2026 DEvents
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: DEvents 13.1\n"
+"Report-Msgid-Bugs-To: https://github.com/devents/devents\n"
+"POT-Creation-Date: 2026-03-16 08:10+0000\n"
+"PO-Revision-Date: 2026-03-16 18:11+0000\n"
+"Last-Translator: Janusz Pierzchalski\n"
+"Language-Team: German\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Loco https://localise.biz/\n"
+"X-Domain: devents\n"
+"X-Loco-Version: 2.8.3; wp-6.9.4; php-8.2.30"
+
+#: includes/controllers/class-devents-event-controller.php:550
+#, php-format
+msgid "%s zaktualizował Twoje: %s"
+msgstr "%s hat Ihr %s aktualisiert"
+
+#: templates/components/order-modals.twig:131
+msgid "1. Konfiguracja"
+msgstr "1. Konfiguration"
+
+#: templates/components/order-modals.twig:7
+msgid "1. Wybór pakietu"
+msgstr "1. Paketauswahl"
+
+#: templates/components/order-modals.twig:8 templates/components/order-modals.twig:132
+msgid "2. Dane i Faktura"
+msgstr "2. Daten und Rechnung"
+
+#: templates/components/order-modals.twig:9 templates/components/order-modals.twig:133
+msgid "3. Podsumowanie"
+msgstr "3. Zusammenfassung"
+
+#: templates/user/my-units.twig:170 templates/user/my-institution.twig:98
+msgid "300 zł"
+msgstr "300 PLN"
+
+#: includes/devents-helpers.php:500
+msgid "Adamorobe (Język migowy)"
+msgstr "Adamorobe-Gebärdensprache"
+
+#: templates/user/my-institution.twig:294
+msgid "Admin"
+msgstr "Administrator"
+
+#: templates/forms/register-form.twig:34
+msgid "Administracja publiczna"
+msgstr "Öffentliche Verwaltung"
+
+#: templates/user/panel.twig:28 templates/user/my-units.twig:293 templates/user/my-institution.twig:267
+msgid "Administrator"
+msgstr "Administrator"
+
+#: templates/user/my-pulpit.twig:206
+msgid "Administrator Systemu"
+msgstr "Systemadministrator"
+
+#: templates/components/order-billing-form.twig:19
+msgid "Adres"
+msgstr "Adresse"
+
+#: templates/forms/password-reset.twig:16
+msgid "Adres e-mail"
+msgstr "E-Mail-Adresse"
+
+#: templates/user/my-account.twig:49
+msgid "Adres e-mail (Login)"
+msgstr "E-Mail-Adresse (Login)"
+
+#: templates/user/my-account.twig:51
+msgid "Adres e-mail służy do logowania i nie może być zmieniony samodzielnie."
+msgstr "Die E-Mail-Adresse dient zum Einloggen und kann nicht selbstständig geändert werden."
+
+#: templates/components/order-billing-form.twig:57
+msgid "Adres firmy"
+msgstr "Firmenadresse"
+
+#: templates/components/order-billing-form.twig:91
+msgid "Adres odbiorcy"
+msgstr "Empfängeradresse"
+
+#: templates/forms/register-form.twig:58 templates/user/my-units.twig:201 templates/user/my-institution.twig:133
+msgid "Adres siedziby"
+msgstr "Sitz der Gesellschaft"
+
+#: includes/devents-helpers.php:503
+msgid "Afgański język migowy"
+msgstr "Afghanische Gebärdensprache"
+
+#: templates/user/my-units.twig:42
+msgid "Akceptuj"
+msgstr "Akzeptieren"
+
+#: templates/forms/register-form.twig:169
+#, php-format
+msgid "Akceptuję %sRegulamin%s i %sPolitykę Prywatności%s"
+msgstr "Ich akzeptiere die %sAGB%s und die %sDatenschutzerklärung%s"
+
+#: templates/forms/accept-invite-form.twig:55
+#, php-format
+msgid "Akceptuję %sRegulamin%s, %sPolitykę Prywatności%s oraz zasady RODO"
+msgstr "Ich akzeptiere die %sAGB%s, die %sDatenschutzerklärung%s sowie die DSGVO-Regeln"
+
+#: templates/single/event.twig:389 templates/user/my-events.twig:118 templates/user/my-orders.twig:21 templates/user/my-units.twig:64
+msgid "Akcje"
+msgstr "Aktionen"
+
+#: templates/pages/homepage.twig:23
+msgid "Aktualnie nie ma nadchodzących wydarzeń. Bądź pierwszy!"
+msgstr "Derzeit gibt es keine anstehenden Veranstaltungen. Seien Sie der Erste!"
+
+#: includes/devents-helpers.php:322 templates/pages/news-list.twig:15
+msgid "Aktualności"
+msgstr "Aktuelles"
+
+#: templates/user/my-units.twig:80
+msgid "Aktywna"
+msgstr "Aktiv"
+
+#: templates/user/my-units.twig:56
+msgid "Aktywne placówki w sieci"
+msgstr "Aktive Einrichtungen im Netzwerk"
+
+#: templates/user/my-pulpit.twig:61
+msgid "Aktywne wydarzenia"
+msgstr "Aktive Veranstaltungen"
+
+#: templates/user/my-institution.twig:303
+msgid "Aktywni członkowie"
+msgstr "Aktive Mitglieder"
+
+#: includes/class-devents-shortcodes.php:852 includes/devents-helpers.php:80
+msgid "Aktywny"
+msgstr "Aktiv"
+
+#: templates/forms/accept-invite-form.twig:64
+msgid "Aktywuj konto"
+msgstr "Konto aktivieren"
+
+#: includes/devents-helpers.php:508
+msgid "Algierski język migowy"
+msgstr "Algerische Gebärdensprache"
+
+#: includes/devents-helpers.php:504
+msgid "Algierski żydowski język migowy"
+msgstr "Algerisch-jüdische Gebärdensprache"
+
+#: includes/devents-helpers.php:506
+msgid "Amerykański język migowy"
+msgstr "Amerikanische Gebärdensprache (ASL)"
+
+#: includes/devents-helpers.php:482
+msgid "Angielski"
+msgstr "Englisch"
+
+#: templates/user/my-orders.twig:8
+msgid "ANULOWANE"
+msgstr "STORNIERT"
+
+#: templates/components/review-form.twig:52
+msgid "Anuluj"
+msgstr "Abbrechen"
+
+#: templates/pages/organizer-profile.twig:331
+msgid "Archiwum wydarzeń"
+msgstr "Veranstaltungsarchiv"
+
+#: includes/devents-helpers.php:501
+msgid "Argentyński język migowy"
+msgstr "Argentinische Gebärdensprache"
+
+#: templates/pages/publish-event.twig:186
+msgid "Asystent Tekstu ETR (Łatwego do Czytania)"
+msgstr "ETR-Text-Assistent (Leichte Sprache)"
+
+#: includes/devents-helpers.php:618
+msgid "Audiodeskrypcja"
+msgstr "Audiodeskription"
+
+#: includes/devents-helpers.php:619
+msgid "Audioprzewodnik"
+msgstr "Audioguide"
+
+#: includes/devents-helpers.php:507
+msgid "Australijski język migowy (Auslan)"
+msgstr "Australische Gebärdensprache (Auslan)"
+
+#: includes/devents-helpers.php:509
+msgid "Austriacki język migowy"
+msgstr "Österreichische Gebärdensprache"
+
+#: includes/handlers/graphic-handler.php:197
+msgid "BEZPŁATNE"
+msgstr "KOSTENLOS"
+
+#: templates/components/event-card.twig:26 templates/components/featured-event-item.twig:48 templates/components/event-list.twig:51
+msgid "Bezpłatne"
+msgstr "Kostenlos"
+
+#: includes/handlers/graphic-handler.php:201
+msgid "Bezpłatnie"
+msgstr "Gratis"
+
+#: templates/single/event.twig:329
+msgid "Bezpłatny"
+msgstr "Kostenlos"
+
+#: templates/user/my-account.twig:111
+msgid "Bieżące hasło"
+msgstr "Aktuelles Passwort"
+
+#: includes/controllers/class-devents-event-controller.php:184
+msgid "Bilet"
+msgstr "Ticket"
+
+#: templates/single/event.twig:318 templates/pages/publish-event.twig:55
+msgid "Bilety"
+msgstr "Tickets"
+
+#: templates/pages/publish-event.twig:683
+msgid "Bilety i Zapisy"
+msgstr "Tickets und Anmeldung"
+
+#: includes/devents-helpers.php:604
+msgid "Birmański język migowy"
+msgstr "Birmanische Gebärdensprache"
+
+#: includes/devents-helpers.php:517
+msgid "Boliwijski język migowy"
+msgstr "Bolivianische Gebärdensprache"
+
+#: templates/user/my-account.twig:77 templates/user/my-account.twig:88 templates/pages/publish-event.twig:266 templates/pages/publish-event.twig:330
+msgid "Brak"
+msgstr "Keine"
+
+#: templates/user/my-account.twig:68
+msgid "Brak / Cały świat"
+msgstr "Keine / Weltweit"
+
+#: templates/pages/news-list.twig:61
+msgid "Brak aktualności"
+msgstr "Keine Neuigkeiten"
+
+#: templates/user/my-events.twig:222
+msgid "Brak aktywnych wydarzeń pasujących do filtrów."
+msgstr "Keine aktiven Veranstaltungen für diese Filter gefunden."
+
+#: templates/user/my-institution.twig:320
+msgid "Brak innych członków zespołu."
+msgstr "Keine weiteren Teammitglieder."
+
+#: templates/pages/organizer-profile.twig:324
+msgid "Brak nadchodzących wydarzeń."
+msgstr "Keine anstehenden Veranstaltungen."
+
+#: templates/components/reviews.twig:29
+msgid "Brak opinii. Bądź pierwszy!"
+msgstr "Noch keine Bewertungen. Seien Sie der Erste!"
+
+#: templates/user/my-units.twig:167 templates/user/my-institution.twig:95
+msgid "Brak opisu działalności w PJM?"
+msgstr "Keine Tätigkeitsbeschreibung in Gebärdensprache?"
+
+#: templates/user/my-units.twig:100
+msgid "Brak podpiętych jednostek. Udostępnij kod sieci lub dodaj placówkę ręcznie."
+msgstr "Keine verknüpften Einheiten. Netzwerkcode teilen oder manuell hinzufügen."
+
+#: includes/class-devents-shortcodes.php:2363
+msgid "Brak tokena w linku."
+msgstr "Kein Token im Link enthalten."
+
+#: includes/controllers/class-devents-event-controller.php:94
+msgid "Brak uprawnień do zapisu zmian w tym wydarzeniu."
+msgstr "Keine Berechtigung, Änderungen an diesem Event zu speichern."
+
+#: includes/class-devents-shortcodes.php:671
+msgid "Brak uprawnień do zarządzania siecią jednostek."
+msgstr "Keine Berechtigung zur Verwaltung des Einheiten-Netzwerks."
+
+#: includes/class-devents-shortcodes.php:737
+msgid "Brak uprawnień."
+msgstr "Keine Berechtigung."
+
+#: templates/user/my-orders.twig:86
+msgid "Brak zamówień."
+msgstr "Keine Bestellungen."
+
+#: templates/user/my-rewards.twig:52
+msgid "Brakuje:"
+msgstr "Es fehlen:"
+
+#: includes/devents-helpers.php:518
+msgid "Brazylijski język migowy"
+msgstr "Brasilianische Gebärdensprache"
+
+#: includes/devents-helpers.php:512
+msgid "Brytyjski język migowy"
+msgstr "Britische Gebärdensprache"
+
+#: includes/devents-helpers.php:515
+msgid "Bułgarski język migowy"
+msgstr "Bulgarische Gebärdensprache"
+
+#: templates/user/my-orders.twig:9
+msgid "BŁĄD"
+msgstr "FEHLER"
+
+#: includes/controllers/class-devents-event-controller.php:350
+msgid "Błąd"
+msgstr "Fehler"
+
+#: includes/controllers/class-devents-event-controller.php:637
+msgid "Błąd bezpieczeństwa (Błędny token)."
+msgstr "Sicherheitsfehler (Ungültiges Token)."
+
+#: includes/controllers/class-devents-event-controller.php:54
+msgid "Błąd bezpieczeństwa (Wygasła sesja). Odśwież stronę."
+msgstr "Sicherheitsfehler (Sitzung abgelaufen). Bitte Seite neu laden."
+
+#: includes/class-devents-shortcodes.php:2391
+msgid "Błąd bezpieczeństwa."
+msgstr "Sicherheitsfehler."
+
+#: includes/controllers/class-devents-event-controller.php:789
+msgid "Błąd połączenia z API lokalizacji."
+msgstr "Fehler bei der Verbindung zur Standort-API."
+
+#: includes/handlers/public-profiles.php:348
+msgid "Błąd profilu:"
+msgstr "Profilfehler:"
+
+#: includes/class-devents-shortcodes.php:2290
+msgid "Błąd renderowania widoku:"
+msgstr "Fehler beim Rendern der Ansicht:"
+
+#: includes/class-devents-assets.php:122
+msgid "Błąd serwera."
+msgstr "Serverfehler."
+
+#: includes/class-devents-shortcodes.php:2190
+msgid "Błąd systemu: Tabela instytucji nie istnieje."
+msgstr "Systemfehler: Institutionstabelle existiert nicht."
+
+#: includes/class-devents-shortcodes.php:2429
+msgid "Błąd tworzenia konta:"
+msgstr "Fehler beim Erstellen des Kontos:"
+
+#: includes/class-devents-assets.php:121
+msgid "Błąd zmiany hasła."
+msgstr "Fehler beim Ändern des Passworts."
+
+#: includes/controllers/class-devents-user-controller.php:59
+msgid "Błędne dane logowania lub konto nie zostało jeszcze aktywowane."
+msgstr "Ungültige Anmeldedaten oder Konto noch nicht aktiviert."
+
+#: includes/class-devents-assets.php:128
+msgid "Błędne hasło."
+msgstr "Falsches Passwort."
+
+#: includes/handlers/graphic-handler.php:83
+msgid "Cały dzień"
+msgstr "Ganztägig"
+
+#: includes/i18n/class-devents-region-manager.php:201 includes/i18n/class-devents-region-manager.php:263 includes/i18n/class-devents-region-manager.php:284
+msgid "Cały świat"
+msgstr "Weltweit"
+
+#: includes/handlers/graphic-handler.php:236 templates/user/my-orders.twig:20 templates/pages/publish-event.twig:698
+msgid "Cena"
+msgstr "Preis"
+
+#: templates/components/event-list.twig:53
+msgid "Cena biletu"
+msgstr "Ticketpreis"
+
+#: templates/components/order-billing-form.twig:34
+msgid "Chcę Fakturę VAT"
+msgstr "Ich benötige eine Rechnung"
+
+#: includes/devents-helpers.php:523
+msgid "Chilijski język migowy"
+msgstr "Chilenische Gebärdensprache"
+
+#: includes/devents-helpers.php:524
+msgid "Chiński język migowy"
+msgstr "Chinesische Gebärdensprache"
+
+#: includes/devents-helpers.php:526
+msgid "Chorwacki język migowy"
+msgstr "Kroatische Gebärdensprache"
+
+#: includes/devents-helpers.php:620
+msgid "Ciche godziny"
+msgstr "Stille Stunden"
+
+#: templates/components/generate-graphic.twig:64
+msgid "Ciemny"
+msgstr "Dunkel"
+
+#: includes/devents-helpers.php:406
+msgid "Co miesiąc"
+msgstr "Monatlich"
+
+#: includes/devents-helpers.php:405
+msgid "Co tydzień"
+msgstr "Wöchentlich"
+
+#: includes/devents-helpers.php:404
+msgid "Codziennie"
+msgstr "Täglich"
+
+#: templates/forms/register-form.twig:161 templates/forms/accept-invite-form.twig:45 templates/user/my-account.twig:130
+msgid "Cyfra"
+msgstr "Ziffer"
+
+#: templates/pages/publish-event.twig:47
+msgid "Czas i miejsce"
+msgstr "Zeit und Ort"
+
+#: includes/devents-helpers.php:697
+msgid "Czechy"
+msgstr "Tschechien"
+
+#: includes/devents-helpers.php:521
+msgid "Czeski język migowy"
+msgstr "Tschechische Gebärdensprache"
+
+#: templates/pages/news-list.twig:50
+msgid "Czytaj dalej"
+msgstr "Weiterlesen"
+
+#: templates/components/order-modals.twig:57 templates/components/order-modals.twig:175
+msgid "Dalej: Dane"
+msgstr "Weiter: Daten"
+
+#: templates/forms/register-form.twig:44
+msgid "Dane Instytucji"
+msgstr "Institutionsdaten"
+
+#: templates/user/my-units.twig:227 templates/user/my-institution.twig:167
+msgid "Dane Koordynatora Dostępności"
+msgstr "Daten des Inklusionsbeauftragten"
+
+#: templates/forms/register-form.twig:124
+msgid "Dane osoby zakładającej konto"
+msgstr "Daten des Kontoinhabers"
+
+#: templates/user/my-institution.twig:7
+msgid "DANE PODSTAWOWE"
+msgstr "BASISDATEN"
+
+#: includes/class-devents-assets.php:115
+msgid "Dane profilowe zostały zaktualizowane."
+msgstr "Profildaten wurden aktualisiert."
+
+#: templates/single/event.twig:233 templates/user/my-orders.twig:18
+msgid "Data"
+msgstr "Datum"
+
+#: templates/user/my-events.twig:70
+msgid "Data do"
+msgstr "Datum bis"
+
+#: templates/pages/publish-event.twig:523
+msgid "Data i godzina rozpoczęcia"
+msgstr "Startdatum und -zeit"
+
+#: templates/pages/publish-event.twig:536
+msgid "Data i godzina zakończenia"
+msgstr "Enddatum und -zeit"
+
+#: templates/user/my-events.twig:66
+msgid "Data od"
+msgstr "Datum von"
+
+#: templates/single/news-post.twig:68
+msgid "Data publikacji:"
+msgstr "Veröffentlichungsdatum:"
+
+#: templates/user/my-events.twig:116
+msgid "Data rozpoczęcia"
+msgstr "Startdatum"
+
+#: includes/class-devents-shortcodes.php:856 includes/devents-helpers.php:72
+msgid "Diamentowy"
+msgstr "Diamant"
+
+#: templates/pages/publish-event.twig:786
+msgid "Dlaczego edytujesz to wydarzenie?"
+msgstr "Warum bearbeiten Sie dieses Ereignis?"
+
+#: templates/components/order-modals.twig:27 templates/components/order-modals.twig:37 templates/components/order-modals.twig:48
+msgid "dni"
+msgstr "Tage"
+
+#: templates/user/my-events.twig:173
+msgid "Do"
+msgstr "Bis"
+
+#: includes/devents-helpers.php:412
+msgid "do"
+msgstr "bis"
+
+#: templates/user/my-events.twig:5
+msgid "DO WERYFIKACJI"
+msgstr "ZUR ÜBERPRÜFUNG"
+
+#: includes/devents-helpers.php:34 templates/user/my-events.twig:95
+msgid "Do weryfikacji"
+msgstr "Ausstehende Prüfung"
+
+#: templates/components/order-modals.twig:96 templates/components/order-modals.twig:211
+msgid "DO ZAPŁATY:"
+msgstr "ZU ZAHLEN:"
+
+#: templates/pages/publish-event.twig:720
+msgid "Dodaj bilet"
+msgstr "Ticket hinzufügen"
+
+#: templates/pages/publish-event.twig:560
+msgid "Dodaj grafikę/plakat"
+msgstr "Grafik/Plakat hinzufügen"
+
+#: templates/user/my-units.twig:10
+msgid "Dodaj jednostkę"
+msgstr "Einheit hinzufügen"
+
+#: templates/pages/publish-event.twig:124
+msgid "Dodaj język"
+msgstr "Sprache hinzufügen"
+
+#: templates/user/my-institution.twig:77
+msgid "Dodaj link do filmu (YouTube/Vimeo) z Twoją wizytówką w PJM."
+msgstr "Video-Link (YouTube/Vimeo) mit Ihrer Gebärdensprachvisitenkarte hinzufügen."
+
+#: templates/user/my-units.twig:153
+msgid "Dodaj link do filmu (YouTube/Vimeo) z wizytówką placówki w PJM."
+msgstr "Video-Link (YouTube/Vimeo) mit der Gebärdensprachvisitenkarte der Einrichtung hinzufügen."
+
+#: templates/pages/publish-event.twig:607
+msgid "Dodaj linki do zaproszeń wideo dla Głuchych. Jeśli posiadasz wiele języków migowych, kliknij \"Dodaj zaproszenie\"."
+msgstr "Video-Einladungen für Gehörlose hinzufügen. Bei mehreren Sprachen auf „Einladung hinzufügen“ klicken."
+
+#: templates/user/my-units.twig:131
+msgid "Dodaj logo"
+msgstr "Logo hinzufügen"
+
+#: templates/components/order-modals.twig:207
+msgid "Dodaj napisy"
+msgstr "Untertitel hinzufügen"
+
+#: templates/components/reviews.twig:31
+msgid "Dodaj opinię"
+msgstr "Bewertung hinzufügen"
+
+#: templates/user/my-institution.twig:244
+msgid "Dodaj pracowników, aby pomogli Ci zarządzać ofertami."
+msgstr "Mitarbeiter hinzufügen, um Angebote zu verwalten."
+
+#: includes/devents-helpers.php:187
+msgid "Dodaj wydarzenie"
+msgstr "Event hinzufügen"
+
+#: templates/pages/publish-event.twig:647
+msgid "Dodaj zaproszenie w innym języku"
+msgstr "Einladung in weiterer Sprache hinzufügen"
+
+#: templates/pages/publish-event.twig:601
+msgid "Dodaj zaproszenie wideo (PJM / IS)"
+msgstr "Video-Einladung hinzufügen (Gebärdensprache)"
+
+#: templates/user/my-units.twig:269
+msgid "Dodawaj i usuwaj pracowników wybranej placówki."
+msgstr "Mitarbeiter der gewählten Einrichtung hinzufügen oder entfernen."
+
+#: templates/user/my-orders.twig:56
+msgid "Dokończ płatność"
+msgstr "Zahlung abschließen"
+
+#: templates/pages/publish-event.twig:83
+msgid "Domyślny"
+msgstr "Standard"
+
+#: templates/user/my-account.twig:75
+msgid "Domyślny język foniczny"
+msgstr "Standard-Lautsprache"
+
+#: templates/user/my-account.twig:86
+msgid "Domyślny język migowy"
+msgstr "Standard-Gebärdensprache"
+
+#: templates/user/my-account.twig:66
+msgid "Domyślny kraj"
+msgstr "Standardland"
+
+#: includes/devents-helpers.php:331 templates/components/hero-event.twig:92 templates/single/event.twig:357 templates/user/my-events.twig:56 templates/pages/publish-event.twig:43
+msgid "Dostępność"
+msgstr "Barrierefreiheit"
+
+#: templates/pages/publish-event.twig:375
+msgid "Dostępność foniczna i tekstowa"
+msgstr "Lautsprachliche und textliche Barrierefreiheit"
+
+#: templates/pages/publish-event.twig:424
+msgid "Dostępność w języku migowym"
+msgstr "Barrierefreiheit in Gebärdensprache"
+
+#: includes/handlers/graphic-handler.php:240 templates/pages/publish-event.twig:346
+msgid "Dostępność wydarzenia"
+msgstr "Barrierefreiheit des Events"
+
+#: templates/pages/event-search.twig:150
+msgid "Dowolny sposób"
+msgstr "Beliebige Art"
+
+#: templates/pages/event-search.twig:162
+msgid "Dowolny wiek"
+msgstr "Jedes Alter"
+
+#: includes/devents-helpers.php:531
+msgid "Duński język migowy"
+msgstr "Dänische Gebärdensprache"
+
+#: templates/components/report-modal.twig:6
+msgid "Dziękujemy, że pomagasz nam dbać o jakość treści w serwisie."
+msgstr "Vielen Dank, dass Sie uns helfen, die Inhaltsqualität zu sichern."
+
+#: templates/forms/register-form.twig:102 templates/forms/login-form.twig:27 templates/components/order-billing-form.twig:14 templates/user/my-units.twig:240 templates/user/my-institution.twig:180
+msgid "E-mail"
+msgstr "E-Mail"
+
+#: templates/forms/register-form.twig:137
+msgid "E-mail (Login)"
+msgstr "E-Mail (Login)"
+
+#: templates/forms/register-form.twig:74 templates/user/my-units.twig:190 templates/user/my-institution.twig:121
+msgid "E-mail ogólny"
+msgstr "Allgemeine E-Mail"
+
+#: templates/user/my-institution.twig:256
+msgid "E-mail służbowy"
+msgstr "Dienstliche E-Mail"
+
+#: includes/devents-helpers.php:534
+msgid "Egipski język migowy"
+msgstr "Ägyptische Gebärdensprache"
+
+#: includes/devents-helpers.php:533
+msgid "Ekwadorski język migowy"
+msgstr "Ecuadorianische Gebärdensprache"
+
+#: templates/components/order-billing-form.twig:53
+msgid "Email do faktury"
+msgstr "Rechnungs-E-Mail"
+
+#: includes/devents-helpers.php:535
+msgid "Estoński język migowy"
+msgstr "Estnische Gebärdensprache"
+
+#: includes/devents-helpers.php:536
+msgid "Etiopski język migowy"
+msgstr "Äthiopische Gebärdensprache"
+
+#: templates/components/order-modals.twig:83 templates/components/order-modals.twig:200 templates/user/my-orders.twig:77
+msgid "Faktura"
+msgstr "Rechnung"
+
+#: includes/devents-helpers.php:333
+msgid "FAQ"
+msgstr "FAQ"
+
+#: includes/devents-helpers.php:663
+msgid "Festiwal"
+msgstr "Festival"
+
+#: includes/devents-helpers.php:579
+msgid "Filipiński język migowy"
+msgstr "Philippinische Gebärdensprache"
+
+#: includes/devents-helpers.php:650
+msgid "Film"
+msgstr "Film"
+
+#: includes/devents-helpers.php:621
+msgid "Filmowy przewodnik (tablet)"
+msgstr "Video-Guide (Tablet)"
+
+#: includes/class-devents-shortcodes.php:2137
+msgid "Filmu:"
+msgstr "Film:"
+
+#: templates/user/my-events.twig:83
+msgid "Filtruj"
+msgstr "Filtern"
+
+#: templates/pages/event-search.twig:118
+msgid "Filtry"
+msgstr "Filter"
+
+#: includes/devents-helpers.php:539
+msgid "Fiński język migowy"
+msgstr "Finnische Gebärdensprache"
+
+#: includes/devents-helpers.php:541
+msgid "Fińsko-szwedzki język migowy"
+msgstr "Finnisch-Schwedische Gebärdensprache"
+
+#: includes/devents-helpers.php:598
+msgid "Flamandzki język migowy"
+msgstr "Flämische Gebärdensprache"
+
+#: templates/pages/event-search.twig:236
+msgid "Foniczne"
+msgstr "Phonisch"
+
+#: templates/components/generate-graphic.twig:21 templates/components/order-modals.twig:155
+msgid "Format"
+msgstr "Format"
+
+#: includes/devents-helpers.php:693
+msgid "Francja"
+msgstr "Frankreich"
+
+#: includes/devents-helpers.php:485
+msgid "Francuski"
+msgstr "Französisch"
+
+#: includes/devents-helpers.php:540
+msgid "Francuski język migowy"
+msgstr "Französische Gebärdensprache"
+
+#: templates/components/generate-graphic.twig:12
+msgid "Generator Grafiki"
+msgstr "Grafik-Generator"
+
+#: includes/devents-helpers.php:543
+msgid "Ghański język migowy"
+msgstr "Ghanaische Gebärdensprache"
+
+#: templates/single/event.twig:249
+msgid "Godzina"
+msgstr "Uhrzeit"
+
+#: templates/components/order-modals.twig:167
+msgid "Grafika"
+msgstr "Grafik"
+
+#: templates/pages/publish-event.twig:566
+msgid "Grafika (Plik)"
+msgstr "Grafik (Datei)"
+
+#: templates/pages/publish-event.twig:554
+msgid "Grafika i Zaproszenia"
+msgstr "Grafiken und Einladungen"
+
+#: templates/user/my-rewards.twig:107
+msgid "Gratulacje! Osiągnąłeś ten poziom."
+msgstr "Glückwunsch! Sie haben dieses Level erreicht."
+
+#: includes/devents-helpers.php:546
+msgid "Grecki język migowy"
+msgstr "Griechische Gebärdensprache"
+
+#: templates/components/order-billing-form.twig:45 templates/components/order-billing-form.twig:83
+msgid "GUS"
+msgstr "GUS"
+
+#: includes/devents-helpers.php:545
+msgid "Gwatemalski język migowy"
+msgstr "Guatemaltekische Gebärdensprache"
+
+#: includes/class-devents-shortcodes.php:2409
+msgid "Hasła nie są identyczne."
+msgstr "Passwörter stimmen nicht überein."
+
+#: templates/forms/register-form.twig:143 templates/forms/login-form.twig:34 templates/forms/accept-invite-form.twig:18
+msgid "Hasło"
+msgstr "Passwort"
+
+#: includes/controllers/class-devents-user-controller.php:292
+msgid "Hasło do Twojego konta zostało zmienione."
+msgstr "Ihr Kontopasswort wurde geändert."
+
+#: includes/controllers/class-devents-user-controller.php:89
+msgid "Hasło musi mieć co najmniej 8 znaków."
+msgstr "Das Passwort muss mindestens 8 Zeichen lang sein."
+
+#: includes/controllers/class-devents-user-controller.php:288
+msgid "Hasło musi składać się z przynajmniej 8 znaków."
+msgstr "Passwort muss aus mindestens 8 Zeichen bestehen."
+
+#: includes/class-devents-assets.php:120 includes/controllers/class-devents-user-controller.php:293
+msgid "Hasło zostało zmienione."
+msgstr "Passwort wurde geändert."
+
+#: includes/devents-helpers.php:549
+msgid "Hawajski język migowy"
+msgstr "Hawaiianische Gebärdensprache"
+
+#: includes/devents-helpers.php:695
+msgid "Hiszpania"
+msgstr "Spanien"
+
+#: includes/devents-helpers.php:486
+msgid "Hiszpański"
+msgstr "Spanisch"
+
+#: includes/devents-helpers.php:588
+msgid "Hiszpański język migowy"
+msgstr "Spanische Gebärdensprache"
+
+#: includes/devents-helpers.php:530
+msgid "Holenderski język migowy"
+msgstr "Niederländische Gebärdensprache"
+
+#: includes/devents-helpers.php:677
+msgid "Hybrydowo"
+msgstr "Hybrid"
+
+#: templates/forms/register-form.twig:92 templates/forms/register-form.twig:127 templates/user/my-account.twig:39 templates/user/my-units.twig:230 templates/user/my-institution.twig:170
+msgid "Imię"
+msgstr "Vorname"
+
+#: templates/forms/contact-form.twig:28 templates/components/order-billing-form.twig:8
+msgid "Imię i nazwisko"
+msgstr "Vor- und Nachname"
+
+#: templates/user/my-institution.twig:252
+msgid "Imię pracownika"
+msgstr "Name des Mitarbeiters"
+
+#: includes/devents-helpers.php:555
+msgid "Indyjski język migowy"
+msgstr "Indische Gebärdensprache"
+
+#: templates/pages/event-search.twig:216
+msgid "Infrastruktura"
+msgstr "Infrastruktur"
+
+#: templates/pages/publish-event.twig:352
+msgid "Infrastruktura i rozwiązania bazowe"
+msgstr "Infrastruktur und Basislösungen"
+
+#: includes/devents-helpers.php:639
+msgid "Inna forma wsparcia"
+msgstr "Andere Form der Unterstützung"
+
+#: includes/devents-helpers.php:667
+msgid "Inne"
+msgstr "Andere"
+
+#: templates/components/order-billing-form.twig:72
+msgid "Inny odbiorca"
+msgstr "Anderer Empfänger"
+
+#: templates/components/organizer-card.twig:29
+msgid "Instytucja Nadrzędna"
+msgstr "Übergeordnete Institution"
+
+#: templates/user/panel.twig:25
+msgid "Instytucja nadrzędna"
+msgstr "Übergeordnete Institution"
+
+#: templates/user/my-pulpit.twig:212
+msgid "Instytucja:"
+msgstr "Institution:"
+
+#: templates/user/my-pulpit.twig:140
+msgid "Instytucje"
+msgstr "Institutionen"
+
+#: includes/devents-helpers.php:557
+msgid "Irlandzki język migowy"
+msgstr "Irische Gebärdensprache"
+
+#: includes/devents-helpers.php:552
+msgid "Islandzki język migowy"
+msgstr "Isländische Gebärdensprache"
+
+#: includes/devents-helpers.php:558
+msgid "Izraelski język migowy"
+msgstr "Israelische Gebärdensprache"
+
+#: includes/devents-helpers.php:560
+msgid "Jamajski język migowy"
+msgstr "Jamaikanische Gebärdensprache"
+
+#. Author of the plugin
+msgid "Janusz Pierzchalski"
+msgstr "Janusz Pierzchalski"
+
+#: includes/devents-helpers.php:562
+msgid "Japoński język migowy"
+msgstr "Japanische Gebärdensprache"
+
+#: templates/components/generate-graphic.twig:55
+msgid "Jasny"
+msgstr "Hell"
+
+#: templates/forms/password-reset.twig:81
+msgid "Jedna cyfra"
+msgstr "Eine Ziffer"
+
+#: templates/forms/password-reset.twig:79
+msgid "Jedna duża litera"
+msgstr "Ein Großbuchstabe"
+
+#: templates/forms/password-reset.twig:80
+msgid "Jedna mała litera"
+msgstr "Ein Kleinbuchstabe"
+
+#: templates/user/my-units.twig:62
+msgid "Jednostka"
+msgstr "Einheit"
+
+#: templates/pages/organizer-profile.twig:57
+msgid "Jednostka sieci:"
+msgstr "Netzwerkeinheit:"
+
+#: templates/user/my-units.twig:5
+msgid "Jednostki Organizacyjne"
+msgstr "Organisationseinheiten"
+
+#: includes/class-devents-shortcodes.php:2356
+msgid "Jesteś już zalogowany w systemie."
+msgstr "Sie sind bereits im System angemeldet."
+
+#: includes/devents-helpers.php:561
+msgid "Jordański język migowy"
+msgstr "Jordanische Gebärdensprache"
+
+#: templates/forms/register-form.twig:85
+msgid "JPG lub PNG, max 2 MB."
+msgstr "JPG oder PNG, max. 2 MB."
+
+#: templates/forms/register-form.twig:117
+msgid "JPG lub PNG, max 2 MB. Opcjonalne."
+msgstr "JPG oder PNG, max. 2 MB. Optional."
+
+#: templates/components/lang-switcher.twig:48
+msgid "Język interfejsu"
+msgstr "Oberflächensprache"
+
+#: templates/pages/publish-event.twig:622 templates/pages/publish-event.twig:658
+msgid "Język migowy"
+msgstr "Gebärdensprache"
+
+#: includes/devents-helpers.php:510
+msgid "Język migowy aborygenów australijskich"
+msgstr "Gebärdensprache der Aborigines"
+
+#: includes/devents-helpers.php:514
+msgid "Język migowy Bamako"
+msgstr "Bamako-Gebärdensprache"
+
+#: includes/devents-helpers.php:513
+msgid "Język migowy Ban Khor"
+msgstr "Ban-Khor-Gebärdensprache"
+
+#: includes/devents-helpers.php:516
+msgid "Język migowy Bengkala"
+msgstr "Bengkala-Gebärdensprache"
+
+#: includes/devents-helpers.php:548
+msgid "Język migowy Hongkongu"
+msgstr "Hongkong-Gebärdensprache"
+
+#: includes/devents-helpers.php:553
+msgid "Język migowy Inuitów"
+msgstr "Inuit-Gebärdensprache"
+
+#: includes/devents-helpers.php:538
+msgid "Język migowy Quebecu"
+msgstr "Quebec-Gebärdensprache"
+
+#: templates/single/event.twig:192
+msgid "Język migowy:"
+msgstr "Gebärdensprache:"
+
+#: includes/devents-helpers.php:528
+msgid "Kambodżański język migowy"
+msgstr "Kambodschanische Gebärdensprache"
+
+#: includes/devents-helpers.php:520
+msgid "Kataloński język migowy"
+msgstr "Katalanische Gebärdensprache"
+
+#: includes/handlers/graphic-handler.php:235 templates/user/my-events.twig:46 templates/pages/event-search.twig:135 templates/pages/publish-event.twig:279
+msgid "Kategoria"
+msgstr "Kategorie"
+
+#: includes/devents-helpers.php:601
+msgid "Kenijski język migowy"
+msgstr "Kenianische Gebärdensprache"
+
+#: includes/handlers/graphic-handler.php:230
+msgid "Kiedy"
+msgstr "Wann"
+
+#: templates/single/event.twig:226
+msgid "Kiedy i gdzie"
+msgstr "Wann und wo"
+
+#: templates/user/my-units.twig:216 templates/user/my-institution.twig:155
+msgid "Kod pocztowy"
+msgstr "Postleitzahl"
+
+#: templates/forms/password-reset.twig:33
+#, php-format
+msgid "Kod został wysłany na adres %s."
+msgstr "Code wurde an %s gesendet."
+
+#: templates/components/order-modals.twig:151
+msgid "Kolor tła"
+msgstr "Hintergrundfarbe"
+
+#: includes/devents-helpers.php:525
+msgid "Kolumbijski język migowy"
+msgstr "Kolumbianische Gebärdensprache"
+
+#: templates/components/review-form.twig:33
+msgid "Komentarz (opcjonalnie)"
+msgstr "Kommentar (optional)"
+
+#: templates/pages/publish-event.twig:782
+msgid "Komentarz edycji"
+msgstr "Bearbeitungskommentar"
+
+#: includes/devents-helpers.php:622
+msgid "Komfortka"
+msgstr "Pflegeraum (Komfortka)"
+
+#: includes/devents-helpers.php:651
+msgid "Koncert"
+msgstr "Konzert"
+
+#: includes/devents-helpers.php:652
+msgid "Konferencja"
+msgstr "Konferenz"
+
+#: templates/single/event.twig:261
+msgid "Koniec:"
+msgstr "Ende:"
+
+#: includes/devents-helpers.php:323 templates/pages/organizer-profile.twig:142
+msgid "Kontakt"
+msgstr "Kontakt"
+
+#: templates/user/my-pulpit.twig:14
+msgid "Konto niezweryfikowane:"
+msgstr "Konto nicht verifiziert:"
+
+#: templates/user/my-pulpit.twig:215
+msgid "Konto Uczestnika"
+msgstr "Teilnehmerkonto"
+
+#: templates/user/my-pulpit.twig:6
+msgid "Konto zostało pomyślnie aktywowane! Witamy w serwisie."
+msgstr "Konto erfolgreich aktiviert! Willkommen beim Service."
+
+#: includes/controllers/class-devents-user-controller.php:306
+msgid "Konto zostało pomyślnie usunięte z systemu."
+msgstr "Konto wurde erfolgreich aus dem System gelöscht."
+
+#: includes/class-devents-assets.php:127
+msgid "Konto zostało usunięte. Żegnaj!"
+msgstr "Konto wurde gelöscht. Auf Wiedersehen!"
+
+#: includes/class-devents-shortcodes.php:2457
+msgid "Konto zostało utworzone!"
+msgstr "Konto wurde erstellt!"
+
+#: includes/controllers/class-devents-user-controller.php:204
+msgid "Konto zostało utworzone. Sprawdź swoją skrzynkę e-mail, aby dokończyć aktywację profilu."
+msgstr "Konto erstellt. Bitte E-Mails prüfen, um die Profilaktivierung abzuschließen."
+
+#: templates/forms/register-form.twig:89
+msgid "Koordynator Dostępności"
+msgstr "Inklusionsbeauftragter"
+
+#: templates/pages/organizer-profile.twig:183
+msgid "Koordynator dostępności"
+msgstr "Inklusionsbeauftragter"
+
+#: includes/controllers/class-devents-event-controller.php:589
+msgid "Kopia"
+msgstr "Kopie"
+
+#: templates/components/generate-graphic.twig:100
+msgid "Kopiuj tekst"
+msgstr "Text kopieren"
+
+#: includes/devents-helpers.php:564
+msgid "Koreański język migowy"
+msgstr "Koreanische Gebärdensprache"
+
+#: includes/devents-helpers.php:527
+msgid "Kostarykański język migowy"
+msgstr "Costa-ricanische Gebärdensprache"
+
+#: templates/single/event.twig:291
+msgid "Kraj"
+msgstr "Land"
+
+#: templates/pages/publish-event.twig:589
+msgid "Krótki opis obrazka dla czytników ekranowych."
+msgstr "Kurzbeschreibung des Bildes für Screenreader."
+
+#: includes/controllers/class-devents-event-controller.php:529
+msgid "Ktoś z zespołu"
+msgstr "Jemand aus dem Team"
+
+#: includes/devents-helpers.php:522
+msgid "Kubański język migowy"
+msgstr "Kubanische Gebärdensprache"
+
+#: templates/components/hero-event.twig:70 templates/single/event.twig:345
+msgid "Kup bilet"
+msgstr "Ticket kaufen"
+
+#: includes/devents-helpers.php:666
+msgid "Kurs"
+msgstr "Kurs"
+
+#: templates/user/my-account.twig:32
+msgid "Kwadrat (np. 500x500px), max 2MB."
+msgstr "Quadrat (z.B. 500x500px), max. 2MB."
+
+#: templates/pages/publish-event.twig:320
+msgid "lat"
+msgstr "Jahre"
+
+#: includes/class-devents-shortcodes.php:857 includes/devents-helpers.php:70
+msgid "Legenda"
+msgstr "Legende"
+
+#: includes/devents-helpers.php:623
+msgid "Lektor"
+msgstr "Sprecher / Voice-over"
+
+#: templates/user/my-rewards.twig:5
+msgid "Liczba Twoich zatwierdzonych wydarzeń:"
+msgstr "Anzahl Ihrer bestätigten Events:"
+
+#: templates/pages/publish-event.twig:725
+msgid "Link do platformy z biletami"
+msgstr "Link zur Ticketplattform"
+
+#: templates/pages/publish-event.twig:613 templates/pages/publish-event.twig:654
+msgid "Link do wideo"
+msgstr "Video-Link"
+
+#: templates/pages/publish-event.twig:734
+msgid "Link do zewnętrznej platformy sprzedaży (np. Eventim, Bilety24)."
+msgstr "Link zu externer Verkaufsplattform (z.B. Eventim)."
+
+#: templates/pages/publish-event.twig:765
+msgid "Link przycisku"
+msgstr "Button-Link"
+
+#: includes/class-devents-shortcodes.php:2377
+msgid "Link wygasł. Poproś administratora instytucji o nowe zaproszenie."
+msgstr "Link abgelaufen. Bitten Sie den Administrator um eine neue Einladung."
+
+#: includes/devents-helpers.php:566
+msgid "Litewski język migowy"
+msgstr "Litauische Gebärdensprache"
+
+#: includes/devents-helpers.php:699
+msgid "Litwa"
+msgstr "Litauen"
+
+#: templates/pages/publish-event.twig:823
+msgid "Logi systemowe"
+msgstr "Systemprotokolle"
+
+#: templates/components/order-modals.twig:163
+msgid "Logo"
+msgstr "Logo"
+
+#: templates/forms/register-form.twig:83
+msgid "Logo instytucji"
+msgstr "Logo der Institution"
+
+#: includes/handlers/graphic-handler.php:234 templates/pages/publish-event.twig:479
+msgid "Lokalizacja"
+msgstr "Standort"
+
+#: templates/pages/publish-event.twig:475
+msgid "Lokalizacja i czas"
+msgstr "Ort und Zeit"
+
+#: includes/devents-helpers.php:602
+msgid "Malezyjski język migowy"
+msgstr "Malaysische Gebärdensprache"
+
+#: includes/devents-helpers.php:569
+msgid "Maltański język migowy"
+msgstr "Maltesische Gebärdensprache"
+
+#: templates/user/my-institution.twig:228
+msgid "Masz kod z Instytucji nadrzędnej?"
+msgstr "Haben Sie einen Code der übergeordneten Institution?"
+
+#: templates/forms/contact-form.twig:7
+msgid "Masz pytania lub sugestie? Chętnie Cię wysłuchamy."
+msgstr "Haben Sie Fragen oder Anregungen? Wir hören Ihnen gerne zu."
+
+#: templates/forms/accept-invite-form.twig:44
+msgid "Mała litera"
+msgstr "Kleinbuchstabe"
+
+#: templates/pages/publish-event.twig:51
+msgid "Media"
+msgstr "Medien"
+
+#: includes/devents-helpers.php:570
+msgid "Meksykański język migowy"
+msgstr "Mexikanische Gebärdensprache"
+
+#: templates/user/my-units.twig:220 templates/user/my-institution.twig:159
+msgid "Miasto"
+msgstr "Stadt"
+
+#: templates/single/event.twig:272
+msgid "Miejsce"
+msgstr "Ort"
+
+#: includes/devents-helpers.php:625
+msgid "Miejsce wyciszenia"
+msgstr "Rückzugsort / Ruhebereich"
+
+#: templates/pages/event-search.twig:281
+msgid "Migowe"
+msgstr "Gebärden"
+
+#: templates/forms/register-form.twig:159 templates/forms/accept-invite-form.twig:42 templates/user/my-account.twig:128
+msgid "Min. 8 znaków"
+msgstr "Mind. 8 Zeichen"
+
+#: templates/pages/publish-event.twig:307
+msgid "Minimalny wiek uczestników"
+msgstr "Mindestalter der Teilnehmer"
+
+#: templates/forms/password-reset.twig:78
+msgid "Minimum 8 znaków"
+msgstr "Mindestens 8 Zeichen"
+
+#: includes/devents-helpers.php:554
+msgid "Międzynarodowy język migowy"
+msgstr "Internationale Gebärdensprache"
+
+#: templates/user/panel.twig:27 templates/user/my-units.twig:300 templates/user/my-institution.twig:274 templates/user/my-institution.twig:294
+msgid "Moderator"
+msgstr "Moderator"
+
+#: includes/devents-helpers.php:235
+msgid "Moje opinie"
+msgstr "Meine Bewertungen"
+
+#: includes/devents-helpers.php:229 templates/user/my-pulpit.twig:179
+msgid "Moje subskrypcje"
+msgstr "Meine Abonnements"
+
+#: includes/devents-helpers.php:571
+msgid "Mongolski język migowy"
+msgstr "Mongolische Gebärdensprache"
+
+#: templates/components/generate-graphic.twig:46
+msgid "Motyw"
+msgstr "Thema"
+
+#: templates/user/my-units.twig:168 templates/user/my-institution.twig:96
+#, php-format
+msgid "Możesz go u nas zamówić! Przygotujemy tłumaczenie opisu (do 1800 znaków) na %spolski język migowy%s i napisami za %s300 zł%s."
+msgstr "Sie können es bei uns bestellen! Wir übersetzen die Beschreibung in %spolnische Gebärdensprache%s mit Untertiteln für %s300 PLN%s."
+
+#: templates/components/reviews.twig:16
+#, php-format
+msgid "Musisz być %szalogowany%s, aby dodać opinię."
+msgstr "Sie müssen %sangemeldet%s sein, um eine Bewertung abzugeben."
+
+#: includes/class-devents-shortcodes.php:995
+msgid "Musisz być zalogowany, aby opublikować wydarzenie."
+msgstr "Anmeldung erforderlich, um ein Event zu veröffentlichen."
+
+#: includes/class-devents-shortcodes.php:2296
+msgid "Musisz być zalogowany, aby zobaczyć tę sekcję."
+msgstr "Anmeldung erforderlich, um diesen Bereich zu sehen."
+
+#: templates/pages/publish-event.twig:505
+msgid "Musisz wybrać poprawny adres z rozwijanej listy!"
+msgstr "Bitte wählen Sie eine Adresse aus der Liste aus!"
+
+#: templates/user/my-institution.twig:14
+msgid "MÓJ ZESPÓŁ"
+msgstr "MEIN TEAM"
+
+#: includes/devents-helpers.php:676
+msgid "Na żywo"
+msgstr "Live"
+
+#: templates/components/order-billing-form.twig:30
+msgid "Nabywca (Faktura)"
+msgstr "Käufer (Rechnung)"
+
+#: templates/pages/homepage.twig:88
+msgid "Nadchodzące i trwające"
+msgstr "Bevorstehend und laufend"
+
+#: templates/pages/organizer-profile.twig:309 templates/pages/organizer-search.twig:179
+msgid "Nadchodzące wydarzenia"
+msgstr "Anstehende Events"
+
+#: includes/devents-helpers.php:217
+msgid "Nagrody"
+msgstr "Auszeichnungen"
+
+#: templates/pages/news-list.twig:16
+msgid "Najnowsze informacje i ogłoszenia."
+msgstr "Aktuelle Informationen und Ankündigungen."
+
+#: includes/devents-helpers.php:627
+msgid "Napisy dla niesłyszących"
+msgstr "Untertitel für Gehörlose"
+
+#: includes/devents-helpers.php:626
+msgid "Napisy na żywo"
+msgstr "Live-Untertitel"
+
+#: includes/devents-helpers.php:628
+msgid "Napisy standardowe"
+msgstr "Standard-Untertitel"
+
+#: templates/user/my-units.twig:172 templates/user/my-institution.twig:100
+msgid "Napisz do nas:"
+msgstr "Schreiben Sie uns:"
+
+#: templates/pages/organizer-profile.twig:124
+msgid "Napisz opinię"
+msgstr "Bewertung schreiben"
+
+#: templates/components/report-modal.twig:20
+msgid "Naruszenie praw autorskich"
+msgstr "Urheberrechtsverletzung"
+
+#: templates/pages/event-search.twig:565
+msgid "Następna strona"
+msgstr "Nächste Seite"
+
+#: templates/pages/event-search.twig:521
+msgid "Nawigacja stron wyników"
+msgstr "Seitennavigation"
+
+#: templates/components/order-billing-form.twig:87
+msgid "Nazwa"
+msgstr "Name"
+
+#: templates/pages/publish-event.twig:690
+msgid "Nazwa biletu"
+msgstr "Ticketname"
+
+#: templates/components/order-billing-form.twig:49
+msgid "Nazwa firmy"
+msgstr "Firmenname"
+
+#: templates/forms/register-form.twig:47
+msgid "Nazwa organizacji / instytucji"
+msgstr "Name der Organisation / Institution"
+
+#: templates/pages/publish-event.twig:756
+msgid "Nazwa przycisku"
+msgstr "Button-Text"
+
+#: templates/forms/register-form.twig:96 templates/forms/register-form.twig:132 templates/user/my-account.twig:43 templates/user/my-units.twig:234 templates/user/my-institution.twig:174
+msgid "Nazwisko"
+msgstr "Nachname"
+
+#: templates/pages/news-list.twig:62
+msgid "Nie ma jeszcze żadnych aktualności do wyświetlenia."
+msgstr "Noch keine Neuigkeiten vorhanden."
+
+#: templates/forms/login-form.twig:59
+msgid "Nie masz jeszcze konta?"
+msgstr "Noch kein Konto?"
+
+#: templates/user/my-favorites.twig:17
+msgid "Nie masz jeszcze żadnych ulubionych wydarzeń."
+msgstr "Sie haben noch keine Favoriten."
+
+#: includes/class-devents-shortcodes.php:1042
+msgid "Nie masz uprawnień do edycji tego wydarzenia."
+msgstr "Keine Berechtigung zum Bearbeiten dieses Events."
+
+#: includes/controllers/class-devents-event-controller.php:61
+msgid "Nie masz uprawnień lub Twoje konto nie jest zweryfikowane."
+msgstr "Keine Berechtigung oder Konto nicht verifiziert."
+
+#: templates/user/my-subscriptions.twig:17
+msgid "Nie obserwujesz jeszcze żadnego organizatora lub obserwowani twórcy nie dodali żadnych nowych wydarzeń."
+msgstr "Sie folgen noch niemandem oder es gibt keine neuen Events Ihrer Abonnements."
+
+#: templates/forms/login-form.twig:46
+msgid "Nie pamiętasz hasła?"
+msgstr "Passwort vergessen?"
+
+#: includes/class-devents-shortcodes.php:1784 includes/class-devents-shortcodes.php:2337
+msgid "Nie podano"
+msgstr "Nicht angegeben"
+
+#: includes/class-devents-shortcodes.php:1295
+msgid "Nie podano organizatora"
+msgstr "Veranstalter nicht angegeben"
+
+#: templates/forms/contact-form.twig:20
+msgid "Nie wypełniaj tego pola:"
+msgstr "Dieses Feld nicht ausfüllen:"
+
+#: includes/handlers/graphic-handler.php:36
+msgid "Nie znaleziono ID wydarzenia."
+msgstr "Event-ID nicht gefunden."
+
+#: includes/class-devents-shortcodes.php:1136
+msgid "Nie znaleziono wydarzenia o podanym ID."
+msgstr "Event mit dieser ID nicht gefunden."
+
+#: includes/class-devents-shortcodes.php:1245 includes/controllers/class-devents-event-controller.php:682 includes/controllers/class-devents-event-controller.php:709
+msgid "Nie znaleziono wydarzenia."
+msgstr "Event nicht gefunden."
+
+#: includes/devents-helpers.php:692
+msgid "Niemcy"
+msgstr "Deutschland"
+
+#: includes/devents-helpers.php:484
+msgid "Niemiecki"
+msgstr "Deutsch"
+
+#: includes/devents-helpers.php:544
+msgid "Niemiecki język migowy"
+msgstr "Deutsche Gebärdensprache (DGS)"
+
+#: templates/user/my-account.twig:148
+msgid "nieodwracalną"
+msgstr "unwiderruflich"
+
+#: templates/user/my-orders.twig:4
+msgid "NIEOPŁACONE"
+msgstr "UNBEZAHLT"
+
+#: templates/components/report-modal.twig:19
+msgid "Nieprawdziwe informacje (np. błędna data, miejsce)"
+msgstr "Falsche Informationen (z.B. Datum, Ort)"
+
+#: includes/controllers/class-devents-event-controller.php:825
+msgid "Nieprawidłowe ID wydarzenia."
+msgstr "Ungültige Event-ID."
+
+#: includes/class-devents-shortcodes.php:1230
+msgid "Nieprawidłowy ID wydarzenia."
+msgstr "Ungültige Event-ID."
+
+#: includes/class-devents-shortcodes.php:2373
+msgid "Nieprawidłowy lub zużyty link zapraszający."
+msgstr "Ungültiger oder abgelaufener Einladungslink."
+
+#: templates/user/my-events.twig:140
+msgid "Nieprzypisana"
+msgstr "Nicht zugewiesen"
+
+#: includes/handlers/graphic-handler.php:116
+msgid "Nieznany"
+msgstr "Unbekannt"
+
+#: includes/devents-helpers.php:574
+msgid "Nigeryjski język migowy"
+msgstr "Nigerianische Gebärdensprache"
+
+#: includes/devents-helpers.php:573
+msgid "Nikaraguański język migowy"
+msgstr "Nicaraguanische Gebärdensprache"
+
+#: templates/forms/register-form.twig:53 templates/components/order-billing-form.twig:41 templates/components/order-billing-form.twig:79 templates/user/my-units.twig:179 templates/user/my-institution.twig:109
+msgid "NIP"
+msgstr "Steuernummer"
+
+#: includes/devents-helpers.php:575
+msgid "Norweski język migowy"
+msgstr "Norwegische Gebärdensprache"
+
+#: templates/single/news-post.twig:6
+msgid "Nowa Funkcja"
+msgstr "Neue Funktion"
+
+#: templates/pages/news-list.twig:8
+msgid "Nowa funkcja"
+msgstr "Neue Funktion"
+
+#: templates/user/my-units.twig:116
+msgid "Nowa Jednostka Organizacyjna"
+msgstr "Neue Organisationseinheit"
+
+#: includes/class-devents-assets.php:118
+msgid "Nowe hasła nie są identyczne."
+msgstr "Neue Passwörter stimmen nicht überein."
+
+#: templates/forms/password-reset.twig:70 templates/user/my-account.twig:116
+msgid "Nowe hasło"
+msgstr "Neues Passwort"
+
+#: includes/controllers/class-devents-event-controller.php:512
+#, php-format
+msgid "Nowe wydarzenie od %s: %s"
+msgstr "Neues Event von %s: %s"
+
+#: includes/devents-helpers.php:576
+msgid "Nowozelandzki język migowy"
+msgstr "Neuseeländische Gebärdensprache"
+
+#: templates/user/my-units.twig:210
+msgid "Nr budynku"
+msgstr "Hausnummer"
+
+#: templates/user/my-institution.twig:149
+msgid "Nr budynku/lokalu"
+msgstr "Haus-/Wohnungsnummer"
+
+#: templates/user/my-orders.twig:16
+msgid "Nr zamówienia"
+msgstr "Bestellnummer"
+
+#: includes/devents-helpers.php:324
+msgid "O nas"
+msgstr "Über uns"
+
+#: templates/pages/organizer-profile.twig:247
+msgid "O organizacji"
+msgstr "Über die Organisation"
+
+#: templates/user/my-units.twig:317
+msgid "Obecny zespół placówki"
+msgstr "Aktuelles Team der Einrichtung"
+
+#: templates/single/event.twig:184
+msgid "Obejrzyj zaproszenie"
+msgstr "Einladung ansehen"
+
+#: templates/pages/publish-event.twig:191
+msgid "Obliczanie..."
+msgstr "Berechnung..."
+
+#: templates/user/my-pulpit.twig:110
+msgid "Obserwowane miejsca"
+msgstr "Gefolgte Orte"
+
+#: templates/single/event.twig:114 templates/pages/organizer-profile.twig:114 templates/pages/organizer-search.twig:204
+msgid "Obserwuj"
+msgstr "Folgen"
+
+#: templates/single/event.twig:115 templates/pages/organizer-profile.twig:118
+msgid "Obserwujesz"
+msgstr "Gefolgt"
+
+#: templates/user/my-pulpit.twig:92 templates/pages/organizer-search.twig:187
+msgid "Obserwujących"
+msgstr "Follower"
+
+#: templates/pages/organizer-profile.twig:90
+msgid "obserwujących"
+msgstr "Follower"
+
+#: templates/user/my-institution.twig:222
+msgid "Oczekiwanie na akceptację"
+msgstr "Warten auf Bestätigung"
+
+#: includes/devents-helpers.php:35
+msgid "Oczekuje"
+msgstr "Wartend"
+
+#: templates/user/my-rewards.twig:58
+msgid "Oczekuje na zatwierdzenie."
+msgstr "Wartet auf Genehmigung."
+
+#: templates/user/my-units.twig:27
+msgid "Oczekujące prośby do Twojej sieci"
+msgstr "Ausstehende Netzwerkanfragen"
+
+#: templates/user/my-pulpit.twig:51
+msgid "Oczekujące weryfikacje"
+msgstr "Ausstehende Verifizierungen"
+
+#: templates/user/my-institution.twig:289
+msgid "Oczekujące zaproszenia"
+msgstr "Ausstehende Einladungen"
+
+#: templates/components/event-card.twig:29
+msgid "Od"
+msgstr "Von"
+
+#: templates/components/featured-event-item.twig:50
+msgid "od"
+msgstr "ab"
+
+#: templates/components/order-billing-form.twig:69
+msgid "Odbiorca"
+msgstr "Empfänger"
+
+#: templates/components/reviews.twig:51
+msgid "Odpowiedz"
+msgstr "Antworten"
+
+#: templates/user/my-events.twig:8
+msgid "ODRZUCONE"
+msgstr "ABGELEHNT"
+
+#: templates/user/my-units.twig:43
+msgid "Odrzuć"
+msgstr "Ablehnen"
+
+#: templates/user/my-events.twig:9
+msgid "ODWOŁANE"
+msgstr "ABSAGE"
+
+#: templates/user/my-events.twig:98
+msgid "Odwołane"
+msgstr "Abgesagt"
+
+#: includes/class-devents-shortcodes.php:1108 includes/controllers/class-devents-event-controller.php:840
+msgid "Odwołano wydarzenie"
+msgstr "Event abgesagt"
+
+#: includes/controllers/class-devents-event-controller.php:744
+#, php-format
+msgid "Odwołano: %s"
+msgstr "Abgesagt: %s"
+
+#: templates/user/my-institution.twig:216
+msgid "Odłącz się"
+msgstr "Trennen"
+
+#: templates/single/news-post.twig:5 templates/pages/news-list.twig:7
+msgid "Ogłoszenie"
+msgstr "Ankündigung"
+
+#: templates/pages/event-search.twig:174
+msgid "Okazja specjalna"
+msgstr "Besonderer Anlass"
+
+#: includes/devents-helpers.php:678
+msgid "Online"
+msgstr "Online"
+
+#: templates/pages/publish-event.twig:545
+msgid "Opcjonalne. Musi być późniejsza niż data rozpoczęcia."
+msgstr "Optional. Muss nach dem Startdatum liegen."
+
+#: templates/pages/organizer-profile.twig:346
+msgid "Opinie uczestników"
+msgstr "Teilnehmerstimmen"
+
+#: templates/pages/organizer-profile.twig:77
+msgid "opinii"
+msgstr "Bewertungen"
+
+#: templates/user/my-units.twig:143 templates/user/my-institution.twig:66
+msgid "Opis działalności"
+msgstr "Tätigkeitsbeschreibung"
+
+#: templates/pages/publish-event.twig:168 templates/pages/publish-event.twig:226 templates/pages/publish-event.twig:246
+msgid "Opis wydarzenia"
+msgstr "Eventbeschreibung"
+
+#: templates/user/my-events.twig:6
+msgid "OPUBLIKOWANE"
+msgstr "VERÖFFENTLICHT"
+
+#: templates/user/my-events.twig:94
+msgid "Opublikowane"
+msgstr "Veröffentlicht"
+
+#: includes/controllers/class-devents-event-controller.php:345
+msgid "Opublikowano!"
+msgstr "Veröffentlicht!"
+
+#: templates/pages/publish-event.twig:810 templates/pages/homepage.twig:146
+msgid "Opublikuj"
+msgstr "Veröffentlichen"
+
+#: templates/user/my-pulpit.twig:144
+msgid "Opublikuj jako admin"
+msgstr "Als Admin veröffentlichen"
+
+#: templates/user/my-events.twig:26
+msgid "Opublikuj nowe wydarzenie"
+msgstr "Neues Event veröffentlichen"
+
+#: templates/user/my-pulpit.twig:150 templates/pages/homepage.twig:26 templates/pages/homepage.twig:143
+msgid "Opublikuj wydarzenie"
+msgstr "Event erstellen"
+
+#: templates/user/my-orders.twig:5
+msgid "OPŁACONE"
+msgstr "BEZAHLT"
+
+#: templates/components/organizer-card.twig:34
+msgid "Organizacja"
+msgstr "Organisation"
+
+#: includes/handlers/graphic-handler.php:224 templates/forms/register-form.twig:29 templates/components/hero-event.twig:82 templates/user/panel.twig:26
+msgid "Organizator"
+msgstr "Veranstalter"
+
+#: templates/single/event.twig:95
+msgid "Organizator:"
+msgstr "Veranstalter:"
+
+#: includes/devents-helpers.php:319 templates/pages/organizer-profile.twig:28
+msgid "Organizatorzy"
+msgstr "Veranstalter"
+
+#: templates/forms/register-form.twig:38
+msgid "Organizatorzy i administracja publiczna wymagają weryfikacji przez nasz zespół."
+msgstr "Veranstalter und Verwaltung werden von uns verifiziert."
+
+#: includes/devents-helpers.php:502
+msgid "Ormiański język migowy"
+msgstr "Armenische Gebärdensprache"
+
+#: templates/user/my-rewards.twig:123
+msgid "Oryginał dyplomu zostanie wysłany do Ciebie pocztą tradycyjną w najbliższym czasie na adres podany w profilu."
+msgstr "Das Original-Diplom wird Ihnen in Kürze per Post an die Profiladresse zugesandt."
+
+#: templates/components/order-modals.twig:92
+msgid "Pakiet:"
+msgstr "Paket:"
+
+#: templates/user/my-rewards.twig:122
+msgid "Pamiątkowy Dyplom Papierowy"
+msgstr "Erinnerungsdiplom (Papier)"
+
+#: templates/user/panel.twig:71
+msgid "Panel"
+msgstr "Panel"
+
+#: includes/devents-helpers.php:250
+msgid "Panel Admina"
+msgstr "Admin-Bereich"
+
+#: includes/devents-helpers.php:277 includes/devents-helpers.php:327
+msgid "Panel użytkownika"
+msgstr "Benutzerbereich"
+
+#: includes/devents-helpers.php:653
+msgid "Performens"
+msgstr "Performance"
+
+#: templates/user/my-institution.twig:59
+msgid "Pełna nazwa instytucji / organizacji"
+msgstr "Vollständiger Name der Institution"
+
+#: templates/user/my-units.twig:137
+msgid "Pełna nazwa placówki / jednostki"
+msgstr "Vollständiger Name der Einrichtung"
+
+#: templates/user/my-institution.twig:268
+msgid "Pełny dostęp do danych"
+msgstr "Vollständiger Datenzugriff"
+
+#: templates/user/my-events.twig:195
+msgid "PJM niedostępne"
+msgstr "Gebärdensprache nicht verfügbar"
+
+#: templates/user/my-events.twig:188
+msgid "PJM: Gotowe"
+msgstr "Gebärdensprache: Fertig"
+
+#: templates/user/my-events.twig:186
+msgid "PJM: W toku"
+msgstr "Gebärdensprache: In Arbeit"
+
+#: includes/class-devents-shortcodes.php:855 includes/devents-helpers.php:74
+msgid "Platynowy"
+msgstr "Platin"
+
+#: templates/pages/publish-event.twig:574
+msgid "PNG, JPG lub WebP. Zalecany rozmiar: 1200×675px (16:9)."
+msgstr "PNG, JPG oder WebP. Empfohlen: 1200×675px."
+
+#: templates/pages/publish-event.twig:377
+msgid "Po zaznaczeniu opcji, pod spodem rozwinie się lista do wyboru języka (np. polski, angielski)."
+msgstr "Nach Auswahl erscheint eine Liste zur Sprachwahl."
+
+#: templates/pages/publish-event.twig:426
+msgid "Po zaznaczeniu opcji, pod spodem rozwinie się lista wyboru języka migowego (np. PJM, IS)."
+msgstr "Nach Auswahl erscheint eine Liste zur Wahl der Gebärdensprache."
+
+#: templates/user/my-orders.twig:72
+msgid "Pobierz film"
+msgstr "Video herunterladen"
+
+#: templates/components/generate-graphic.twig:72
+msgid "Pobierz grafikę"
+msgstr "Grafik herunterladen"
+
+#: templates/forms/password-reset.twig:12
+msgid "Podaj swój adres e-mail, aby otrzymać 6-cyfrowy kod weryfikacyjny."
+msgstr "Geben Sie Ihre E-Mail ein, um einen 6-stelligen Verifizierungscode zu erhalten."
+
+#: templates/pages/publish-event.twig:161
+msgid "Podaj zwięzłą i chwytliwą nazwę."
+msgstr "Geben Sie einen prägnanten Namen ein."
+
+#: includes/controllers/class-devents-user-controller.php:133
+msgid "Podanie nazwy instytucji jest wymagane dla tego typu konta."
+msgstr "Institutionsname für diesen Kontotyp erforderlich."
+
+#: templates/user/my-units.twig:158 templates/user/my-institution.twig:83
+msgid "Podgląd"
+msgstr "Vorschau"
+
+#: templates/user/my-institution.twig:331
+msgid "Podgląd wizytówki PJM"
+msgstr "Vorschau Gebärdensprach-Visitenkarte"
+
+#: templates/components/order-modals.twig:68 templates/components/order-modals.twig:186
+msgid "Podsumowanie"
+msgstr "Zusammenfassung"
+
+#: templates/components/order-modals.twig:89
+msgid "Podsumowanie kosztów"
+msgstr "Kostenübersicht"
+
+#: templates/pages/homepage.twig:144
+msgid "Podziel się swoim wydarzeniem ze społecznością Głuchych i słyszących."
+msgstr "Teilen Sie Ihr Event mit der Gehörlosen- und Hörendengemeinschaft."
+
+#: templates/user/my-institution.twig:213
+msgid "Podłączono do:"
+msgstr "Verbunden mit:"
+
+#: templates/user/my-events.twig:212
+msgid "Pokaż:"
+msgstr "Zeige:"
+
+#: templates/components/hero-event.twig:18 templates/components/featured-event-item.twig:20 templates/components/order-modals.twig:46
+msgid "Polecane"
+msgstr "Empfohlen"
+
+#: includes/devents-helpers.php:326
+msgid "Polityka prywatności"
+msgstr "Datenschutzerklärung"
+
+#: templates/forms/contact-form.twig:72
+msgid "Polityką Prywatności"
+msgstr "Datenschutzerklärung"
+
+#: templates/forms/register-form.twig:171 templates/forms/accept-invite-form.twig:57
+msgid "Politykę Prywatności"
+msgstr "Datenschutzerklärung"
+
+#: includes/devents-helpers.php:689
+msgid "Polska"
+msgstr "Polen"
+
+#: includes/devents-helpers.php:481 templates/pages/publish-event.twig:8
+msgid "Polski"
+msgstr "Polnisch"
+
+#: includes/devents-helpers.php:578
+msgid "Polski język migowy"
+msgstr "Polnische Gebärdensprache (PJM)"
+
+#: templates/user/my-units.twig:169 templates/user/my-institution.twig:97
+msgid "polski język migowy"
+msgstr "Polnische Gebärdensprache"
+
+#: includes/devents-helpers.php:332
+msgid "Pomoc"
+msgstr "Hilfe"
+
+#: templates/pages/event-search.twig:529
+msgid "Poprzednia strona"
+msgstr "Vorherige Seite"
+
+#: templates/pages/homepage.twig:124
+msgid "Popularne"
+msgstr "Beliebt"
+
+#: templates/single/news-post.twig:7 templates/pages/news-list.twig:9
+msgid "Poradnik"
+msgstr "Ratgeber"
+
+#: includes/devents-helpers.php:580
+msgid "Portugalski język migowy"
+msgstr "Portugiesische Gebärdensprache"
+
+#: templates/forms/password-reset.twig:85
+msgid "Potwierdź nowe hasło"
+msgstr "Neues Passwort bestätigen"
+
+#: templates/user/panel.twig:115
+msgid "Powiadomienia"
+msgstr "Benachrichtigungen"
+
+#: templates/forms/register-form.twig:148 templates/forms/accept-invite-form.twig:25
+msgid "Powtórz hasło"
+msgstr "Passwort wiederholen"
+
+#: templates/user/my-account.twig:120
+msgid "Powtórz nowe hasło"
+msgstr "Neues Passwort wiederholen"
+
+#: templates/components/report-modal.twig:14
+msgid "Powód zgłoszenia"
+msgstr "Grund der Meldung"
+
+#: templates/pages/publish-event.twig:190
+msgid "Poziom trudności tekstu:"
+msgstr "Text-Schwierigkeitsgrad:"
+
+#: templates/pages/homepage.twig:151
+msgid "Poznaj organizatorów"
+msgstr "Veranstalter kennenlernen"
+
+#: includes/devents-helpers.php:586
+msgid "Południowoafrykański język migowy"
+msgstr "Südafrikanische Gebärdensprache"
+
+#: templates/user/my-institution.twig:231
+msgid "Połącz"
+msgstr "Verbinden"
+
+#: templates/user/my-orders.twig:17
+msgid "Produkt"
+msgstr "Produkt"
+
+#: templates/components/organizer-card.twig:79
+msgid "Profil"
+msgstr "Profil"
+
+#: templates/user/my-institution.twig:23
+msgid "Profil Instytucji"
+msgstr "Institutionsprofil"
+
+#: includes/devents-helpers.php:205
+msgid "Profil instytucji"
+msgstr "Institutionsprofil"
+
+#: templates/user/my-pulpit.twig:158
+msgid "Profil instytucji i kadra"
+msgstr "Profil und Personal"
+
+#: includes/class-devents-shortcodes.php:2126
+msgid "Profilu organizatora"
+msgstr "Veranstalterprofil"
+
+#: includes/devents-helpers.php:632
+msgid "Przedprzewodnik"
+msgstr "Vorfahrt / Vorab-Guide"
+
+#: templates/pages/homepage.twig:154
+msgid "Przeglądaj"
+msgstr "Durchsuchen"
+
+#: templates/pages/homepage.twig:152
+msgid "Przeglądaj profile instytucji i obserwuj swoich ulubionych."
+msgstr "Profile durchsuchen und Favoriten folgen."
+
+#: templates/pages/organizer-search.twig:14
+msgid "Przeglądaj profile zweryfikowanych organizacji i instytucji."
+msgstr "Profile verifizierter Organisationen durchsuchen."
+
+#: templates/user/my-pulpit.twig:175
+msgid "Przeglądaj ulubione"
+msgstr "Favoriten ansehen"
+
+#: templates/user/my-favorites.twig:18
+msgid "Przeglądaj wydarzenia"
+msgstr "Events durchsuchen"
+
+#: includes/class-devents-shortcodes.php:2356
+msgid "Przejdź do panelu"
+msgstr "Zum Dashboard"
+
+#: includes/devents-helpers.php:633
+msgid "Przenośne systemy FM"
+msgstr "Mobile FM-Anlagen"
+
+#: templates/pages/organizer-search.twig:204
+msgid "Przestań obserwować"
+msgstr "Nicht mehr folgen"
+
+#: templates/pages/publish-event.twig:749
+msgid "Przycisk akcji (np. Zarejestruj się)"
+msgstr "Aktions-Button (z.B. Anmelden)"
+
+#: templates/pages/publish-event.twig:263
+msgid "Przypisz do instytucji (DLA ADMINA)"
+msgstr "Institution zuweisen (FÜR ADMIN)"
+
+#: includes/class-devents-shortcodes.php:1109
+msgid "Przywrócono wydarzenie"
+msgstr "Event wiederhergestellt"
+
+#: includes/controllers/class-devents-event-controller.php:841
+msgid "Przywrócono ze szkicu"
+msgstr "Aus Entwurf wiederhergestellt"
+
+#: includes/controllers/class-devents-event-controller.php:748
+#, php-format
+msgid "Przywrócono: %s"
+msgstr "Wiederhergestellt: %s"
+
+#: includes/devents-helpers.php:181
+msgid "Pulpit"
+msgstr "Dashboard"
+
+#: includes/devents-helpers.php:630
+msgid "Pętla indukcyjna"
+msgstr "Induktionsschleife"
+
+#: includes/i18n/class-devents-region-manager.php:287
+msgid "Region zapisany"
+msgstr "Region gespeichert"
+
+#: includes/i18n/class-devents-region-manager.php:262
+#, php-format
+msgid "Region zmieniony na: %s"
+msgstr "Region geändert auf: %s"
+
+#: includes/devents-helpers.php:325 templates/forms/register-form.twig:170 templates/forms/accept-invite-form.twig:56
+msgid "Regulamin"
+msgstr "Nutzungsbedingungen"
+
+#: templates/user/my-events.twig:82
+msgid "Resetuj"
+msgstr "Zurücksetzen"
+
+#: includes/devents-helpers.php:664
+msgid "Rodzinne"
+msgstr "Familie"
+
+#: templates/user/my-institution.twig:294
+msgid "Rola:"
+msgstr "Rolle:"
+
+#: includes/devents-helpers.php:488
+msgid "Rosyjski"
+msgstr "Russisch"
+
+#: includes/devents-helpers.php:582
+msgid "Rosyjski język migowy"
+msgstr "Russische Gebärdensprache"
+
+#: includes/devents-helpers.php:583
+msgid "Rumuński język migowy"
+msgstr "Rumänische Gebärdensprache"
+
+#: includes/devents-helpers.php:585
+msgid "Saudyjski język migowy"
+msgstr "Saudi-arabische Gebärdensprache"
+
+#: includes/controllers/class-devents-event-controller.php:820
+msgid "Sesja wygasła. Odśwież stronę."
+msgstr "Sitzung abgelaufen. Bitte Seite neu laden."
+
+#: templates/user/my-institution.twig:11
+msgid "SIEĆ WSPÓŁPRACY"
+msgstr "KOOPERATIONSNETZWERK"
+
+#: templates/user/my-pulpit.twig:209
+msgid "Sieć Główna:"
+msgstr "Hauptnetzwerk:"
+
+#: includes/devents-helpers.php:211
+msgid "Sieć jednostek"
+msgstr "Einheiten-Netzwerk"
+
+#: templates/user/my-institution.twig:206
+msgid "Sieć współpracy"
+msgstr "Kooperationsnetzwerk"
+
+#: templates/forms/accept-invite-form.twig:36
+msgid "Siła hasła:"
+msgstr "Passwortstärke:"
+
+#: templates/forms/contact-form.twig:5
+msgid "Skontaktuj się z nami"
+msgstr "Kontaktieren Sie uns"
+
+#: includes/controllers/class-devents-event-controller.php:621
+msgid "Skopiowano jako szkic!"
+msgstr "Als Entwurf kopiert!"
+
+#: includes/class-devents-shortcodes.php:1110 includes/controllers/class-devents-event-controller.php:842
+msgid "Skopiowano wydarzenie"
+msgstr "Event kopiert"
+
+#: includes/devents-helpers.php:654
+msgid "Spacer"
+msgstr "Rundgang"
+
+#: templates/components/report-modal.twig:17
+msgid "Spam lub treści wprowadzające w błąd"
+msgstr "Spam oder irreführende Inhalte"
+
+#: templates/pages/publish-event.twig:327
+msgid "Specjalna okazja / Festiwal"
+msgstr "Besonderer Anlass / Festival"
+
+#: includes/devents-helpers.php:655
+msgid "Spektakl"
+msgstr "Aufführung"
+
+#: includes/devents-helpers.php:661
+msgid "Sport"
+msgstr "Sport"
+
+#: templates/components/hero-event.twig:118
+msgid "Sposób"
+msgstr "Art / Methode"
+
+#: templates/pages/event-search.twig:147 templates/pages/publish-event.twig:292
+msgid "Sposób realizacji"
+msgstr "Durchführungsart"
+
+#: includes/devents-helpers.php:656
+msgid "Spotkanie"
+msgstr "Treffen"
+
+#: includes/class-devents-shortcodes.php:853 includes/devents-helpers.php:78
+msgid "Srebrny"
+msgstr "Silber"
+
+#: includes/devents-helpers.php:691
+msgid "Stany Zjednoczone"
+msgstr "USA"
+
+#: templates/single/event.twig:260
+msgid "Start:"
+msgstr "Start:"
+
+#: templates/user/my-events.twig:117 templates/user/my-orders.twig:19 templates/user/my-units.twig:63
+msgid "Status"
+msgstr "Status"
+
+#: templates/user/my-account.twig:144
+msgid "Strefa niebezpieczna"
+msgstr "Gefahrenzone"
+
+#: includes/class-devents-shortcodes.php:1007
+msgid "Strefa Organizatora"
+msgstr "Veranstalter-Bereich"
+
+#: templates/pages/event-search.twig:550
+msgid "Strona"
+msgstr "Seite"
+
+#: includes/devents-helpers.php:314
+msgid "Strona główna"
+msgstr "Startseite"
+
+#: templates/forms/register-form.twig:79
+msgid "Strona internetowa"
+msgstr "Webseite"
+
+#: templates/user/my-units.twig:194 templates/user/my-institution.twig:125 templates/pages/organizer-profile.twig:149
+msgid "Strona WWW"
+msgstr "Webseite"
+
+#: includes/controllers/class-devents-event-controller.php:736 includes/controllers/class-devents-event-controller.php:854
+msgid "System"
+msgstr "System"
+
+#: templates/components/event-card.twig:129 templates/components/event-list.twig:62 templates/pages/publish-event.twig:39
+msgid "Szczegóły"
+msgstr "Details"
+
+#: templates/single/news-post.twig:56
+msgid "Szczegóły wpisu"
+msgstr "Beitragsdetails"
+
+#: templates/pages/publish-event.twig:256
+msgid "Szczegóły wydarzenia"
+msgstr "Eventdetails"
+
+#: templates/user/my-events.twig:7
+msgid "SZKIC"
+msgstr "ENTWURF"
+
+#: templates/user/my-events.twig:96
+msgid "Szkice"
+msgstr "Entwürfe"
+
+#: templates/user/my-events.twig:41 templates/pages/event-search.twig:108 templates/pages/organizer-search.twig:54
+msgid "Szukaj"
+msgstr "Suchen"
+
+#: templates/user/my-pulpit.twig:171
+msgid "Szukaj nowych wydarzeń"
+msgstr "Nach neuen Events suchen"
+
+#: templates/pages/event-search.twig:91
+msgid "Szukanie..."
+msgstr "Suche..."
+
+#: includes/devents-helpers.php:587
+msgid "Szwajcarski język migowy (niemiecki)"
+msgstr "Deutschschweizer Gebärdensprache"
+
+#: includes/devents-helpers.php:590
+msgid "Szwedzki język migowy"
+msgstr "Schwedische Gebärdensprache"
+
+#: templates/user/my-pulpit.twig:130
+msgid "Szybkie akcje"
+msgstr "Schnellzugriffe"
+
+#: includes/devents-helpers.php:698
+msgid "Słowacja"
+msgstr "Slowakei"
+
+#: includes/devents-helpers.php:589
+msgid "Słowacki język migowy"
+msgstr "Slowakische Gebärdensprache"
+
+#: includes/devents-helpers.php:629
+msgid "Słuchawki wyciszające"
+msgstr "Gehörschutz / Lärmschutzkopfhörer"
+
+#: includes/class-devents-shortcodes.php:657
+msgid "Ta sekcja jest dostępna tylko dla Administratorów instytucji."
+msgstr "Dieser Bereich ist nur für Institutionsadministratoren."
+
+#: includes/class-devents-shortcodes.php:1008
+msgid "Ta sekcja jest dostępna tylko dla kont typu Organizator, Master oraz ich Moderatorów."
+msgstr "Bereich nur für Veranstalter, Master und Moderatoren."
+
+#: includes/class-devents-shortcodes.php:2097
+msgid "Ta sekcja jest dostępna tylko dla organizatorów."
+msgstr "Dieser Bereich ist nur für Veranstalter."
+
+#: includes/devents-helpers.php:593
+msgid "Tajski język migowy"
+msgstr "Thailändische Gebärdensprache"
+
+#: includes/devents-helpers.php:594
+msgid "Tajwański język migowy"
+msgstr "Taiwanische Gebärdensprache"
+
+#: includes/devents-helpers.php:665
+msgid "Targi"
+msgstr "Messe"
+
+#: templates/user/my-account.twig:60
+msgid "Te ustawienia będą domyślnie wybierane podczas przeglądania wyszukiwarki wydarzeń."
+msgstr "Diese Einstellungen werden standardmäßig in der Suche verwendet."
+
+#: templates/pages/publish-event.twig:579
+msgid "Tekst alternatywny (Alt)"
+msgstr "Alternativtext (Alt)"
+
+#: templates/components/generate-graphic.twig:91
+msgid "Tekst do social media"
+msgstr "Social-Media-Text"
+
+#: templates/forms/register-form.twig:106 templates/user/my-units.twig:244 templates/user/my-institution.twig:184
+msgid "Telefon"
+msgstr "Telefon"
+
+#: templates/forms/register-form.twig:70 templates/user/my-units.twig:183 templates/user/my-institution.twig:113
+msgid "Telefon ogólny"
+msgstr "Allgemeines Telefon"
+
+#: templates/forms/contact-form.twig:49
+msgid "Temat"
+msgstr "Betreff"
+
+#: includes/controllers/class-devents-user-controller.php:86
+msgid "Ten adres e-mail jest już zajęty."
+msgstr "Diese E-Mail-Adresse ist bereits vergeben."
+
+#: templates/single/event.twig:534
+msgid "To wydarzenie nie zostało jeszcze zweryfikowane przez administratora."
+msgstr "Dieses Event wurde noch nicht administrativ verifiziert."
+
+#: templates/single/event.twig:49
+msgid "To wydarzenie zostało dodane przez administratora."
+msgstr "Dieses Event wurde vom Administrator hinzugefügt."
+
+#: templates/single/event.twig:44
+msgid "To wydarzenie zostało dodane przez użytkownika, który nie jest organizatorem."
+msgstr "Dieses Event wurde von einem Nutzer (kein Veranstalter) hinzugefügt."
+
+#: templates/user/my-account.twig:31
+msgid "To zdjęcie będzie widoczne tylko w Twoim panelu oraz przy Twoich komentarzach."
+msgstr "Dieses Foto ist nur im Panel und bei Kommentaren sichtbar."
+
+#: templates/components/generate-graphic.twig:117
+msgid "TRANSMISJA ONLINE"
+msgstr "ONLINE-ÜBERTRAGUNG"
+
+#: templates/components/report-modal.twig:18
+msgid "Treści obraźliwe lub nienawistne"
+msgstr "Beleidigende oder hasserfüllte Inhalte"
+
+#: templates/pages/publish-event.twig:35
+msgid "Treść"
+msgstr "Inhalt"
+
+#: templates/components/order-modals.twig:145
+msgid "Treść i Wygląd"
+msgstr "Inhalt und Design"
+
+#: templates/components/review-form.twig:33
+msgid "Treść odpowiedzi"
+msgstr "Antwortinhalt"
+
+#: templates/components/hero-event.twig:25 templates/components/event-card.twig:38 templates/single/event.twig:75
+msgid "Trwa teraz"
+msgstr "Jetzt laufend"
+
+#: templates/user/my-institution.twig:25
+msgid "Tryb podglądu (Moderator)"
+msgstr "Vorschau-Modus (Moderator)"
+
+#: includes/devents-helpers.php:592
+msgid "Turecki język migowy"
+msgstr "Türkische Gebärdensprache"
+
+#: templates/user/my-pulpit.twig:15
+msgid "Twoja instytucja oczekuje na weryfikację. Wszystkie Twoje nowo dodane wydarzenia będą miały status \"szkicu\" do momentu weryfikacji."
+msgstr "Warten auf Institutionsverifizierung. Neue Events bleiben vorerst im Entwurfsstatus."
+
+#: templates/user/my-rewards.twig:73
+msgid "Twoja Nagroda"
+msgstr "Ihre Belohnung"
+
+#: templates/components/review-form.twig:18
+msgid "Twoja ocena:"
+msgstr "Ihre Bewertung:"
+
+#: templates/components/review-form.twig:5
+msgid "Twoja odpowiedź"
+msgstr "Ihre Antwort"
+
+#: templates/single/event.twig:177
+msgid "Twoja przeglądarka nie obsługuje odtwarzania wideo."
+msgstr "Ihr Browser unterstützt keine Video-Wiedergabe."
+
+#: templates/user/my-account.twig:7
+msgid "Twoje dane osobiste"
+msgstr "Ihre persönlichen Daten"
+
+#: includes/controllers/class-devents-user-controller.php:271
+msgid "Twoje dane profilowe zostały zaktualizowane."
+msgstr "Ihre Profildaten wurden aktualisiert."
+
+#: includes/class-devents-shortcodes.php:1016
+msgid "Twoje konto musi zostać zweryfikowane przez administratora."
+msgstr "Ihr Konto muss administrativ verifiziert werden."
+
+#: templates/user/my-rewards.twig:112
+msgid "Twoje Nagrody Cyfrowe"
+msgstr "Ihre digitalen Belohnungen"
+
+#: templates/user/my-account.twig:58
+msgid "Twoje preferencje (domyślne filtry)"
+msgstr "Ihre Präferenzen (Standardfilter)"
+
+#: templates/user/my-institution.twig:214
+msgid "Twoje wydarzenia są raportowane do administratora sieci."
+msgstr "Ihre Events werden an den Netzwerkadministrator gemeldet."
+
+#: templates/forms/contact-form.twig:38
+msgid "Twój e-mail"
+msgstr "Ihre E-Mail"
+
+#: templates/user/my-units.twig:15
+msgid "Twój Kod Sieci:"
+msgstr "Ihr Netzwerkcode:"
+
+#: templates/user/my-account.twig:28
+msgid "Twój osobisty awatar"
+msgstr "Ihr persönlicher Avatar"
+
+#: templates/user/my-pulpit.twig:187
+msgid "Twój profil"
+msgstr "Ihr Profil"
+
+#: templates/user/panel.twig:98
+msgid "Twój profil instytucji jest niekompletny!"
+msgstr "Ihr Institutionsprofil ist unvollständig!"
+
+#: includes/devents-helpers.php:636
+msgid "Tyflografika i materiały dotykowe"
+msgstr "Tastgrafiken und taktile Materialien"
+
+#: templates/pages/event-search.twig:333
+msgid "Tylko trwające teraz"
+msgstr "Nur jetzt laufende"
+
+#: templates/user/my-events.twig:78
+msgid "Tylko wyróżnione"
+msgstr "Nur hervorgehobene"
+
+#: templates/user/my-units.twig:301 templates/user/my-institution.twig:275
+msgid "Tylko zarządzanie ofertami"
+msgstr "Nur Angebotsverwaltung"
+
+#: templates/single/news-post.twig:61
+msgid "Typ:"
+msgstr "Typ:"
+
+#: templates/user/my-events.twig:115 templates/pages/publish-event.twig:148 templates/pages/publish-event.twig:214 templates/pages/publish-event.twig:242
+msgid "Tytuł wydarzenia"
+msgstr "Event-Titel"
+
+#: includes/devents-helpers.php:635
+msgid "Tłumaczenie na język foniczny"
+msgstr "Übersetzung in Lautsprache"
+
+#: includes/devents-helpers.php:634
+msgid "Tłumaczenie na język migowy"
+msgstr "Übersetzung in Gebärdensprache"
+
+#: includes/class-devents-shortcodes.php:802 templates/single/news-post.twig:8 templates/pages/news-list.twig:10
+msgid "Wyróżnienie"
+msgstr "Hervorhebung"
+
+#: templates/forms/register-form.twig:24 templates/user/panel.twig:29
+msgid "Uczestnik"
+msgstr "Teilnehmer"
+
+#: templates/pages/organizer-profile.twig:209
+msgid "Udostępnij"
+msgstr "Teilen"
+
+#: includes/devents-helpers.php:696
+msgid "Ukraina"
+msgstr "Ukraine"
+
+#: includes/devents-helpers.php:483
+msgid "Ukraiński"
+msgstr "Ukrainisch"
+
+#: includes/devents-helpers.php:596
+msgid "Ukraiński język migowy"
+msgstr "Ukrainische Gebärdensprache"
+
+#: templates/user/my-units.twig:206 templates/user/my-institution.twig:145
+msgid "Ulica"
+msgstr "Straße"
+
+#: includes/devents-helpers.php:223 templates/user/my-pulpit.twig:103
+msgid "Ulubione wydarzenia"
+msgstr "Favorisierte Events"
+
+#: templates/user/my-units.twig:288
+msgid "Uprawnienia pracownika:"
+msgstr "Mitarbeiterrechte:"
+
+#: templates/user/my-institution.twig:262
+msgid "Uprawnienia:"
+msgstr "Berechtigungen:"
+
+#: templates/forms/accept-invite-form.twig:6
+msgid "Ustaw hasło, aby aktywować swoje konto i rozpocząć pracę."
+msgstr "Passwort festlegen, um das Konto zu aktivieren."
+
+#: templates/forms/password-reset.twig:63
+msgid "Ustaw nowe hasło"
+msgstr "Neues Passwort festlegen"
+
+#: includes/devents-helpers.php:241
+msgid "Ustawienia konta"
+msgstr "Kontoeinstellungen"
+
+#: templates/user/my-account.twig:147
+#, php-format
+msgid "Usunięcie konta jest operacją %snieodwracalną%s. Wszystkie Twoje dane zostaną trwale usunięte z systemu."
+msgstr "Kontolöschung ist %sunwiderruflich%s. Alle Daten werden dauerhaft entfernt."
+
+#: includes/controllers/class-devents-event-controller.php:746
+#, php-format
+msgid "Usunięto: %s"
+msgstr "Gelöscht: %s"
+
+#: includes/class-devents-assets.php:126
+msgid "Usuwanie..."
+msgstr "Löschen..."
+
+#: templates/components/reviews.twig:58
+msgid "Usuń"
+msgstr "Löschen"
+
+#: templates/pages/event-search.twig:380
+msgid "Usuń filtr daty"
+msgstr "Datumsfilter entfernen"
+
+#: templates/pages/event-search.twig:373
+msgid "Usuń filtr wiekowy"
+msgstr "Altersfilter entfernen"
+
+#: templates/pages/event-search.twig:351 templates/pages/event-search.twig:359 templates/pages/event-search.twig:366 templates/pages/event-search.twig:398 templates/pages/event-search.twig:411 templates/pages/organizer-search.twig:75
+msgid "Usuń filtr:"
+msgstr "Filter entfernen:"
+
+#: templates/pages/event-search.twig:389
+msgid "Usuń filtr: tylko trwające"
+msgstr "Filter entfernen: nur laufende"
+
+#: includes/class-devents-assets.php:129 templates/user/my-account.twig:160
+msgid "Usuń konto na zawsze"
+msgstr "Konto dauerhaft löschen"
+
+#: templates/user/my-institution.twig:50
+msgid "Usuń logo"
+msgstr "Logo entfernen"
+
+#: includes/class-devents-shortcodes.php:1106 includes/controllers/class-devents-event-controller.php:838
+msgid "Utworzono wydarzenie"
+msgstr "Event erstellt"
+
+#: templates/user/my-units.twig:253
+msgid "Utwórz i dodaj jednostkę"
+msgstr "Einheit erstellen und hinzufügen"
+
+#: templates/forms/register-form.twig:179
+msgid "Utwórz konto"
+msgstr "Konto erstellen"
+
+#: templates/forms/register-form.twig:5
+msgid "Utwórz nowe konto"
+msgstr "Neues Konto erstellen"
+
+#: includes/class-devents-assets.php:125
+msgid "UWAGA! Czy na pewno chcesz TRWALE USUNĄĆ swoje konto? Tej operacji nie można cofnąć."
+msgstr "ACHTUNG! Konto wirklich DAUERHAFT LÖSCHEN? Dies kann nicht rückgängig gemacht werden."
+
+#: templates/user/my-institution.twig:139
+msgid "Uwaga:"
+msgstr "Achtung:"
+
+#: templates/user/panel.twig:102
+msgid "Uzupełnij profil teraz"
+msgstr "Profil jetzt vervollständigen"
+
+#: templates/components/order-modals.twig:106
+msgid "Użyj"
+msgstr "Verwenden"
+
+#: includes/class-devents-shortcodes.php:848
+msgid "Użytkownik"
+msgstr "Benutzer"
+
+#: includes/class-devents-shortcodes.php:2413
+msgid "Użytkownik o tym adresie e-mail już istnieje."
+msgstr "Ein Benutzer mit dieser E-Mail existiert bereits."
+
+#: includes/devents-helpers.php:631
+msgid "W języku migowym"
+msgstr "In Gebärdensprache"
+
+#: templates/user/my-orders.twig:6
+msgid "W REALIZACJI"
+msgstr "IN BEARBEITUNG"
+
+#: templates/user/my-orders.twig:63
+msgid "W realizacji"
+msgstr "In Bearbeitung"
+
+#: includes/devents-helpers.php:657
+msgid "Warsztaty"
+msgstr "Workshop"
+
+#: templates/pages/homepage.twig:40
+msgid "Warto zobaczyć"
+msgstr "Sehenswert"
+
+#: templates/components/hero-event.twig:70
+msgid "Wejście wolne"
+msgstr "Eintritt frei"
+
+#: includes/class-devents-shortcodes.php:1053
+msgid "Wejściówka"
+msgstr "Einlasskarte"
+
+#: includes/devents-helpers.php:599
+msgid "Wenezuelski język migowy"
+msgstr "Venezolanische Gebärdensprache"
+
+#: includes/devents-helpers.php:662
+msgid "Wernisaż/Finisaż"
+msgstr "Vernissage/Finissage"
+
+#: includes/devents-helpers.php:33
+msgid "Wersja robocza"
+msgstr "Entwurf"
+
+#: templates/forms/contact-form.twig:56
+msgid "Wiadomość"
+msgstr "Nachricht"
+
+#: templates/user/my-units.twig:150 templates/user/my-institution.twig:74
+msgid "Wideo wizytówka w języku migowym (PJM)"
+msgstr "Video-Visitenkarte (Gebärdensprache)"
+
+#: templates/pages/event-search.twig:465
+msgid "Widok listy"
+msgstr "Listenansicht"
+
+#: templates/pages/event-search.twig:457
+msgid "Widok siatki"
+msgstr "Gitteransicht"
+
+#: templates/pages/event-search.twig:451
+msgid "Widok wyników"
+msgstr "Ergebnisansicht"
+
+#: templates/pages/event-search.twig:159
+msgid "Wiek uczestnika"
+msgstr "Alter des Teilnehmers"
+
+#: includes/handlers/graphic-handler.php:227
+msgid "Wiek uczestników"
+msgstr "Alter der Teilnehmer"
+
+#: includes/devents-helpers.php:690
+msgid "Wielka Brytania"
+msgstr "Großbritannien"
+
+#: templates/forms/register-form.twig:160 templates/forms/accept-invite-form.twig:43 templates/user/my-account.twig:129
+msgid "Wielka litera"
+msgstr "Großbuchstabe"
+
+#: templates/pages/homepage.twig:22
+msgid "Witaj w DEvents"
+msgstr "Willkommen bei DEvents"
+
+#: templates/forms/accept-invite-form.twig:5
+msgid "Witaj w zespole!"
+msgstr "Willkommen im Team!"
+
+#: templates/pages/organizer-profile.twig:257
+msgid "Wizytówka PJM"
+msgstr "Gebärden-Visitenkarte"
+
+#: includes/handlers/graphic-handler.php:237 templates/single/event.twig:307
+msgid "Więcej informacji"
+msgstr "Mehr Informationen"
+
+#: templates/components/lang-switcher.twig:73
+msgid "wkrótce"
+msgstr "demnächst"
+
+#: templates/pages/publish-event.twig:508
+msgid "Wpisz adres i wybierz go z listy podpowiedzi."
+msgstr "Adresse eingeben und aus der Liste wählen."
+
+#: templates/user/my-account.twig:154
+msgid "Wpisz hasło, aby potwierdzić usunięcie konta"
+msgstr "Passwort zur Löschbestätigung eingeben"
+
+#: includes/class-devents-assets.php:124
+msgid "Wpisz hasło, aby potwierdzić."
+msgstr "Passwort zur Bestätigung eingeben."
+
+#: templates/forms/password-reset.twig:30
+msgid "Wpisz kod weryfikacyjny"
+msgstr "Verifizierungscode eingeben"
+
+#: templates/components/order-modals.twig:147
+msgid "Wpisz treść zaproszenia"
+msgstr "Einladungstext eingeben"
+
+#: templates/components/order-modals.twig:66 templates/components/order-modals.twig:115 templates/components/order-modals.twig:184 templates/components/order-modals.twig:216
+msgid "Wróć"
+msgstr "Zurück"
+
+#: includes/devents-helpers.php:637
+msgid "Wsparcie dla osób w spektrum autyzmu"
+msgstr "Unterstützung für Personen im Autismus-Spektrum"
+
+#: includes/devents-helpers.php:638
+msgid "Wsparcie dla osób z niepełnosprawnością intelektualną"
+msgstr "Unterstützung für Personen mit geistiger Behinderung"
+
+#: includes/controllers/class-devents-event-controller.php:492
+msgid "Współpracownik"
+msgstr "Mitarbeiter / Kooperationspartner"
+
+#: includes/controllers/class-devents-event-controller.php:193
+msgid "Wstęp wolny"
+msgstr "Eintritt frei"
+
+#: templates/user/my-pulpit.twig:30
+msgid "Wszyscy Użytkownicy"
+msgstr "Alle Benutzer"
+
+#: templates/user/my-events.twig:48 templates/user/my-events.twig:93
+msgid "Wszystkie"
+msgstr "Alle"
+
+#: templates/pages/event-search.twig:138
+msgid "Wszystkie kategorie"
+msgstr "Alle Kategorien"
+
+#: templates/pages/event-search.twig:177
+msgid "Wszystkie okazje"
+msgstr "Alle Anlässe"
+
+#: templates/user/my-events.twig:58
+msgid "Wszystkie opcje"
+msgstr "Alle Optionen"
+
+#. Description of the plugin
+msgid "Wtyczka do wydarzeń stworzona dedykowanie dla DEvents"
+msgstr "Event-Plugin speziell für DEvents erstellt"
+
+#: templates/pages/publish-event.twig:283 templates/pages/publish-event.twig:296
+msgid "Wybierz"
+msgstr "Wählen"
+
+#: templates/pages/publish-event.twig:354
+msgid "Wybierz dostępne rozwiązania wspierające dostępność wydarzenia."
+msgstr "Verfügbare Barrierefreiheits-Optionen wählen."
+
+#: templates/user/my-units.twig:319
+msgid "Wybierz jednostkę, aby zobaczyć zespół."
+msgstr "Einheit wählen, um das Team zu sehen."
+
+#: templates/pages/publish-event.twig:624 templates/pages/publish-event.twig:660
+msgid "Wybierz język migowy"
+msgstr "Gebärdensprache wählen"
+
+#: templates/pages/publish-event.twig:449
+msgid "Wybierz język migowy:"
+msgstr "Gebärdensprache wählen:"
+
+#: templates/pages/publish-event.twig:400
+msgid "Wybierz języki:"
+msgstr "Sprachen wählen:"
+
+#: templates/components/order-modals.twig:20
+msgid "Wybierz okres wyróżnienia"
+msgstr "Hervorhebungszeitraum wählen"
+
+#: templates/components/report-modal.twig:16
+msgid "Wybierz powód"
+msgstr "Grund wählen"
+
+#: templates/forms/register-form.twig:18
+msgid "Wybierz typ konta"
+msgstr "Kontotyp wählen"
+
+#: templates/forms/register-form.twig:6
+msgid "Wybierz typ konta, aby rozpocząć"
+msgstr "Kontotyp zum Starten wählen"
+
+#: templates/pages/event-search.twig:422 templates/pages/organizer-search.twig:82
+msgid "Wyczyść wszystkie filtry"
+msgstr "Alle Filter löschen"
+
+#: includes/devents-helpers.php:316 templates/single/event.twig:23
+msgid "Wydarzenia"
+msgstr "Events"
+
+#: templates/user/my-pulpit.twig:44
+msgid "Wydarzenia (Globalnie)"
+msgstr "Events (global)"
+
+#: templates/user/my-events.twig:107
+msgid "Wydarzenia Aktualne"
+msgstr "Aktuelle Events"
+
+#. Name of the plugin
+msgid "Wydarzenia DEvents"
+msgstr "DEvents Events"
+
+#: includes/class-devents-shortcodes.php:2131
+msgid "Wydarzenia:"
+msgstr "Events:"
+
+#: includes/devents-helpers.php:315
+msgid "Wydarzenie"
+msgstr "Event"
+
+#: templates/pages/publish-event.twig:516
+msgid "Wydarzenie całodniowe"
+msgstr "Ganztägiges Event"
+
+#: includes/controllers/class-devents-event-controller.php:79 includes/controllers/class-devents-event-controller.php:645
+msgid "Wydarzenie nie istnieje."
+msgstr "Event existiert nicht."
+
+#: includes/handlers/graphic-handler.php:54
+msgid "Wydarzenie o ID %d nie istnieje."
+msgstr "Event mit ID %d existiert nicht."
+
+#: includes/controllers/class-devents-event-controller.php:694
+msgid "Wydarzenie zostało odwołane."
+msgstr "Event wurde abgesagt."
+
+#: includes/controllers/class-devents-event-controller.php:721
+msgid "Wydarzenie zostało przywrócone jako szkic."
+msgstr "Event als Entwurf wiederhergestellt."
+
+#: includes/controllers/class-devents-event-controller.php:667
+msgid "Wydarzenie zostało trwale usunięte."
+msgstr "Event wurde dauerhaft gelöscht."
+
+#: includes/controllers/class-devents-event-controller.php:585
+msgid "Wydarzenie źródłowe nie istnieje."
+msgstr "Ursprungsevent existiert nicht."
+
+#: templates/pages/organizer-profile.twig:84 templates/pages/organizer-search.twig:128
+msgid "wydarzeń"
+msgstr "Events"
+
+#: templates/user/my-institution.twig:139
+msgid "Wykryto starszy format adresu. Prosimy o przepisanie go do poniższych pól."
+msgstr "Altes Adressformat erkannt. Bitte in die neuen Felder übertragen."
+
+#: includes/devents-helpers.php:658
+msgid "Wykład"
+msgstr "Vortrag"
+
+#: includes/devents-helpers.php:282 includes/devents-helpers.php:330 templates/user/panel.twig:53
+msgid "Wyloguj się"
+msgstr "Abmelden"
+
+#: templates/pages/event-search.twig:210
+msgid "Wymagana dostępność"
+msgstr "Erforderliche Barrierefreiheit"
+
+#: templates/user/my-rewards.twig:41
+msgid "Wymagane:"
+msgstr "Erforderlich:"
+
+#: templates/user/my-units.twig:117
+msgid "Wypełnij dane, aby utworzyć nową placówkę w Twojej sieci."
+msgstr "Daten ausfüllen, um neue Einrichtung im Netzwerk zu erstellen."
+
+#: includes/controllers/class-devents-user-controller.php:83
+msgid "Wypełnij wszystkie wymagane pola."
+msgstr "Bitte alle Pflichtfelder ausfüllen."
+
+#: includes/controllers/class-devents-event-controller.php:123
+msgid "Wypełnij wymagane pola (Tytuł, Kategoria, Data)."
+msgstr "Pflichtfelder ausfüllen (Titel, Kategorie, Datum)."
+
+#: templates/forms/contact-form.twig:71
+#, php-format
+msgid "Wyrażam zgodę na przetwarzanie moich danych osobowych w celu obsługi zapytania. Zapoznałem się z %sPolityką Prywatności%s."
+msgstr "Ich stimme der Datenverarbeitung zu. Ich habe die %sDatenschutzerklärung%s gelesen."
+
+#: templates/user/my-events.twig:177
+msgid "Wyróżnienie niedostępne"
+msgstr "Hervorhebung nicht verfügbar"
+
+#: templates/user/my-events.twig:180
+msgid "Wyróżnij"
+msgstr "Hervorheben"
+
+#: includes/devents-helpers.php:659
+msgid "Wystawa"
+msgstr "Ausstellung"
+
+#: templates/user/my-pulpit.twig:117
+msgid "Wystawione opinie"
+msgstr "Abgegebene Bewertungen"
+
+#: includes/class-devents-assets.php:116
+msgid "Wystąpił błąd podczas zapisu."
+msgstr "Fehler beim Speichern."
+
+#: includes/class-devents-assets.php:117
+msgid "Wystąpił błąd połączenia z serwerem."
+msgstr "Fehler bei der Verbindung zum Server."
+
+#: includes/devents-helpers.php:321 templates/pages/organizer-search.twig:13
+msgid "Wyszukiwarka Organizatorów"
+msgstr "Veranstalter-Suche"
+
+#: includes/devents-helpers.php:320
+msgid "Wyszukiwarka organizatorów"
+msgstr "Veranstaltersuche"
+
+#: includes/devents-helpers.php:318 templates/pages/event-search.twig:45
+msgid "Wyszukiwarka Wydarzeń"
+msgstr "Event-Suche"
+
+#: includes/devents-helpers.php:317
+msgid "Wyszukiwarka wydarzeń"
+msgstr "Eventsuche"
+
+#: templates/user/my-institution.twig:223
+msgid "Wysłano prośbę do:"
+msgstr "Anfrage gesendet an:"
+
+#: includes/controllers/class-devents-user-controller.php:344
+#, php-format
+msgid "Wysłano prośbę o przyznanie nagrody za odznakę: %s"
+msgstr "Antrag auf Belohnung für Badge gestellt: %s"
+
+#: templates/components/review-form.twig:49
+msgid "Wyślij"
+msgstr "Senden"
+
+#: templates/forms/password-reset.twig:21
+msgid "Wyślij kod"
+msgstr "Code senden"
+
+#: templates/forms/contact-form.twig:81
+msgid "Wyślij wiadomość"
+msgstr "Nachricht senden"
+
+#: templates/user/my-institution.twig:281
+msgid "Wyślij zaproszenie"
+msgstr "Einladung senden"
+
+#: templates/user/my-units.twig:312
+msgid "Wyślij zaproszenie do zespołu"
+msgstr "Teameinladung senden"
+
+#: templates/components/report-modal.twig:26
+msgid "Wyślij zgłoszenie"
+msgstr "Meldung senden"
+
+#: includes/devents-helpers.php:550
+msgid "Węgierski język migowy"
+msgstr "Ungarische Gebärdensprache"
+
+#: includes/devents-helpers.php:694
+msgid "Włochy"
+msgstr "Italien"
+
+#: includes/devents-helpers.php:487
+msgid "Włoski"
+msgstr "Italienisch"
+
+#: includes/devents-helpers.php:556
+msgid "Włoski język migowy"
+msgstr "Italienische Gebärdensprache"
+
+#: templates/user/my-events.twig:97
+msgid "Zakończone"
+msgstr "Beendet"
+
+#: templates/pages/event-search.twig:190
+msgid "Zakres dat"
+msgstr "Zeitraum"
+
+#: includes/controllers/class-devents-event-controller.php:839
+msgid "Zaktualizowano dane"
+msgstr "Daten aktualisiert"
+
+#: includes/class-devents-shortcodes.php:1107
+msgid "Zaktualizowano wydarzenie"
+msgstr "Event aktualisiert"
+
+#: includes/controllers/class-devents-event-controller.php:345
+msgid "Zaktualizowano!"
+msgstr "Aktualisiert!"
+
+#: includes/controllers/class-devents-event-controller.php:549
+#, php-format
+msgid "Zaktualizowałeś: %s"
+msgstr "Sie haben %s aktualisiert"
+
+#: templates/pages/publish-event.twig:810
+msgid "Zaktualizuj"
+msgstr "Aktualisieren"
+
+#: templates/user/my-account.twig:32
+msgid "Zalecany format:"
+msgstr "Empfohlenes Format:"
+
+#: includes/controllers/class-devents-user-controller.php:63
+msgid "Zalogowano pomyślnie."
+msgstr "Erfolgreich angemeldet."
+
+#: templates/components/reviews.twig:18
+msgid "zalogowany"
+msgstr "angemeldet"
+
+#: includes/devents-helpers.php:287 includes/devents-helpers.php:328 templates/forms/login-form.twig:53
+msgid "Zaloguj się"
+msgstr "Anmelden"
+
+#: templates/forms/login-form.twig:10
+msgid "Zaloguj się na swoje konto"
+msgstr "In Ihr Konto einloggen"
+
+#: templates/components/order-modals.twig:79 templates/components/order-modals.twig:196 templates/components/order-billing-form.twig:5
+msgid "Zamawiający"
+msgstr "Bestellende Person"
+
+#: includes/devents-helpers.php:607
+msgid "Zambijski język migowy"
+msgstr "Sambische Gebärdensprache"
+
+#: templates/user/my-events.twig:192
+msgid "Zamów PJM"
+msgstr "Gebärdensprache bestellen"
+
+#: includes/devents-helpers.php:199
+msgid "Zamówienia"
+msgstr "Bestellungen"
+
+#: templates/forms/login-form.twig:42
+msgid "Zapamiętaj mnie"
+msgstr "Angemeldet bleiben"
+
+#: includes/i18n/class-devents-region-manager.php:286
+msgid "Zapisuję..."
+msgstr "Speichere..."
+
+#: includes/class-devents-assets.php:114
+msgid "Zapisywanie..."
+msgstr "Speichere..."
+
+#: templates/forms/password-reset.twig:90
+msgid "Zapisz nowe hasło"
+msgstr "Neues Passwort speichern"
+
+#: templates/pages/publish-event.twig:806
+msgid "Zapisz szkic"
+msgstr "Entwurf speichern"
+
+#: templates/user/my-institution.twig:194
+msgid "Zapisz zmiany"
+msgstr "Änderungen speichern"
+
+#: templates/user/my-account.twig:99
+msgid "Zapisz zmiany w profilu"
+msgstr "Profil speichern"
+
+#: includes/class-devents-shortcodes.php:2405
+msgid "Zaproszenie nie istnieje lub zostało już wykorzystane."
+msgstr "Einladung existiert nicht oder wurde bereits genutzt."
+
+#: templates/single/event.twig:133
+msgid "Zaproszenie wideo"
+msgstr "Video-Einladung"
+
+#: templates/user/my-units.twig:274
+msgid "Zaproś nowego pracownika"
+msgstr "Neuen Mitarbeiter einladen"
+
+#: templates/components/order-modals.twig:117
+msgid "ZAPŁAĆ I WYRÓŻNIJ"
+msgstr "BEZAHLEN & HERVORHEBEN"
+
+#: templates/components/order-modals.twig:218
+msgid "ZAPŁAĆ I ZAMÓW"
+msgstr "BEZAHLEN & BESTELLEN"
+
+#: templates/user/my-pulpit.twig:37
+msgid "Zarejestrowane Instytucje"
+msgstr "Registrierte Institutionen"
+
+#: includes/devents-helpers.php:292 includes/devents-helpers.php:329 templates/forms/login-form.twig:64
+msgid "Zarejestruj się"
+msgstr "Registrieren"
+
+#: templates/user/my-pulpit.twig:223
+msgid "Zarządzaj kontem"
+msgstr "Konto verwalten"
+
+#: templates/user/my-pulpit.twig:136
+msgid "Zarządzaj platformą"
+msgstr "Plattform verwalten"
+
+#: templates/user/my-pulpit.twig:164
+msgid "Zarządzaj siecią (jednostki)"
+msgstr "Netzwerk verwalten (Einheiten)"
+
+#: templates/user/my-units.twig:6
+msgid "Zarządzaj siecią swoich placówek i ich uprawnieniami."
+msgstr "Einrichtungen und Rechte verwalten."
+
+#: includes/devents-helpers.php:193 templates/user/my-pulpit.twig:154
+msgid "Zarządzaj wydarzeniami"
+msgstr "Events verwalten"
+
+#: templates/user/my-pulpit.twig:84
+msgid "Zarządzane Jednostki"
+msgstr "Verwaltete Einheiten"
+
+#: templates/user/my-units.twig:268
+msgid "Zarządzanie kadrą jednostki"
+msgstr "Personalverwaltung der Einheit"
+
+#: templates/user/my-units.twig:294
+msgid "Zarządzanie profilem i kadrą"
+msgstr "Profil- und Personalverwaltung"
+
+#: templates/user/my-institution.twig:243
+msgid "Zarządzanie Zespołem"
+msgstr "Teamverwaltung"
+
+#: templates/forms/register-form.twig:115
+msgid "Zdjęcie profilowe"
+msgstr "Profilbild"
+
+#: templates/user/my-rewards.twig:64
+msgid "Zdobyto"
+msgstr "Erhalten"
+
+#: includes/controllers/class-devents-user-controller.php:345
+msgid "Zgłoszenie zostało wysłane do administratora."
+msgstr "Meldung an den Administrator gesendet."
+
+#: templates/single/event.twig:457
+msgid "Zgłoś naruszenie"
+msgstr "Verstoß melden"
+
+#: templates/components/report-modal.twig:5
+msgid "Zgłoś nieprawidłowość"
+msgstr "Problem melden"
+
+#: includes/devents-helpers.php:606
+msgid "Zimbabwiański język migowy"
+msgstr "Simbabwische Gebärdensprache"
+
+#: templates/user/my-account.twig:107
+msgid "Zmiana hasła"
+msgstr "Passwort ändern"
+
+#: templates/components/lang-switcher.twig:97
+msgid "Zmiana języka przeładuje stronę."
+msgstr "Sprachwechsel lädt die Seite neu."
+
+#: includes/controllers/class-devents-user-controller.php:274
+msgid "Zmiany zostały zapisane pomyślnie."
+msgstr "Änderungen erfolgreich gespeichert."
+
+#: includes/class-devents-assets.php:119
+msgid "Zmienianie..."
+msgstr "Ändern..."
+
+#: includes/class-devents-assets.php:123 templates/user/my-account.twig:136
+msgid "Zmień hasło"
+msgstr "Passwort ändern"
+
+#: templates/user/my-institution.twig:44
+msgid "Zmień logo"
+msgstr "Logo ändern"
+
+#: includes/i18n/class-devents-region-manager.php:285
+msgid "Zmień region"
+msgstr "Region ändern"
+
+#: includes/class-devents-shortcodes.php:1010
+msgid "Zmień typ konta w ustawieniach"
+msgstr "Kontotyp in den Einstellungen ändern"
+
+#: templates/pages/event-search.twig:46
+msgid "Znajdź interesujące Cię wydarzenia i sprawdź ich dostępność."
+msgstr "Events finden und Barrierefreiheit prüfen."
+
+#: templates/user/my-subscriptions.twig:18
+msgid "Znajdź organizatorów"
+msgstr "Veranstalter finden"
+
+#: templates/pages/publish-event.twig:162 templates/pages/publish-event.twig:179 templates/pages/publish-event.twig:590 templates/pages/publish-event.twig:794
+msgid "znaków"
+msgstr "Zeichen"
+
+#: templates/components/hero-event.twig:66
+msgid "Zobacz szczegóły"
+msgstr "Details ansehen"
+
+#: templates/pages/homepage.twig:110
+msgid "Zobacz wszystkie wydarzenia"
+msgstr "Alle Events ansehen"
+
+#: templates/components/review-form.twig:5
+msgid "Zostaw swoją opinię"
+msgstr "Bewertung abgeben"
+
+#: templates/user/my-orders.twig:7
+msgid "ZREALIZOWANE"
+msgstr "ABGESCHLOSSEN"
+
+#: templates/forms/password-reset.twig:9
+msgid "Zresetuj hasło"
+msgstr "Passwort zurücksetzen"
+
+#: includes/devents-helpers.php:32
+msgid "Zweryfikowany"
+msgstr "Verifiziert"
+
+#: templates/forms/password-reset.twig:54
+msgid "Zweryfikuj kod"
+msgstr "Code verifizieren"
+
+#: includes/devents-helpers.php:660
+msgid "Zwiedzanie"
+msgstr "Besichtigung"
+
+#: templates/components/event-card.twig:30 templates/components/event-list.twig:55 templates/components/order-modals.twig:28 templates/components/order-modals.twig:38 templates/components/order-modals.twig:49 templates/components/order-modals.twig:98
+#: templates/components/order-modals.twig:207 templates/components/order-modals.twig:211 templates/user/my-orders.twig:45
+msgid "zł"
+msgstr "PLN"
+
+#: includes/class-devents-shortcodes.php:854 includes/devents-helpers.php:76
+msgid "Złoty"
+msgstr "Gold"
+
+#: includes/devents-helpers.php:624
+msgid "Łatwy tekst (ETR)"
+msgstr "Leichte Sprache (ETR)"
+
+#: includes/devents-helpers.php:567
+msgid "Łotewski język migowy"
+msgstr "Lettische Gebärdensprache"
+
+#: templates/user/my-reviews.twig:20
+msgid "Łącznie opinii"
+msgstr "Bewertungen insgesamt"
+
+#: templates/pages/organizer-search.twig:183
+msgid "Łącznie wydarzeń"
+msgstr "Events insgesamt"
+
+#: templates/user/my-pulpit.twig:68
+msgid "Łącznie wyświetleń"
+msgstr "Aufrufe insgesamt"
+
+#: templates/pages/homepage.twig:159
+msgid "Śledź nas"
+msgstr "Folgen Sie uns"
+
+#: templates/user/my-pulpit.twig:75 templates/user/my-reviews.twig:11
+msgid "Średnia ocena"
+msgstr "Durchschnittsbewertung"

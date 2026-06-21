@@ -1,0 +1,63 @@
+{# templates/components/review-form.twig — v14.0 (Pytania do organizatora)
+   Bez gwiazdek/ocen. Główny formularz = pytanie do organizatora; odpowiadać mogą zalogowani.
+   Niezalogowani pytają anonimowo; zalogowani mogą zaznaczyć „jako anonim". #}
+<div class="review-form-wrapper" id="review-form-wrapper-{{ parent_id|default(0) }}" {% if parent_id > 0 %}style="display:none;"{% endif %}>
+
+    <h4>
+        {{ parent_id > 0 ? __('Twoja odpowiedź', 'devents') : __('Zadaj pytanie organizatorowi', 'devents') }}
+    </h4>
+
+    <form class="devents-form review-form" data-parent-id="{{ parent_id|default(0) }}">
+        {# Ukryte pola wymagane przez backend #}
+        <input type="hidden" name="item_id" value="{{ item.id }}">
+        <input type="hidden" name="item_type" value="{{ item_type }}">
+        <input type="hidden" name="parent_id" value="{{ parent_id|default(0) }}">
+        <input type="hidden" name="security" value="{{ review_nonce }}">
+
+        {# Pole tekstowe (pytanie / odpowiedź) #}
+        <div class="form-group">
+            <label for="comment-{{ parent_id|default(0) }}" class="form-label">
+                {{ parent_id > 0 ? __('Treść odpowiedzi', 'devents') : __('Twoje pytanie', 'devents') }}
+                <span class="form-required-field" aria-hidden="true">*</span>
+            </label>
+            <textarea
+                id="comment-{{ parent_id|default(0) }}"
+                name="comment"
+                class="form-textarea"
+                rows="4"
+                maxlength="500"
+                required
+                aria-describedby="char-counter-{{ parent_id|default(0) }}"
+                placeholder="{{ parent_id > 0 ? __('Napisz odpowiedź...', 'devents') : __('O co chcesz zapytać organizatora?', 'devents') }}"
+            ></textarea>
+            <div class="char-counter" id="char-counter-{{ parent_id|default(0) }}" aria-live="polite">500</div>
+        </div>
+
+        {# Anonimowość — tylko dla głównego pytania #}
+        {% if parent_id == 0 %}
+            {% if is_user_logged_in %}
+                <div class="form-group form-checkbox-group">
+                    <label>
+                        <input type="checkbox" name="is_anonymous" value="1">
+                        <span>{{ __('Zadaj pytanie jako anonim', 'devents') }}</span>
+                    </label>
+                </div>
+            {% else %}
+                <input type="hidden" name="is_anonymous" value="1">
+                <p class="add-form-input-info">{{ __('Pytasz jako osoba niezalogowana — Twoje pytanie pojawi się jako „Anonim".', 'devents') }}</p>
+            {% endif %}
+        {% endif %}
+
+        {# Przyciski #}
+        <div class="form-group form-actions">
+            <button type="submit" class="btn btn--primary">{{ parent_id > 0 ? __('Wyślij odpowiedź', 'devents') : __('Wyślij pytanie', 'devents') }}</button>
+
+            {% if parent_id > 0 %}
+                <button type="button" class="btn btn--secondary btn-cancel-reply">{{ __('Anuluj', 'devents') }}</button>
+            {% endif %}
+        </div>
+
+        {# Kontener na komunikaty #}
+        <div class="review-form-messages" style="margin-top: 1rem;" role="status" aria-live="polite"></div>
+    </form>
+</div>

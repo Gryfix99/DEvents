@@ -1,0 +1,81 @@
+{# templates/admin/tabs/contact.twig — Panel kontaktu: konwersacje z formularza #}
+<div class="contact-admin">
+    <div class="admin-card">
+        <div class="contact-admin__head">
+            <h3 class="contact-admin__title">
+                <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+                Wiadomości z formularza kontaktowego
+            </h3>
+            {% if data.contact_unread|default(0) > 0 %}
+                <span class="search-toolbar__badge" aria-label="Nieprzeczytane: {{ data.contact_unread }}">
+                    {{ data.contact_unread }} nowych
+                </span>
+            {% endif %}
+        </div>
+        <p class="contact-admin__desc">Cała korespondencja w jednym miejscu. Odpowiedź wysyłana jest e-mailem do nadawcy i zapisywana w wątku.</p>
+
+        {% if data.contact_threads|default([]) is empty %}
+            <div class="empty-state-reviews">
+                <p>Brak wiadomości kontaktowych.</p>
+            </div>
+        {% else %}
+            <div class="contact-threads">
+                {% for thread in data.contact_threads %}
+                    <details class="contact-thread {{ thread.is_read ? '' : 'contact-thread--unread' }}">
+                        <summary class="contact-thread__summary">
+                            {% if not thread.is_read %}
+                                <span class="contact-thread__dot" aria-hidden="true"></span>
+                            {% endif %}
+                            <span class="contact-thread__from">{{ thread.name }}</span>
+                            <span class="contact-thread__subject">{{ thread.subject }}</span>
+                            <span class="contact-thread__date">{{ thread.created_at_fmt }}</span>
+                            {% if thread.replies|default([])|length > 0 %}
+                                <span class="contact-thread__count" title="Liczba odpowiedzi">{{ thread.replies|length }}</span>
+                            {% endif %}
+                        </summary>
+
+                        <div class="contact-thread__body">
+                            <div class="contact-msg contact-msg--in">
+                                <div class="contact-msg__meta">
+                                    <strong>{{ thread.name }}</strong>
+                                    <a href="mailto:{{ thread.email }}">{{ thread.email }}</a>
+                                    <span class="contact-msg__date">{{ thread.created_at_fmt }}</span>
+                                </div>
+                                <div class="contact-msg__text">{{ thread.message }}</div>
+                            </div>
+
+                            {% for reply in thread.replies|default([]) %}
+                                <div class="contact-msg contact-msg--out">
+                                    <div class="contact-msg__meta">
+                                        <strong>Odpowiedź</strong>
+                                        <span class="contact-msg__date">{{ reply.created_at_fmt }}</span>
+                                    </div>
+                                    <div class="contact-msg__text">{{ reply.message }}</div>
+                                </div>
+                            {% endfor %}
+
+                            {# Formularz odpowiedzi — obsługiwany przez generyczny handler admin-dashboard.js (sub_action) #}
+                            <form class="devents-form contact-reply-form">
+                                <input type="hidden" name="action" value="devents_admin_general_action">
+                                <input type="hidden" name="sub_action" value="reply_contact">
+                                <input type="hidden" name="payload[parent_id]" value="{{ thread.id }}">
+                                <div class="form-group">
+                                    <label for="contact-reply-{{ thread.id }}" class="form-label">
+                                        Odpowiedz na adres: {{ thread.email }}
+                                    </label>
+                                    <textarea id="contact-reply-{{ thread.id }}" name="payload[reply_message]" class="form-textarea" rows="3" required placeholder="Napisz odpowiedź..."></textarea>
+                                </div>
+                                <div class="form-actions-right">
+                                    <button type="submit" class="btn btn--primary">
+                                        <span class="material-symbols-outlined" aria-hidden="true">send</span>
+                                        Wyślij odpowiedź
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </details>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>

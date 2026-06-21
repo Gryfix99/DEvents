@@ -1,0 +1,111 @@
+{# templates/admin/tabs/special_occasions.twig #}
+
+<div class="admin-dashboard-grid">
+    
+    {# --- WIDGET DODAWANIA OKAZJI --- #}
+    <div class="admin-widget">
+        <h3>Dodaj nową okazję specjalną</h3>
+        <div class="widget-content" style="padding: 1.25rem;">
+            <form class="devents-form" method="POST">
+                <input type="hidden" name="sub_action" value="save_special_occasion">
+                <input type="hidden" name="nonce" value="{{ wp_create_nonce('devents_admin_general_nonce') }}">
+                
+                <div class="form-group">
+                    <label for="adm-occasion-name">Nazwa</label>
+                    <input type="text" id="adm-occasion-name" name="payload[name]" class="form-control" required placeholder="np. Black Friday">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adm-occasion-slug">Skrót (max 10 znaków)</label>
+                        <input type="text" id="adm-occasion-slug" name="payload[slug]" class="form-control" required maxlength="10" placeholder="np. BLACK">
+                    </div>
+                    <div class="form-group">
+                        <label for="occasion_color_picker">Kolor</label>
+                        <div class="color-input-wrapper" style="display: flex; gap: 10px;">
+                            <input type="color" id="occasion_color_picker" value="#0097A8" style="height: 38px; width: 50px; padding: 0; border: none; background: none;">
+                            <input type="text" id="occasion_color_text" name="payload[color]" class="form-control" value="#0097A8" maxlength="7" placeholder="#0097A8">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="adm-occasion-start">Data rozpoczęcia</label>
+                        <input type="date" id="adm-occasion-start" name="payload[start_date]" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adm-occasion-end">Data zakończenia</label>
+                        <input type="date" id="adm-occasion-end" name="payload[end_date]" class="form-control" required>
+                    </div>
+                </div>
+                
+                <div class="form-actions" style="margin-top: 20px;">
+                    <button type="submit" class="btn btn--primary">Zapisz okazję</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# --- TABELA LISTY OKAZJI --- #}
+    <div class="admin-widget" style="grid-column: 1 / -1;">
+        <h3>Lista Okazji Specjalnych</h3>
+        <div class="widget-content table-responsive-wrapper">
+            <table class="my-content-list__table devents-responsive-table devents-table--cards">
+                <thead>
+                    <tr>
+                        <th scope="col">Nazwa</th>
+                        <th scope="col">Skrót</th>
+                        <th scope="col">Okres</th>
+                        <th scope="col" style="text-align: right;">Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data.occasions %}
+                        <tr>
+                            <td data-label="Nazwa"><strong>{{ item.name }}</strong></td>
+                            <td data-label="Skrót">
+                                <span class="status-badge" style="background-color:{{ item.color }}; color: #fff; border: 1px solid rgba(0,0,0,0.1);">
+                                    {{ item.slug }}
+                                </span>
+                            </td>
+                            <td data-label="Okres">
+                                {{ item.start_date|date('d.m.Y') }} - {{ item.end_date|date('d.m.Y') }}
+                            </td>
+                            <td data-label="Akcje" class="actions-cell">
+                                <div class="actions-group" style="justify-content: flex-end;">
+                                    {# Przycisk usuwania (Ikona) #}
+                                    <button class="btn btn--danger btn--small btn--icon" data-action="delete_occasion" data-id="{{ item.id }}" title="Usuń" aria-label="Usuń">
+                                        <span class="material-symbols-outlined" aria-hidden="true">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align:center; padding: 2rem; color: var(--text-secondary);">Brak zdefiniowanych okazji.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Prosty skrypt do synchronizacji pickera koloru z inputem tekstowym (działa inline dla pewności)
+    document.addEventListener('DOMContentLoaded', function() {
+        const colorPicker = document.getElementById('occasion_color_picker');
+        const colorText = document.getElementById('occasion_color_text');
+        if(colorPicker && colorText) {
+            colorPicker.addEventListener('input', function() {
+                colorText.value = this.value.toUpperCase();
+            });
+            colorText.addEventListener('input', function() {
+                if(/^#[0-9A-F]{6}$/i.test(this.value)) {
+                    colorPicker.value = this.value;
+                }
+            });
+        }
+    });
+</script>
